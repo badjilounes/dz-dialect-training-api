@@ -1,9 +1,32 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+
+  app.enableCors({ origin: app.get(ConfigService).get('CORS_ORIGIN') });
+
+  const swaggerOptions = new DocumentBuilder()
+    .setTitle('DzDialect Training API')
+    .setDescription('DzDialect Training API Documentation')
+    .setVersion('1.0.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerOptions);
+
+  SwaggerModule.setup('openapi', app, document, {
+    swaggerOptions: {
+      displayRequestDuration: true,
+      docExpansion: 'none',
+      operationsSorter: 'alpha',
+      tagsSorter: 'alpha',
+    },
+  });
+
+  await app.listen(app.get(ConfigService).get('PORT') || 3000);
 }
 bootstrap();
