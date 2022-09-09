@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Logger as TypeormLogger } from 'typeorm';
 
-export class AppTypeormLogger implements TypeormLogger {
+export class DatabaseLogger implements TypeormLogger {
   logger = new Logger('Typeorm');
 
   private readonly logLevel = this.configService.get('TYPEORM_LOGGING');

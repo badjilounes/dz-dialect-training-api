@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 
-import { AppWinstonModuleOptionsFactory } from './app-winston-module-options.factory';
+import { LoggerModuleOptionsFactory } from './logger-module-options.factory';
 
 const factoryImports = [ConfigModule];
 @Global()
@@ -12,9 +12,9 @@ const factoryImports = [ConfigModule];
     WinstonModule.forRootAsync({
       imports: factoryImports,
       inject: [ConfigService],
-      useClass: AppWinstonModuleOptionsFactory,
+      useClass: LoggerModuleOptionsFactory,
     }),
   ],
-  providers: [AppWinstonModuleOptionsFactory],
+  providers: [LoggerModuleOptionsFactory],
 })
-export class AppWinstonModule {}
+export class LoggerModule {}

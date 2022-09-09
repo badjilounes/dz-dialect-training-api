@@ -5,7 +5,7 @@ import { WinstonModuleOptionsFactory } from 'nest-winston';
 import * as winston from 'winston';
 
 @Injectable()
-export class AppWinstonModuleOptionsFactory implements WinstonModuleOptionsFactory {
+export class LoggerModuleOptionsFactory implements WinstonModuleOptionsFactory {
   format = {
     dateTime: winston.format((info) => {
       if (!info.dateTime) {

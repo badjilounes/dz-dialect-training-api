@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AppWinstonModule } from '../app-winston/app-winston.module';
+import { LoggerModule } from '../logger/logger.module';
 
-import { AppTypeormLogger } from './app-typeorm.logger';
+import { DatabaseLogger } from './database.logger';
 
 @Module({
   imports: [
-    AppWinstonModule,
+    LoggerModule,
     ConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -18,10 +18,10 @@ import { AppTypeormLogger } from './app-typeorm.logger';
         url: configService.get('DATABASE_URL'),
         autoLoadEntities: true,
         synchronize: true,
-        logger: new AppTypeormLogger(configService),
+        logger: new DatabaseLogger(configService),
         ssl: configService.get('DATABASE_SSL_STRICT') ? { rejectUnauthorized: false } : false,
       }),
     }),
   ],
 })
-export class AppDatabaseModule {}
+export class DatabaseModule {}
