@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 
+import { TrainingQueryHandlers } from '../domain/queries';
+
 import { TrainingController } from './training.controller';
 /*
 https://docs.nestjs.com/modules
@@ -8,6 +10,6 @@ https://docs.nestjs.com/modules
 @Module({
   imports: [],
   controllers: [TrainingController],
-  providers: [],
+  providers: [...TrainingQueryHandlers],
 })
 export class TrainingModule {}
