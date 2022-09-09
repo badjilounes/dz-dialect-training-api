@@ -1,18 +1,16 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
-import { ClientApiService } from '../client-api.service';
+import { SentenceControllerApi, SentenceDTO } from 'src/clients/sentence-api';
 
 @Injectable()
-export class SentenceClientApiService extends ClientApiService {
+export class SentenceClientApiService {
   protected readonly logger = new Logger(SentenceClientApiService.name);
 
-  constructor(private readonly httpService: HttpService, private readonly config: ConfigService) {
-    super(httpService, config.get('SENTENCE_API_URL'));
-  }
+  constructor(private readonly sentenceApi: SentenceControllerApi) {}
 
-  async getSentences(): Promise<string[]> {
-    return [];
+  async getSentences(count: number): Promise<Array<SentenceDTO>> {
+    const response = await this.sentenceApi.generateRandomSentence(count);
+
+    return response.data;
   }
 }

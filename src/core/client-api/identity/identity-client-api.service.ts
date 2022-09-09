@@ -1,19 +1,20 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
-import { ClientApiService } from '../client-api.service';
+import { UsersApi } from 'src/clients/identity-api';
 
 @Injectable()
-export class IdentityClientApiService extends ClientApiService {
+export class IdentityClientApiService {
   protected readonly logger = new Logger(IdentityClientApiService.name);
 
-  constructor(private readonly httpService: HttpService, private readonly config: ConfigService) {
-    super(httpService, config.get('IDENTITY_API_URL'));
-  }
+  constructor(private readonly usersApi: UsersApi) {}
 
   async isConnected(token: string): Promise<boolean> {
-    const connectedUser = await this.get<object | undefined>('getConnectUser', token, {}, undefined);
+    const connectedUser = await this.usersApi.getConnectedUser({
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     return Boolean(connectedUser);
   }
 }
