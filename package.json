@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "dotenv -e .env.test -e .env -- jest --config ./test/jest-e2e.json",
     "db:start": "docker-compose -f docker-compose.yml up",
     "generate:sentence-api": "rimraf ./src/clients/sentence-api && openapi-generator generate -i https://evening-meadow-36429.herokuapp.com/v3/api-docs -g typescript-axios -o ./src/clients/sentence-api --additional-properties=enumPropertyNaming=UPPERCASE,serviceSuffix=HttpService,fileNaming=kebab-case",
     "generate:identity-api": "rimraf ./src/clients/identity-api && openapi-generator generate -i https://dz-dialect-identity-api.server.bdsapp.fr/openapi-json -g typescript-axios -o ./src/clients/identity-api --additional-properties=enumPropertyNaming=UPPERCASE,serviceSuffix=HttpService,fileNaming=kebab-case"
@@ -37,6 +37,7 @@
     "axios": "^0.27.2",
     "class-validator": "^0.13.2",
     "colors": "^1.4.0",
+    "dotenv-cli": "^6.0.0",
     "nest-winston": "^1.7.0",
     "passport-jwt": "^4.0.0",
     "pg": "^8.8.0",
