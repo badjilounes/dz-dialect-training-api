@@ -1,9 +1,21 @@
 {
+  "rootDir": "..",
+  "moduleDirectories": ["node_modules", "src"],
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "moduleNameMapper": {
+    "^@identity/(.*)$": "<rootDir>/src/clients/identity-api/$1",
+    "^@sentence/(.*)$": "<rootDir>/src/clients/sentence-api/$1",
+    "^@core/(.*)$": "<rootDir>/src/core/$1",
+    "^@cqrs/(.*)$": "<rootDir>/src/shared/cqrs/$1",
+    "^@ddd/(.*)$": "<rootDir>/src/shared/ddd/$1"
+  },
   "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
+  "testTimeout": 15000,
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "collectCoverageFrom": ["src/**/*.(t|j)s"],
+  "coverageReporters": ["clover", "json", "lcov", "text", "text-summary"],
+  "testRegex": "\\.e2e-spec\\.ts$",
+  "coverageDirectory": "./coverage/e2e"
 }

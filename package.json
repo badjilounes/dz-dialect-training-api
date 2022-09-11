@@ -73,5 +73,41 @@
     "ts-node": "^10.0.0",
     "tsconfig-paths": "4.1.0",
     "typescript": "^4.7.4"
+  },
+  "jest": {
+    "rootDir": ".",
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "moduleNameMapper": {
+      "^@identity/(.*)$": "<rootDir>/src/clients/identity-api/$1",
+      "^@sentence/(.*)$": "<rootDir>/src/clients/sentence-api/$1",
+      "^@core/(.*)$": "<rootDir>/src/core/$1",
+      "^@cqrs/(.*)$": "<rootDir>/src/shared/cqrs/$1",
+      "^@ddd/(.*)$": "<rootDir>/src/shared/ddd/$1"
+    },
+    "testEnvironment": "node",
+    "testRegex": "\\.spec\\.ts$",
+    "testTimeout": 15000,
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "src/**/*.(t|j)s"
+    ],
+    "coverageDirectory": "./coverage/unit",
+    "coverageReporters": [
+      "clover",
+      "json",
+      "lcov",
+      "text",
+      "text-summary"
+    ]
   }
 }
