@@ -1,7 +1,8 @@
-import { AggregateRoot } from '@nestjs/cqrs';
 import { validateSync } from 'class-validator';
 
 import { DomainValidationError } from './error/domain-validation-error';
+
+import { AggregateRoot } from '@cqrs/aggregate';
 
 export abstract class BaseAggregateRoot extends AggregateRoot {
   protected constructor() {

@@ -2,27 +2,24 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Post } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { GetTrainingForBeVerbLearningQuery } from '../domain/queries/get-training-for-be-verb-learning/get-training-for-be-verb-learning.query';
+import { StartPresentationCommand } from '../domain/commands/start-presentation/start-presentation.command';
 
-import { TrainingResponseDto } from './dto/training-response-dto';
+import { TrainingPresentationResponseDto } from './dto/training-presentation-response-dto';
 
-import { JwtAuthGuard } from 'src/core/auth/jwt.guard';
+import { CommandBus } from '@cqrs/command';
 
 @ApiTags('Training')
 @Controller('training')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class TrainingController {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(private readonly commandBus: CommandBus) {}
 
   @ApiOperation({ operationId: 'get-training-presentation', summary: 'Get training presentation' })
-  @Get('get-training-for-be-verb-learning')
-  @ApiOkResponse({ type: TrainingResponseDto })
-  getConnectedUser(): Promise<TrainingResponseDto> {
-    return this.queryBus.execute(new GetTrainingForBeVerbLearningQuery());
+  @Post('start-presentation')
+  @ApiOkResponse({ type: TrainingPresentationResponseDto })
+  getConnectedUser(): Promise<TrainingPresentationResponseDto> {
+    return this.commandBus.execute(new StartPresentationCommand());
   }
 }

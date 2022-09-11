@@ -1,4 +1,5 @@
-import { AggregateRoot, IEvent } from '@nestjs/cqrs';
+import { AggregateRoot } from '@cqrs/aggregate';
+import { IEvent } from '@cqrs/event';
 
 export class AggregateCollection<T extends AggregateRoot> extends AggregateRoot {
   protected collection: T[] = [];

@@ -17,11 +17,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   validate<T extends { id: string }>(request: Request, payload: T) {
-    const { id } = payload;
+    this.context.userId = payload.id;
 
-    this.context.token = request.headers.authorization?.replace('Bearer ', '');
-    this.context.userId = id;
+    if (request.headers.authorization) {
+      this.context.token = request.headers.authorization.replace('Bearer ', '');
+    }
 
-    return { userId: id };
+    return { userId: this.context.userId };
   }
 }

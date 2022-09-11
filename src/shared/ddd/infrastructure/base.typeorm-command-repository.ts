@@ -1,9 +1,9 @@
-import { AggregateRoot } from '@nestjs/cqrs';
 import { Repository } from 'typeorm';
 
 import { BaseCommandRepository } from './base.command-repository';
 
-import { AppContextService } from 'src/core/context/app-context.service';
+import { AppContextService } from '@core/context/app-context.service';
+import { AggregateRoot } from '@cqrs/aggregate';
 
 export abstract class BaseTypeormCommandRepository<T extends AggregateRoot> extends BaseCommandRepository<
   T,
@@ -14,13 +14,13 @@ export abstract class BaseTypeormCommandRepository<T extends AggregateRoot> exte
   }
 
   protected constructor(
-    protected readonly repository: Repository<any>,
+    protected readonly examRepository: Repository<any>,
     protected readonly contextService: AppContextService,
   ) {
     super();
   }
 
   async transaction(promises: Promise<any>[]) {
-    await this.repository.manager.transaction(() => Promise.all(promises));
+    await this.examRepository.manager.transaction(() => Promise.all(promises));
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { UsersApi } from 'src/clients/identity-api';
+import { UsersApi } from '@identity/api';
 
 @Injectable()
 export class IdentityClientApiService {

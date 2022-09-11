@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { SentenceControllerApi, SentenceDTO } from 'src/clients/sentence-api';
+import { SentenceControllerApi, SentenceDTO } from '@sentence/api';
 
 @Injectable()
 export class SentenceClientApiService {

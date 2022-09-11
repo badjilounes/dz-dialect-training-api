@@ -27,3 +27,5 @@ export type IQueryHandler<Q extends Query<unknown>> = NestIQueryHandler<Q, Resul
  * @see {@link NestQueryHandler QueryHandler}
  */
 export const QueryHandler: (query: Constructor<Query<unknown>>) => ClassDecorator = NestQueryHandler;
+
+export { QueryBus } from '@nestjs/cqrs';

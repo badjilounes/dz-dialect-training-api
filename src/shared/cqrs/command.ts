@@ -27,3 +27,5 @@ export type ICommandHandler<C extends Command<unknown>> = NestICommandHandler<C,
  * @see {@link NestCommandHandler CommandHandler}
  */
 export const CommandHandler: (command: Constructor<Command<unknown>>) => ClassDecorator = NestCommandHandler;
+
+export { CommandBus } from '@nestjs/cqrs';

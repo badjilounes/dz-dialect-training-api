@@ -2,7 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { SentenceControllerApi } from 'src/clients/sentence-api';
+import { SentenceControllerApi } from '@sentence/api';
 
 export const SentenceApiProviders: Provider[] = [
   {

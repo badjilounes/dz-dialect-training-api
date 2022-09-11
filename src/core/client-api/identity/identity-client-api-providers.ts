@@ -2,7 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { UsersApi } from 'src/clients/identity-api';
+import { UsersApi } from '@identity/api';
 
 export const IdentityApiProviders: Provider[] = [
   {

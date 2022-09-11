@@ -1,8 +1,8 @@
-import { AggregateRoot } from '@nestjs/cqrs';
-
 import { IAggregateCollection } from '../domain/aggregate-collection/aggregate-collection.interface';
 
 import { IBaseCommandRepository } from './base.command-repository.interface';
+
+import { AggregateRoot } from '@cqrs/aggregate';
 
 type AnyPromise = Promise<any>;
 
