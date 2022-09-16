@@ -9,10 +9,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { TrainingExamTypeEnum } from '../../domain/enums/training-exam-type.enum';
-
 import { TrainingExamQuestion } from './training-exam-question.entity';
 import { Training } from './training.entity';
+
+import { ExamTypeEnum } from 'business/training/domain/enums/exam-type.enum';
 
 @Entity()
 export class TrainingExam {
@@ -20,15 +20,18 @@ export class TrainingExam {
   id!: string;
 
   @Column()
+  order!: number;
+
+  @Column()
   name!: string;
 
-  @Column({ enum: ['TRANSLATION'] })
-  type!: TrainingExamTypeEnum;
+  @Column({ enum: ExamTypeEnum })
+  type!: ExamTypeEnum;
 
   @OneToMany(() => TrainingExamQuestion, (step) => step.exam, { eager: true, cascade: true })
   questions!: TrainingExamQuestion[];
 
-  @ManyToOne(() => Training)
+  @ManyToOne(() => Training, { onDelete: 'CASCADE' })
   @JoinColumn()
   training!: Training;
 

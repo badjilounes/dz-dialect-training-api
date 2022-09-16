@@ -14,13 +14,13 @@ export abstract class BaseTypeormCommandRepository<T extends AggregateRoot> exte
   }
 
   protected constructor(
-    protected readonly examRepository: Repository<any>,
+    protected readonly repository: Repository<any>,
     protected readonly contextService: AppContextService,
   ) {
     super();
   }
 
   async transaction(promises: Promise<any>[]) {
-    await this.examRepository.manager.transaction(() => Promise.all(promises));
+    await this.repository.manager.transaction(() => Promise.all(promises));
   }
 }

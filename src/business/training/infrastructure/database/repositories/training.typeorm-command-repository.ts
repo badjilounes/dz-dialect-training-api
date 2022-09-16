@@ -1,16 +1,17 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { TrainingAggregate } from '../../domain/aggregates/training.aggregate';
-import { TrainingCreatedEvent } from '../../domain/events/training-created-event';
-import { TrainingCommandRepository } from '../../domain/repositories/training-translation-exam-command-repository';
-
-import { TrainingExamQuestion } from './training-exam-question.entity';
-import { TrainingExam } from './training-exam.entity';
-import { Training } from './training.entity';
+import { TrainingAggregate } from '../../../domain/aggregates/training.aggregate';
+import { TrainingCreatedEvent } from '../../../domain/events/training-created-event';
+import { TrainingExamQuestion } from '../entities/training-exam-question.entity';
 
 import { AppContextService } from '@core/context/app-context.service';
 import { BaseTypeormCommandRepository } from '@ddd/infrastructure/base.typeorm-command-repository';
+import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
+import { TrainingCommandRepository } from 'business/training/domain/repositories/training-command-repository';
+import { TrainingExam } from 'business/training/infrastructure/database/entities/training-exam.entity';
+import { Training } from 'business/training/infrastructure/database/entities/training.entity';
+import { fromTypeormEntityToAggregate } from 'business/training/infrastructure/mappers/training.mapper';
 
 export class TrainingTypeormCommandRepository
   extends BaseTypeormCommandRepository<TrainingAggregate>
@@ -28,39 +29,34 @@ export class TrainingTypeormCommandRepository
 
     protected readonly context: AppContextService,
   ) {
-    super(examRepository, context);
+    super(repository, context);
     this.register(TrainingCreatedEvent, this.createTrainingPresentation);
   }
 
   async findPresentation(): Promise<TrainingAggregate | undefined> {
     const training = await this.repository.findOne({
-      where: { name: 'presentation' },
-      relations: ['exams', 'exams.questions'],
+      where: { category: TrainingCategoryEnum.PRESENTATION },
+      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
     });
 
     if (!training) {
       return undefined;
     }
 
-    return TrainingAggregate.from({
-      id: training.id,
-      name: training.name,
-      fromLanguage: training.fromLanguage,
-      learningLanguage: training.learningLanguage,
-      exams: training.exams.map((exam) => ({
-        id: exam.id,
-        name: exam.name,
-        type: exam.type,
-        trainingId: training.id,
-        questions: exam.questions.map((question) => ({
-          id: question.id,
-          examId: exam.id,
-          question: question.question,
-          answer: question.answer,
-          propositions: question.propositions,
-        })),
-      })),
+    return fromTypeormEntityToAggregate(training);
+  }
+
+  async findTrainingById(trainingId: string): Promise<TrainingAggregate | undefined> {
+    const training = await this.repository.findOne({
+      where: { id: trainingId },
+      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
     });
+
+    if (!training) {
+      return undefined;
+    }
+
+    return fromTypeormEntityToAggregate(training);
   }
 
   private async createTrainingPresentation(event: TrainingCreatedEvent): Promise<Training> {
@@ -79,6 +75,7 @@ export class TrainingTypeormCommandRepository
 
     const trainingExam = this.examRepository.create({
       id: exam.id,
+      order: 0,
       training: { id: event.training.id },
       name: exam.name,
       type: exam.type,
@@ -87,7 +84,7 @@ export class TrainingTypeormCommandRepository
 
     const training = this.repository.create({
       id: event.training.id,
-      name: event.training.name,
+      category: event.training.category,
       fromLanguage: 'fr',
       learningLanguage: 'dz',
       exams: [trainingExam],

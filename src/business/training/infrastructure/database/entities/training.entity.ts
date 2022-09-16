@@ -2,13 +2,15 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 
 import { TrainingExam } from './training-exam.entity';
 
+import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
+
 @Entity()
 export class Training {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
-  name!: string;
+  @Column({ enum: TrainingCategoryEnum })
+  category!: TrainingCategoryEnum;
 
   @Column()
   learningLanguage!: string;

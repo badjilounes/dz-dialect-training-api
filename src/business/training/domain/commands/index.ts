@@ -1,3 +1,3 @@
-import { StartPresentationHandler } from './start-presentation/start-presentation.handler';
+import { CreatePresentationHandler } from './create-presentation/create-presentation.handler';
 
-export const TrainingCommandHandlers = [StartPresentationHandler];
+export const TrainingCommandHandlers = [CreatePresentationHandler];

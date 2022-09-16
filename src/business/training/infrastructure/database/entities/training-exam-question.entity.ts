@@ -4,16 +4,22 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { TrainingExam } from './training-exam.entity';
 
+import { TrainingExamResponse } from 'business/training/infrastructure/database/entities/training-exam-response.entity';
+
 @Entity()
 export class TrainingExamQuestion {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @Column()
+  order!: number;
 
   @Column()
   question!: string;
@@ -24,12 +30,13 @@ export class TrainingExamQuestion {
   @Column('text', { array: true })
   propositions!: string[];
 
-  @Column()
-  order!: number;
-
-  @ManyToOne(() => TrainingExam)
+  @ManyToOne(() => TrainingExam, { onDelete: 'CASCADE' })
   @JoinColumn()
   exam!: TrainingExam;
+
+  @OneToMany(() => TrainingExamResponse, (response) => response.question, { eager: true, cascade: true })
+  @JoinColumn()
+  responses!: TrainingExamResponse[];
 
   @CreateDateColumn()
   createdAt!: Date;

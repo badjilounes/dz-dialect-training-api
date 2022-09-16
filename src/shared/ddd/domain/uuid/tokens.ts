@@ -1,1 +1,1 @@
-export const UUID_GENERATOR_TOKEN = Symbol();
+export const UUID_GENERATOR = Symbol();

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 
 import { RandomUuidGenerator } from './random-uuid.generator';
-import { UUID_GENERATOR_TOKEN } from './tokens';
+import { UUID_GENERATOR } from './tokens';
 
 const UuidGenerators = [
   {
-    provide: UUID_GENERATOR_TOKEN,
+    provide: UUID_GENERATOR,
     useClass: RandomUuidGenerator,
   },
 ];

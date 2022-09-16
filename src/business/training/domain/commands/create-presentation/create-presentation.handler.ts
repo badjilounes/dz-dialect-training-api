@@ -1,50 +1,38 @@
 import { Inject } from '@nestjs/common';
 
-import { TrainingExamAggregate } from '../../aggregates/training-exam.aggregate';
 import { TrainingAggregate } from '../../aggregates/training.aggregate';
-import { TrainingExamTypeEnum } from '../../enums/training-exam-type.enum';
+import { ExamEntity } from '../../entities/exam.entity';
+import { ExamTypeEnum } from '../../enums/exam-type.enum';
 import { TRAINING_COMMAND_REPOSITORY } from '../../repositories/tokens';
-import { TrainingCommandRepository } from '../../repositories/training-translation-exam-command-repository';
 
-import { StartPresentationCommand, StartPresentationCommandResult } from './start-presentation.command';
+import { CreatePresentationCommand, CreatePresentationCommandResult } from './create-presentation.command';
 
 import { SentenceClientApiService } from '@core/client-api/sentence/sentence-client-api.service';
 import { CommandHandler, ICommandHandler } from '@cqrs/command';
 import { EventPublisher } from '@cqrs/event';
-import { UUID_GENERATOR_TOKEN } from '@ddd/domain/uuid/tokens';
+import { UUID_GENERATOR } from '@ddd/domain/uuid/tokens';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
+import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
+import { TrainingPresentationAlreadyExistError } from 'business/training/domain/errors/training-presentation-already-exist-error';
+import { TrainingCommandRepository } from 'business/training/domain/repositories/training-command-repository';
 
-@CommandHandler(StartPresentationCommand)
-export class StartPresentationHandler implements ICommandHandler<StartPresentationCommand> {
+@CommandHandler(CreatePresentationCommand)
+export class CreatePresentationHandler implements ICommandHandler<CreatePresentationCommand> {
   constructor(
     @Inject(TRAINING_COMMAND_REPOSITORY)
     private readonly trainingCommandRepository: TrainingCommandRepository,
 
-    @Inject(UUID_GENERATOR_TOKEN)
+    @Inject(UUID_GENERATOR)
     private readonly uuidGenerator: UuidGenerator,
 
     private readonly sentenceApi: SentenceClientApiService,
     private readonly eventPublisher: EventPublisher,
   ) {}
 
-  async execute(): Promise<StartPresentationCommandResult> {
+  async execute(): Promise<CreatePresentationCommandResult> {
     const existingPresentation = await this.trainingCommandRepository.findPresentation();
     if (existingPresentation) {
-      return {
-        id: existingPresentation.id,
-        name: existingPresentation.name,
-        exam: {
-          id: existingPresentation.exams[0].id,
-          name: existingPresentation.exams[0].name,
-          type: existingPresentation.exams[0].type,
-          questions: existingPresentation.exams[0].questions.map((question) => ({
-            id: question.id,
-            question: question.question,
-            answer: question.answer,
-            propositions: question.propositions,
-          })),
-        },
-      };
+      throw new TrainingPresentationAlreadyExistError();
     }
 
     const sentences = await this.sentenceApi.getSentences(10);
@@ -54,15 +42,15 @@ export class StartPresentationHandler implements ICommandHandler<StartPresentati
 
     const training = TrainingAggregate.create({
       id: trainingId,
-      name: 'presentation',
+      category: TrainingCategoryEnum.PRESENTATION,
       fromLanguage: 'fr',
       learningLanguage: 'dz',
       exams: [
-        TrainingExamAggregate.create({
+        ExamEntity.create({
           id: examId,
           trainingId,
           name: 'presentation exam',
-          type: TrainingExamTypeEnum.TRANSLATION,
+          type: ExamTypeEnum.TRANSLATION,
           questions: sentences.map((sentence) => ({
             id: this.uuidGenerator.generate(),
             examId,
@@ -80,7 +68,7 @@ export class StartPresentationHandler implements ICommandHandler<StartPresentati
 
     return {
       id: training.id,
-      name: training.name,
+      category: training.category,
       exam: {
         id: training.exams[0].id,
         name: training.exams[0].name,

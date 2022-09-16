@@ -2,7 +2,7 @@ import { IsString } from 'class-validator';
 
 import { BaseEntity } from '@ddd/domain/base-entity';
 
-export type TrainingExamQuestionEntityProps = {
+export type QuestionEntityProps = {
   id: string;
   examId: string;
   question: string;
@@ -10,7 +10,7 @@ export type TrainingExamQuestionEntityProps = {
   propositions: string[];
 };
 
-export class TrainingExamQuestionEntity extends BaseEntity {
+export class ExamQuestionEntity extends BaseEntity {
   @IsString()
   private readonly _id: string;
   public get id(): string {
@@ -41,7 +41,7 @@ export class TrainingExamQuestionEntity extends BaseEntity {
     return this._propositions;
   }
 
-  private constructor(private readonly props: TrainingExamQuestionEntityProps) {
+  private constructor(private readonly props: QuestionEntityProps) {
     super();
     this._id = this.props.id;
     this._examId = this.props.examId;
@@ -50,11 +50,15 @@ export class TrainingExamQuestionEntity extends BaseEntity {
     this._propositions = this.props.propositions;
   }
 
-  static create(props: TrainingExamQuestionEntityProps): TrainingExamQuestionEntity {
-    return new TrainingExamQuestionEntity(props);
+  static create(props: QuestionEntityProps): ExamQuestionEntity {
+    return new ExamQuestionEntity(props);
   }
 
-  static from(step: TrainingExamQuestionEntityProps): TrainingExamQuestionEntity {
-    return new TrainingExamQuestionEntity(step);
+  static from(step: QuestionEntityProps): ExamQuestionEntity {
+    return new ExamQuestionEntity(step);
+  }
+
+  respond(response: string): void {
+    throw new Error('Method not implemented.');
   }
 }

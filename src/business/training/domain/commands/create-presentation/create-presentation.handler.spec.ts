@@ -1,18 +1,20 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { TrainingExamTypeEnum } from '../../enums/training-exam-type.enum';
-import { TrainingCommandRepository } from '../../repositories/training-translation-exam-command-repository';
+import { ExamTypeEnum } from '../../enums/exam-type.enum';
 
-import { StartPresentationHandler } from './start-presentation.handler';
+import { CreatePresentationHandler } from './create-presentation.handler';
 
 import { SentenceClientApiService } from '@core/client-api/sentence/sentence-client-api.service';
 import { EventPublisher } from '@cqrs/event';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 import { SentenceDTO } from '@sentence/api';
 import { TrainingAggregate } from 'business/training/domain/aggregates/training.aggregate';
+import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
+import { TrainingPresentationAlreadyExistError } from 'business/training/domain/errors/training-presentation-already-exist-error';
+import { TrainingCommandRepository } from 'business/training/domain/repositories/training-command-repository';
 
-describe('Start presentation', () => {
-  let handler: StartPresentationHandler;
+describe('Create presentation', () => {
+  let handler: CreatePresentationHandler;
 
   let trainingCommandRepository: MockProxy<TrainingCommandRepository>;
   let uuidGenerator: MockProxy<UuidGenerator>;
@@ -32,7 +34,7 @@ describe('Start presentation', () => {
     sentenceApi = mock<SentenceClientApiService>();
     eventPublisher = mock<EventPublisher>();
 
-    handler = new StartPresentationHandler(trainingCommandRepository, uuidGenerator, sentenceApi, eventPublisher);
+    handler = new CreatePresentationHandler(trainingCommandRepository, uuidGenerator, sentenceApi, eventPublisher);
 
     sentence = {
       dz: 'el makla rahi el dekhel',
@@ -43,7 +45,7 @@ describe('Start presentation', () => {
 
     training = TrainingAggregate.from({
       id: trainingId,
-      name: 'presentation',
+      category: TrainingCategoryEnum.PRESENTATION,
       fromLanguage: 'fr',
       learningLanguage: 'dz',
       exams: [
@@ -51,7 +53,7 @@ describe('Start presentation', () => {
           id: examId,
           trainingId,
           name: 'presentation exam',
-          type: TrainingExamTypeEnum.TRANSLATION,
+          type: ExamTypeEnum.TRANSLATION,
           questions: [
             {
               id: questionId,
@@ -78,6 +80,12 @@ describe('Start presentation', () => {
     });
   });
 
+  it('should throw if a training presentation already exist', async () => {
+    trainingCommandRepository.findPresentation.mockResolvedValue(training);
+
+    await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationAlreadyExistError());
+  });
+
   it('should create a presentation from when no training presentation exist', async () => {
     trainingCommandRepository.findPresentation.mockResolvedValue(undefined);
     uuidGenerator.generate.mockReturnValueOnce(trainingId);
@@ -88,11 +96,11 @@ describe('Start presentation', () => {
 
     expect(result).toEqual({
       id: trainingId,
-      name: 'presentation',
+      category: TrainingCategoryEnum.PRESENTATION,
       exam: {
         id: examId,
         name: 'presentation exam',
-        type: TrainingExamTypeEnum.TRANSLATION,
+        type: ExamTypeEnum.TRANSLATION,
         questions: [
           {
             id: questionId,
@@ -101,28 +109,6 @@ describe('Start presentation', () => {
             propositions: sentence.word_propositions?.fr,
           },
         ],
-      },
-    });
-  });
-
-  it('should not create again a presentation when a training presentation already exist', async () => {
-    trainingCommandRepository.findPresentation.mockResolvedValue(training);
-
-    const result = await handler.execute();
-
-    expect(result).toEqual({
-      id: training.id,
-      name: training.name,
-      exam: {
-        id: training.exams[0].id,
-        name: training.exams[0].name,
-        type: training.exams[0].type,
-        questions: training.exams[0].questions.map((question) => ({
-          id: question.id,
-          question: question.question,
-          answer: question.answer,
-          propositions: question.propositions,
-        })),
       },
     });
   });
