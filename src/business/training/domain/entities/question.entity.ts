@@ -2,7 +2,7 @@ import { IsString } from 'class-validator';
 
 import { BaseEntity } from '@ddd/domain/base-entity';
 
-export type QuestionEntityProps = {
+export type ExamQuestionEntityProps = {
   id: string;
   examId: string;
   question: string;
@@ -41,7 +41,7 @@ export class ExamQuestionEntity extends BaseEntity {
     return this._propositions;
   }
 
-  private constructor(private readonly props: QuestionEntityProps) {
+  private constructor(private readonly props: ExamQuestionEntityProps) {
     super();
     this._id = this.props.id;
     this._examId = this.props.examId;
@@ -50,11 +50,11 @@ export class ExamQuestionEntity extends BaseEntity {
     this._propositions = this.props.propositions;
   }
 
-  static create(props: QuestionEntityProps): ExamQuestionEntity {
+  static create(props: ExamQuestionEntityProps): ExamQuestionEntity {
     return new ExamQuestionEntity(props);
   }
 
-  static from(step: QuestionEntityProps): ExamQuestionEntity {
+  static from(step: ExamQuestionEntityProps): ExamQuestionEntity {
     return new ExamQuestionEntity(step);
   }
 }

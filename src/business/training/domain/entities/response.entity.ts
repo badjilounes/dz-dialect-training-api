@@ -1,12 +1,12 @@
 import { IsBoolean, IsString } from 'class-validator';
 
-import { ExamQuestionEntity, QuestionEntityProps } from './question.entity';
+import { ExamQuestionEntity } from './question.entity';
 
 import { BaseEntity } from '@ddd/domain/base-entity';
 
 export type ResponseEntityProps = {
   id: string;
-  question: QuestionEntityProps;
+  question: ExamQuestionEntity;
   response: string;
 };
 
@@ -29,6 +29,12 @@ export class ResponseEntity extends BaseEntity {
     return this._response;
   }
 
+  @IsString()
+  private readonly _answer: string;
+  public get answer(): string {
+    return this._answer;
+  }
+
   @IsBoolean()
   private readonly _valid: boolean;
   public get valid(): boolean {
@@ -39,9 +45,9 @@ export class ResponseEntity extends BaseEntity {
     super();
     this._id = this.props.id;
     this._response = this.props.response;
-    const question = ExamQuestionEntity.from(this.props.question);
-    this._questionId = question.id;
-    this._valid = question.answer === this.props.response;
+    this._questionId = this.props.question.id;
+    this._answer = this.props.question.answer;
+    this._valid = this.props.question.answer === this.props.response;
   }
 
   static create(props: ResponseEntityProps): ResponseEntity {

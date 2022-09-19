@@ -3,7 +3,7 @@ import { Command } from '@cqrs/command';
 export type ValidateResponseCommandResult = {
   valid: boolean;
   answer: string;
-  successList: string[];
+  response: string;
 };
 
 export class ValidateResponseCommand extends Command<ValidateResponseCommandResult> {

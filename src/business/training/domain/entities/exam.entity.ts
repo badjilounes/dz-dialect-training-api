@@ -2,7 +2,7 @@ import { IsEnum, IsString } from 'class-validator';
 
 import { ExamTypeEnum } from '../enums/exam-type.enum';
 
-import { ExamQuestionEntity, QuestionEntityProps } from './question.entity';
+import { ExamQuestionEntity, ExamQuestionEntityProps } from './question.entity';
 
 import { BaseEntity } from '@ddd/domain/base-entity';
 
@@ -11,7 +11,7 @@ export type ExamEntityProps = {
   trainingId: string;
   name: string;
   type: ExamTypeEnum;
-  questions: QuestionEntityProps[];
+  questions: ExamQuestionEntityProps[];
 };
 
 export class ExamEntity extends BaseEntity {
