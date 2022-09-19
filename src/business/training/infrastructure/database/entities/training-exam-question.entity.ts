@@ -4,14 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { TrainingExam } from './training-exam.entity';
-
-import { TrainingExamResponse } from 'business/training/infrastructure/database/entities/training-exam-response.entity';
 
 @Entity()
 export class TrainingExamQuestion {
@@ -33,10 +30,6 @@ export class TrainingExamQuestion {
   @ManyToOne(() => TrainingExam, { onDelete: 'CASCADE' })
   @JoinColumn()
   exam!: TrainingExam;
-
-  @OneToMany(() => TrainingExamResponse, (response) => response.question, { eager: true, cascade: true })
-  @JoinColumn()
-  responses!: TrainingExamResponse[];
 
   @CreateDateColumn()
   createdAt!: Date;

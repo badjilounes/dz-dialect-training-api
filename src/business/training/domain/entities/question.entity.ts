@@ -57,8 +57,4 @@ export class ExamQuestionEntity extends BaseEntity {
   static from(step: QuestionEntityProps): ExamQuestionEntity {
     return new ExamQuestionEntity(step);
   }
-
-  respond(response: string): void {
-    throw new Error('Method not implemented.');
-  }
 }

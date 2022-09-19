@@ -7,6 +7,7 @@ import { TrainingExamQuestion } from '../entities/training-exam-question.entity'
 
 import { AppContextService } from '@core/context/app-context.service';
 import { BaseTypeormCommandRepository } from '@ddd/infrastructure/base.typeorm-command-repository';
+import { ExamQuestionEntity } from 'business/training/domain/entities/question.entity';
 import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
 import { TrainingCommandRepository } from 'business/training/domain/repositories/training-command-repository';
 import { TrainingExam } from 'business/training/infrastructure/database/entities/training-exam.entity';
@@ -32,23 +33,13 @@ export class TrainingTypeormCommandRepository
     super(repository, context);
     this.register(TrainingCreatedEvent, this.createTrainingPresentation);
   }
+  findExamQuestion(trainingId: string, examId: string, questionId: string): Promise<ExamQuestionEntity | undefined> {
+    throw new Error('Method not implemented.');
+  }
 
   async findPresentation(): Promise<TrainingAggregate | undefined> {
     const training = await this.repository.findOne({
       where: { category: TrainingCategoryEnum.PRESENTATION },
-      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
-    });
-
-    if (!training) {
-      return undefined;
-    }
-
-    return fromTypeormEntityToAggregate(training);
-  }
-
-  async findTrainingById(trainingId: string): Promise<TrainingAggregate | undefined> {
-    const training = await this.repository.findOne({
-      where: { id: trainingId },
       order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
     });
 

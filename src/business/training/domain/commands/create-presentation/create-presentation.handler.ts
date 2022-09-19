@@ -1,7 +1,6 @@
 import { Inject } from '@nestjs/common';
 
 import { TrainingAggregate } from '../../aggregates/training.aggregate';
-import { ExamEntity } from '../../entities/exam.entity';
 import { ExamTypeEnum } from '../../enums/exam-type.enum';
 import { TRAINING_COMMAND_REPOSITORY } from '../../repositories/tokens';
 
@@ -46,7 +45,7 @@ export class CreatePresentationHandler implements ICommandHandler<CreatePresenta
       fromLanguage: 'fr',
       learningLanguage: 'dz',
       exams: [
-        ExamEntity.create({
+        {
           id: examId,
           trainingId,
           name: 'presentation exam',
@@ -58,7 +57,7 @@ export class CreatePresentationHandler implements ICommandHandler<CreatePresenta
             answer: sentence.fr || '',
             propositions: sentence.word_propositions?.fr || [],
           })),
-        }),
+        },
       ],
     });
 

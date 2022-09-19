@@ -9,7 +9,6 @@ import { TrainingTypeormCommandRepository } from '../infrastructure/database/rep
 
 import { TrainingController } from './training.controller';
 
-import { TrainingExamResponse } from 'business/training/infrastructure/database/entities/training-exam-response.entity';
 import { TrainingExam } from 'business/training/infrastructure/database/entities/training-exam.entity';
 import { Training } from 'business/training/infrastructure/database/entities/training.entity';
 import { TrainingTypeormQueryRepository } from 'business/training/infrastructure/database/repositories/training.typeorm-query-repository';
@@ -18,7 +17,7 @@ https://docs.nestjs.com/modules
 */
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Training, TrainingExam, TrainingExamQuestion, TrainingExamResponse])],
+  imports: [TypeOrmModule.forFeature([Training, TrainingExam, TrainingExamQuestion])],
   controllers: [TrainingController],
   providers: [
     ...TrainingQueryHandlers,
