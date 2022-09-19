@@ -24,6 +24,7 @@
     "target": "es2020",
     "removeComments": true,
     "paths": {
+      "@business/*": ["business/*"],
       "@identity/*": ["clients/identity-api/*"],
       "@sentence/*": ["clients/sentence-api/*"],
       "@core/*": ["core/*"],

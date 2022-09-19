@@ -1,3 +1,5 @@
 import { CreatePresentationHandler } from './create-presentation/create-presentation.handler';
 
-export const TrainingCommandHandlers = [CreatePresentationHandler];
+import { ValidateResponseHandler } from 'business/training/domain/commands/validate-response/validate-response.handler';
+
+export const TrainingCommandHandlers = [CreatePresentationHandler, ValidateResponseHandler];

@@ -22,7 +22,9 @@ describe('(TrainingController) create-presentation', () => {
     await app.init();
   });
 
-  afterEach(() => clearData(repository));
+  beforeEach(async () => {
+    await clearData(repository);
+  });
 
   it('should throw conflict error if a training presentation already exist', async () => {
     await request(app.getHttpServer()).post('/training/create-presentation');
@@ -35,7 +37,7 @@ describe('(TrainingController) create-presentation', () => {
       .expect(HttpStatus.CREATED);
 
     const presentation = await repository.findOne({
-      where: { category: TrainingCategoryEnum.PRESENTATION },
+      where: { id: body.id },
       order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
     });
 
@@ -58,8 +60,8 @@ describe('(TrainingController) create-presentation', () => {
 });
 
 async function clearData(repository: Repository<Training>): Promise<void> {
-  const presentation = await repository.findOne({ where: { category: TrainingCategoryEnum.PRESENTATION } });
-  if (presentation) {
-    await repository.delete(presentation.id);
+  const presentations = await repository.find({ where: { category: TrainingCategoryEnum.PRESENTATION } });
+  if (presentations.length) {
+    await repository.delete(presentations.map((presentation) => presentation.id));
   }
 }

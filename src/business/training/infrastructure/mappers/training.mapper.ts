@@ -1,7 +1,7 @@
 import { TrainingAggregate } from 'business/training/domain/aggregates/training.aggregate';
 import { Training } from 'business/training/infrastructure/database/entities/training.entity';
 
-export function fromTypeormEntityToAggregate(training: Training): TrainingAggregate {
+export function trainingToTrainingAggregate(training: Training): TrainingAggregate {
   return TrainingAggregate.from({
     id: training.id,
     category: training.category,

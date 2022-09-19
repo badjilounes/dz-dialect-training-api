@@ -22,7 +22,9 @@ describe('(TrainingController) get-presentation', () => {
     await app.init();
   });
 
-  afterEach(() => clearData(repository));
+  beforeEach(async () => {
+    await clearData(repository);
+  });
 
   it('should throw not found error if no training presentation exists', async () => {
     await request(app.getHttpServer()).get('/training/get-presentation').expect(HttpStatus.NOT_FOUND);
@@ -34,7 +36,7 @@ describe('(TrainingController) get-presentation', () => {
     const { body } = await request(app.getHttpServer()).get('/training/get-presentation').expect(HttpStatus.OK);
 
     const presentation = await repository.findOne({
-      where: { category: TrainingCategoryEnum.PRESENTATION },
+      where: { id: body.id },
       order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
     });
 
@@ -57,8 +59,8 @@ describe('(TrainingController) get-presentation', () => {
 });
 
 async function clearData(repository: Repository<Training>): Promise<void> {
-  const presentation = await repository.findOne({ where: { category: TrainingCategoryEnum.PRESENTATION } });
-  if (presentation) {
-    await repository.delete(presentation.id);
+  const presentations = await repository.find({ where: { category: TrainingCategoryEnum.PRESENTATION } });
+  if (presentations.length) {
+    await repository.delete(presentations.map((presentation) => presentation.id));
   }
 }

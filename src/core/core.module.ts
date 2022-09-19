@@ -7,6 +7,8 @@ import { ContextModule } from './context/context.module';
 import { DatabaseModule } from './database/database.module';
 import { LoggerModule } from './logger/logger.module';
 
+import { GuestOrUserAuthGuard } from '@core/auth/guest-or-user-auth.guard';
+import { JwtAuthGuard } from '@core/auth/jwt.guard';
 import { CqrsModule } from '@cqrs/module';
 import { UuidModule } from '@ddd/domain/uuid/uuid.module';
 
@@ -21,7 +23,7 @@ import { UuidModule } from '@ddd/domain/uuid/uuid.module';
     ClientApiModule,
     UuidModule,
   ],
-  providers: [JwtStrategy],
+  providers: [JwtStrategy, JwtAuthGuard, GuestOrUserAuthGuard],
   exports: [ConfigModule, ContextModule, CqrsModule, ClientApiModule, UuidModule],
 })
 export class CoreModule {}

@@ -12,7 +12,7 @@ import { TrainingCategoryEnum } from 'business/training/domain/enums/training-ca
 import { TrainingCommandRepository } from 'business/training/domain/repositories/training-command-repository';
 import { TrainingExam } from 'business/training/infrastructure/database/entities/training-exam.entity';
 import { Training } from 'business/training/infrastructure/database/entities/training.entity';
-import { fromTypeormEntityToAggregate } from 'business/training/infrastructure/mappers/training.mapper';
+import { trainingToTrainingAggregate } from 'business/training/infrastructure/mappers/training.mapper';
 
 export class TrainingTypeormCommandRepository
   extends BaseTypeormCommandRepository<TrainingAggregate>
@@ -33,8 +33,27 @@ export class TrainingTypeormCommandRepository
     super(repository, context);
     this.register(TrainingCreatedEvent, this.createTrainingPresentation);
   }
-  findExamQuestion(trainingId: string, examId: string, questionId: string): Promise<ExamQuestionEntity | undefined> {
-    throw new Error('Method not implemented.');
+  async findExamQuestion(
+    trainingId: string,
+    examId: string,
+    questionId: string,
+  ): Promise<ExamQuestionEntity | undefined> {
+    const examQuestion = await this.examQuestionRepository.findOne({
+      where: { exam: { id: examId, training: { id: trainingId } }, id: questionId },
+      relations: ['exam'],
+    });
+
+    if (!examQuestion) {
+      return undefined;
+    }
+
+    return ExamQuestionEntity.from({
+      id: examQuestion.id,
+      examId: examQuestion.exam.id,
+      question: examQuestion.question,
+      answer: examQuestion.answer,
+      propositions: examQuestion.propositions,
+    });
   }
 
   async findPresentation(): Promise<TrainingAggregate | undefined> {
@@ -47,7 +66,7 @@ export class TrainingTypeormCommandRepository
       return undefined;
     }
 
-    return fromTypeormEntityToAggregate(training);
+    return trainingToTrainingAggregate(training);
   }
 
   private async createTrainingPresentation(event: TrainingCreatedEvent): Promise<Training> {

@@ -2,6 +2,7 @@ import { IsString } from 'class-validator';
 
 import { ExamCopyCreatedEvent } from '../events/exam-copy-created-event';
 
+import { ExamCopyResponseAddedEvent } from '@business/training/domain/events/exam-copy-response-added-event';
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 import { ResponseEntity, ResponseEntityProps } from 'business/training/domain/entities/response.entity';
 
@@ -38,7 +39,7 @@ export class ExamCopyAggregate extends BaseAggregateRoot {
 
   static create(props: ExamCopyAggregateProps): ExamCopyAggregate {
     const examCopy = ExamCopyAggregate.from(props);
-    examCopy.apply(new ExamCopyCreatedEvent(examCopy.examId));
+    examCopy.apply(new ExamCopyCreatedEvent(examCopy));
     return examCopy;
   }
 
@@ -49,6 +50,7 @@ export class ExamCopyAggregate extends BaseAggregateRoot {
   writeResponse(props: ResponseEntityProps): ResponseEntity {
     const response = ResponseEntity.from(props);
     this._responses.push(response);
+    this.apply(new ExamCopyResponseAddedEvent(this.id, response));
     return response;
   }
 }

@@ -2,16 +2,20 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Controller, Get, Post, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { CreatePresentationCommand } from '../domain/commands/create-presentation/create-presentation.command';
 
 import { TrainingPresentationResponseDto } from './dto/training-presentation-response-dto';
 
+import { GuestOrUserAuthGuard } from '@core/auth/guest-or-user-auth.guard';
 import { CommandBus } from '@cqrs/command';
+import { ValidateDto } from 'business/training/application/dto/validate-dto';
+import { ValidateResponseDto } from 'business/training/application/dto/validate-response-dto';
 import { TrainingErrorInterceptor } from 'business/training/application/training.error-interceptor';
+import { ValidateResponseCommand } from 'business/training/domain/commands/validate-response/validate-response.command';
 import { GetPresentationQuery } from 'business/training/domain/queries/get-presentation/get-presentation.query';
 
 @ApiTags('Training')
@@ -32,5 +36,17 @@ export class TrainingController {
   @ApiOkResponse({ type: TrainingPresentationResponseDto })
   getTrainingPresentation(): Promise<TrainingPresentationResponseDto> {
     return this.queryBus.execute(new GetPresentationQuery());
+  }
+
+  @UseGuards(GuestOrUserAuthGuard)
+  @ApiBearerAuth()
+  @ApiHeader({ name: 'x-guest-id', required: false })
+  @ApiOperation({ operationId: 'validate', summary: 'Validate exam response' })
+  @Post('validate')
+  @ApiOkResponse({ type: ValidateResponseDto })
+  validate(@Body() response: ValidateDto): Promise<ValidateResponseDto> {
+    return this.commandBus.execute(
+      new ValidateResponseCommand(response.trainingId, response.examId, response.questionId, response.response),
+    );
   }
 }

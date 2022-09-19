@@ -10,15 +10,15 @@ import { ExamCopyAggregate } from 'business/training/domain/aggregates/exam-copy
 import { QuestionNotFoundError } from 'business/training/domain/errors/question-not-found-error';
 import { ExamCopyCommandRepository } from 'business/training/domain/repositories/exam-copy-command-repository';
 import {
+  EXAM_COPY_COMMAND_REPOSITORY,
   TRAINING_COMMAND_REPOSITORY,
-  TRAINING_EXAM_COPY_COMMAND_REPOSITORY,
 } from 'business/training/domain/repositories/tokens';
 import { TrainingCommandRepository } from 'business/training/domain/repositories/training-command-repository';
 
 @CommandHandler(ValidateResponseCommand)
 export class ValidateResponseHandler implements ICommandHandler<ValidateResponseCommand> {
   constructor(
-    @Inject(TRAINING_EXAM_COPY_COMMAND_REPOSITORY)
+    @Inject(EXAM_COPY_COMMAND_REPOSITORY)
     private readonly trainingExamCopyCommandRepository: ExamCopyCommandRepository,
     @Inject(TRAINING_COMMAND_REPOSITORY)
     private readonly trainingCommandRepository: TrainingCommandRepository,
