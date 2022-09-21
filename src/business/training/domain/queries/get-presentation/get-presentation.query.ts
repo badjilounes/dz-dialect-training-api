@@ -1,9 +1,9 @@
-import { ExamTypeEnum } from '../../enums/exam-type.enum';
-
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { Query } from '@cqrs/query';
 
 type GetPresentationExamQuestion = {
   id: string;
+  type: QuestionTypeEnum;
   question: string;
   answer: string;
   propositions: string[];
@@ -12,7 +12,6 @@ type GetPresentationExamQuestion = {
 type GetPresentationExam = {
   id: string;
   name: string;
-  type: ExamTypeEnum;
   questions: GetPresentationExamQuestion[];
 };
 

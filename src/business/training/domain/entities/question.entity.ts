@@ -1,10 +1,12 @@
-import { IsString } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
 
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { BaseEntity } from '@ddd/domain/base-entity';
 
 export type ExamQuestionEntityProps = {
   id: string;
   examId: string;
+  type: QuestionTypeEnum;
   question: string;
   answer: string;
   propositions: string[];
@@ -21,6 +23,12 @@ export class ExamQuestionEntity extends BaseEntity {
   private readonly _examId: string;
   public get examId(): string {
     return this._examId;
+  }
+
+  @IsEnum(QuestionTypeEnum)
+  private readonly _type: QuestionTypeEnum;
+  public get type(): QuestionTypeEnum {
+    return this._type;
   }
 
   @IsString()
@@ -45,6 +53,7 @@ export class ExamQuestionEntity extends BaseEntity {
     super();
     this._id = this.props.id;
     this._examId = this.props.examId;
+    this._type = this.props.type;
     this._question = this.props.question;
     this._answer = this.props.answer;
     this._propositions = this.props.propositions;

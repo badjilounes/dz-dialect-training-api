@@ -2,6 +2,7 @@ import { mock, MockProxy } from 'jest-mock-extended';
 
 import { ValidateResponseHandler } from './validate-response.handler';
 
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { EventPublisher } from '@cqrs/event';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 import { ExamCopyAggregate } from 'business/training/domain/aggregates/exam-copy.aggregate';
@@ -46,6 +47,7 @@ describe('Validate user response', () => {
     examQuestion = ExamQuestionEntity.from({
       id: questionId,
       examId,
+      type: QuestionTypeEnum.WORD_LIST,
       question: 'question',
       answer: 'answer',
       propositions: ['proposition1', 'proposition2'],

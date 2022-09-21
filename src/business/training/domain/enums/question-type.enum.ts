@@ -1,0 +1,5 @@
+export enum QuestionTypeEnum {
+  SIMPLE_CHOICE = 'SIMPLE_CHOICE',
+  MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
+  WORD_LIST = 'WORD_LIST',
+}

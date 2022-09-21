@@ -5,7 +5,7 @@ import { DataSource, Repository } from 'typeorm';
 
 import { generateUserToken } from '../utils/token.utils';
 
-import { ExamTypeEnum } from '@business/training/domain/enums/exam-type.enum';
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { TrainingCategoryEnum } from '@business/training/domain/enums/training-category.enum';
 import { ExamCopyResponse } from '@business/training/infrastructure/database/entities/exam-copy-response.entity';
 import { ExamCopy } from '@business/training/infrastructure/database/entities/exam-copy.entity';
@@ -99,11 +99,11 @@ async function createTraining(repository: Repository<Training>): Promise<Trainin
       {
         id: '08da1d22-38a3-4681-b663-5846612bfeac',
         name: 'name',
-        type: ExamTypeEnum.TRANSLATION,
         order: 1,
         questions: [
           {
             id: '3abb2fa8-d330-486e-963e-47eaefe4c00c',
+            type: QuestionTypeEnum.WORD_LIST,
             question: 'question',
             answer: 'answer',
             propositions: ['proposition'],

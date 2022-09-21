@@ -50,6 +50,7 @@ export class TrainingTypeormCommandRepository
     return ExamQuestionEntity.from({
       id: examQuestion.id,
       examId: examQuestion.exam.id,
+      type: examQuestion.type,
       question: examQuestion.question,
       answer: examQuestion.answer,
       propositions: examQuestion.propositions,
@@ -76,6 +77,7 @@ export class TrainingTypeormCommandRepository
       this.examQuestionRepository.create({
         id: question.id,
         exam: { id: exam.id },
+        type: question.type,
         question: question.question,
         answer: question.answer,
         propositions: question.propositions,
@@ -88,7 +90,6 @@ export class TrainingTypeormCommandRepository
       order: 0,
       training: { id: event.training.id },
       name: exam.name,
-      type: exam.type,
       questions: trainingExamQuestions,
     });
 

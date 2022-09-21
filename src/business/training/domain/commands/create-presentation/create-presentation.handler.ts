@@ -1,11 +1,11 @@
 import { Inject } from '@nestjs/common';
 
 import { TrainingAggregate } from '../../aggregates/training.aggregate';
-import { ExamTypeEnum } from '../../enums/exam-type.enum';
 import { TRAINING_COMMAND_REPOSITORY } from '../../repositories/tokens';
 
 import { CreatePresentationCommand, CreatePresentationCommandResult } from './create-presentation.command';
 
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { SentenceClientApiService } from '@core/client-api/sentence/sentence-client-api.service';
 import { CommandHandler, ICommandHandler } from '@cqrs/command';
 import { EventPublisher } from '@cqrs/event';
@@ -49,10 +49,10 @@ export class CreatePresentationHandler implements ICommandHandler<CreatePresenta
           id: examId,
           trainingId,
           name: 'presentation exam',
-          type: ExamTypeEnum.TRANSLATION,
           questions: sentences.map((sentence) => ({
             id: this.uuidGenerator.generate(),
             examId,
+            type: QuestionTypeEnum.WORD_LIST,
             question: sentence.dz || '',
             answer: sentence.fr || '',
             propositions: sentence.word_propositions?.fr || [],
@@ -71,9 +71,9 @@ export class CreatePresentationHandler implements ICommandHandler<CreatePresenta
       exam: {
         id: training.exams[0].id,
         name: training.exams[0].name,
-        type: training.exams[0].type,
         questions: training.exams[0].questions.map((question) => ({
           id: question.id,
+          type: question.type,
           question: question.question,
           answer: question.answer,
           propositions: question.propositions,

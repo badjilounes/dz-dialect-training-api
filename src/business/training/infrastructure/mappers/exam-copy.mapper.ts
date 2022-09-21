@@ -11,6 +11,7 @@ export function examCopyToExamCopyAggregate(entity: ExamCopy): ExamCopyAggregate
       question: ExamQuestionEntity.from({
         id: response.question.id,
         examId: entity.exam.id,
+        type: response.question.type,
         question: response.question.question,
         answer: response.question.answer,
         propositions: response.question.propositions,

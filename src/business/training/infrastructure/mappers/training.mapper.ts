@@ -10,12 +10,12 @@ export function trainingToTrainingAggregate(training: Training): TrainingAggrega
     exams: training.exams.map((exam) => ({
       id: exam.id,
       name: exam.name,
-      type: exam.type,
       trainingId: training.id,
       questions: exam.questions.map((question) => ({
         id: question.id,
         examId: exam.id,
         question: question.question,
+        type: question.type,
         answer: question.answer,
         propositions: question.propositions,
       })),

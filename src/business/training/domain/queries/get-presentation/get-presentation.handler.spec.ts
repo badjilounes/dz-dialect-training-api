@@ -1,9 +1,8 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { ExamTypeEnum } from '../../enums/exam-type.enum';
-
 import { GetPresentationQueryHandler } from './get-presentation.handler';
 
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
 import { TrainingPresentationNotFoundError } from 'business/training/domain/errors/training-presentation-not-found-error';
 import { Training, TrainingQueryRepository } from 'business/training/domain/repositories/training-query-repository';
@@ -32,10 +31,10 @@ describe('Get presentation', () => {
         {
           id: examId,
           name: 'presentation exam',
-          type: ExamTypeEnum.TRANSLATION,
           questions: [
             {
               id: questionId,
+              type: QuestionTypeEnum.WORD_LIST,
               question: 'el makla rahi el dekhel',
               answer: "la nourriture est à l'intérieur",
               propositions: [
@@ -73,9 +72,9 @@ describe('Get presentation', () => {
       exam: {
         id: training.exams[0].id,
         name: training.exams[0].name,
-        type: training.exams[0].type,
         questions: training.exams[0].questions.map((question) => ({
           id: question.id,
+          type: question.type,
           question: question.question,
           answer: question.answer,
           propositions: question.propositions,

@@ -46,9 +46,9 @@ describe('(TrainingController) get-presentation', () => {
       exam: {
         id: presentation?.exams[0].id,
         name: presentation?.exams[0].name,
-        type: presentation?.exams[0].type,
         questions: presentation?.exams[0].questions.map((question) => ({
           id: question.id,
+          type: question.type,
           question: question.question,
           answer: question.answer,
           propositions: question.propositions,

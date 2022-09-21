@@ -10,6 +10,8 @@ import {
 
 import { TrainingExam } from './training-exam.entity';
 
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
+
 @Entity()
 export class TrainingExamQuestion {
   @PrimaryGeneratedColumn('uuid')
@@ -17,6 +19,9 @@ export class TrainingExamQuestion {
 
   @Column()
   order!: number;
+
+  @Column({ enum: QuestionTypeEnum })
+  type!: QuestionTypeEnum;
 
   @Column()
   question!: string;

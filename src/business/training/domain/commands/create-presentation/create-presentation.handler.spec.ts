@@ -1,9 +1,8 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { ExamTypeEnum } from '../../enums/exam-type.enum';
-
 import { CreatePresentationHandler } from './create-presentation.handler';
 
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { SentenceClientApiService } from '@core/client-api/sentence/sentence-client-api.service';
 import { EventPublisher } from '@cqrs/event';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
@@ -53,11 +52,11 @@ describe('Create presentation', () => {
           id: examId,
           trainingId,
           name: 'presentation exam',
-          type: ExamTypeEnum.TRANSLATION,
           questions: [
             {
               id: questionId,
               examId,
+              type: QuestionTypeEnum.WORD_LIST,
               question: 'el makla rahi el dekhel',
               answer: "la nourriture est à l'intérieur",
               propositions: [
@@ -100,10 +99,10 @@ describe('Create presentation', () => {
       exam: {
         id: examId,
         name: 'presentation exam',
-        type: ExamTypeEnum.TRANSLATION,
         questions: [
           {
             id: questionId,
+            type: QuestionTypeEnum.WORD_LIST,
             question: sentence.dz,
             answer: sentence.fr,
             propositions: sentence.word_propositions?.fr,

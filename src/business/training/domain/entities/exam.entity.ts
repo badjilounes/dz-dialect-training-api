@@ -1,6 +1,4 @@
-import { IsEnum, IsString } from 'class-validator';
-
-import { ExamTypeEnum } from '../enums/exam-type.enum';
+import { IsString } from 'class-validator';
 
 import { ExamQuestionEntity, ExamQuestionEntityProps } from './question.entity';
 
@@ -10,7 +8,6 @@ export type ExamEntityProps = {
   id: string;
   trainingId: string;
   name: string;
-  type: ExamTypeEnum;
   questions: ExamQuestionEntityProps[];
 };
 
@@ -32,12 +29,6 @@ export class ExamEntity extends BaseEntity {
     return this._name;
   }
 
-  @IsEnum(ExamTypeEnum)
-  private readonly _type: ExamTypeEnum;
-  public get type(): ExamTypeEnum {
-    return this._type;
-  }
-
   private readonly _questions: ExamQuestionEntity[];
   public get questions(): ExamQuestionEntity[] {
     return this._questions;
@@ -48,7 +39,6 @@ export class ExamEntity extends BaseEntity {
     this._id = props.id;
     this._trainingId = props.trainingId;
     this._name = props.name;
-    this._type = ExamTypeEnum.TRANSLATION;
     this._questions = this.props.questions.map(ExamQuestionEntity.from);
   }
 

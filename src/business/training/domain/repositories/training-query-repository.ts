@@ -1,7 +1,8 @@
-import { ExamTypeEnum } from 'business/training/domain/enums/exam-type.enum';
+import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 
 type ExamQuestion = {
   id: string;
+  type: QuestionTypeEnum;
   question: string;
   answer: string;
   propositions: string[];
@@ -10,7 +11,6 @@ type ExamQuestion = {
 type Exam = {
   id: string;
   name: string;
-  type: ExamTypeEnum;
   questions: ExamQuestion[];
 };
 
