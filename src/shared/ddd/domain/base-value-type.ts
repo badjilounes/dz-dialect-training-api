@@ -15,4 +15,6 @@ export abstract class ValueType {
       }
     }
   }
+
+  abstract equals(value: ValueType): boolean;
 }

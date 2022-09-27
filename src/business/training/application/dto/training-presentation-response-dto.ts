@@ -13,8 +13,8 @@ class TrainingExamQuestionResponseDto {
   @ApiProperty()
   question!: string;
 
-  @ApiProperty()
-  answer!: string;
+  @ApiProperty({ type: String, isArray: true })
+  answer!: string[];
 }
 
 class TrainingExamResponseDto {

@@ -3,6 +3,7 @@ import { mock, MockProxy } from 'jest-mock-extended';
 import { ValidateResponseHandler } from './validate-response.handler';
 
 import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { EventPublisher } from '@cqrs/event';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 import { ExamCopyAggregate } from 'business/training/domain/aggregates/exam-copy.aggregate';
@@ -23,13 +24,14 @@ describe('Validate user response', () => {
   const trainingId = 'trainingId';
   const examId = 'examId';
   const questionId = 'questionId';
-  const response = 'response';
+  const response = ['response'];
 
   const examCopyId = 'examCopyId';
   const responseId = 'responseId';
 
   let examCopy: ExamCopyAggregate;
   let examQuestion: ExamQuestionEntity;
+  let examResponse: ResponseEntity;
 
   beforeEach(() => {
     examCopyCommandRepository = mock<ExamCopyCommandRepository>();
@@ -49,7 +51,7 @@ describe('Validate user response', () => {
       examId,
       type: QuestionTypeEnum.WORD_LIST,
       question: 'question',
-      answer: 'answer',
+      answer: AnswerValueType.createWordList({ value: ['answer'] }),
       propositions: ['proposition1', 'proposition2'],
     });
     trainingCommandRepository.findExamQuestion.mockResolvedValue(examQuestion);
@@ -60,6 +62,12 @@ describe('Validate user response', () => {
       responses: [],
     });
     examCopyCommandRepository.findExamCopy.mockResolvedValue(examCopy);
+
+    examResponse = ResponseEntity.from({
+      id: responseId,
+      question: examQuestion,
+      response: AnswerValueType.createWordList({ value: response }),
+    });
   });
 
   it('should throw if question does not exist in given training exam', async () => {
@@ -89,7 +97,7 @@ describe('Validate user response', () => {
     const expectedResponse = ResponseEntity.from({
       id: responseId,
       question: examQuestion,
-      response,
+      response: AnswerValueType.createWordList({ value: response }),
     });
 
     await handler.execute({ trainingId, examId, questionId, response });
@@ -111,10 +119,34 @@ describe('Validate user response', () => {
           ResponseEntity.from({
             id: responseId,
             question: examQuestion,
-            response,
+            response: AnswerValueType.createWordList({ value: response }),
           }),
         ],
       }),
     );
+  });
+
+  it('should save an invalid response', async () => {
+    uuidGenerator.generate.mockReturnValue(responseId);
+
+    const result = await handler.execute({ trainingId, examId, questionId, response: examResponse.response.value });
+
+    expect(result).toEqual({
+      valid: false,
+      response: examResponse.response.formattedValue,
+      answer: examQuestion.answer.formattedValue,
+    });
+  });
+
+  it('should save a valid response', async () => {
+    uuidGenerator.generate.mockReturnValue(responseId);
+
+    const result = await handler.execute({ trainingId, examId, questionId, response: examQuestion.answer.value });
+
+    expect(result).toEqual({
+      valid: true,
+      response: examQuestion.answer.formattedValue,
+      answer: examQuestion.answer.formattedValue,
+    });
   });
 });

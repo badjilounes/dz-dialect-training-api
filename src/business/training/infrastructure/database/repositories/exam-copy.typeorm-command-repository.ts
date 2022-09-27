@@ -47,7 +47,6 @@ export class ExamCopyTypeormCommandRepository
       id: event.examCopy.id,
       exam: { id: event.examCopy.examId },
       userId: this.context.userId,
-      responses: [],
     });
 
     return this.repository.save(examCopy);
@@ -58,7 +57,7 @@ export class ExamCopyTypeormCommandRepository
       id: event.response.id,
       examCopy: { id: event.examCopyId },
       question: { id: event.response.questionId },
-      response: event.response.response,
+      response: event.response.response.value,
       valid: event.response.valid,
     });
 

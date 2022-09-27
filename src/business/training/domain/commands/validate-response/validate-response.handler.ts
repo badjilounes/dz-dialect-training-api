@@ -3,6 +3,7 @@ import { EventPublisher } from '@nestjs/cqrs';
 
 import { ValidateResponseCommand, ValidateResponseCommandResult } from './validate-response.command';
 
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { CommandHandler, ICommandHandler } from '@cqrs/command';
 import { UUID_GENERATOR } from '@ddd/domain/uuid/tokens';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
@@ -51,15 +52,18 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
     const responseEntity = copy.writeResponse({
       id: this.uuidGenerator.generate(),
       question,
-      response,
+      response: AnswerValueType.from({
+        questionType: question.type,
+        value: response,
+      }),
     });
 
     await this.trainingExamCopyCommandRepository.persist(copy);
 
     return {
       valid: responseEntity.valid,
-      response: responseEntity.response,
-      answer: responseEntity.answer,
+      response: responseEntity.response.formattedValue,
+      answer: responseEntity.answer.formattedValue,
     };
   }
 }

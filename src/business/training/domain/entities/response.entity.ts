@@ -2,12 +2,13 @@ import { IsBoolean, IsString } from 'class-validator';
 
 import { ExamQuestionEntity } from './question.entity';
 
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { BaseEntity } from '@ddd/domain/base-entity';
 
 export type ResponseEntityProps = {
   id: string;
   question: ExamQuestionEntity;
-  response: string;
+  response: AnswerValueType;
 };
 
 export class ResponseEntity extends BaseEntity {
@@ -23,15 +24,13 @@ export class ResponseEntity extends BaseEntity {
     return this._questionId;
   }
 
-  @IsString()
-  private readonly _response: string;
-  public get response(): string {
+  private readonly _response: AnswerValueType;
+  public get response(): AnswerValueType {
     return this._response;
   }
 
-  @IsString()
-  private readonly _answer: string;
-  public get answer(): string {
+  private readonly _answer: AnswerValueType;
+  public get answer(): AnswerValueType {
     return this._answer;
   }
 
@@ -47,7 +46,7 @@ export class ResponseEntity extends BaseEntity {
     this._response = this.props.response;
     this._questionId = this.props.question.id;
     this._answer = this.props.question.answer;
-    this._valid = this.props.question.answer === this.props.response;
+    this._valid = this.props.question.answer.equals(this.props.response);
   }
 
   static create(props: ResponseEntityProps): ResponseEntity {

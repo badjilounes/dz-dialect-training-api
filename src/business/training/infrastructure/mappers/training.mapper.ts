@@ -1,3 +1,4 @@
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { TrainingAggregate } from 'business/training/domain/aggregates/training.aggregate';
 import { Training } from 'business/training/infrastructure/database/entities/training.entity';
 
@@ -16,7 +17,7 @@ export function trainingToTrainingAggregate(training: Training): TrainingAggrega
         examId: exam.id,
         question: question.question,
         type: question.type,
-        answer: question.answer,
+        answer: AnswerValueType.from({ questionType: question.type, value: question.answer }),
         propositions: question.propositions,
       })),
     })),

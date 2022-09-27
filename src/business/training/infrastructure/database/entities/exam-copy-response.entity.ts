@@ -8,8 +8,8 @@ export class ExamCopyResponse {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
-  response!: string;
+  @Column('text', { array: true })
+  response!: string[];
 
   @Column()
   valid!: boolean;

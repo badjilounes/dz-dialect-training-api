@@ -5,7 +5,7 @@ type GetPresentationExamQuestion = {
   id: string;
   type: QuestionTypeEnum;
   question: string;
-  answer: string;
+  answer: string[];
   propositions: string[];
 };
 

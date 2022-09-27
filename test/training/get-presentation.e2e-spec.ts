@@ -20,9 +20,7 @@ describe('(TrainingController) get-presentation', () => {
     repository = moduleFixture.get(DataSource).getRepository(Training);
 
     await app.init();
-  });
 
-  beforeEach(async () => {
     await clearData(repository);
   });
 

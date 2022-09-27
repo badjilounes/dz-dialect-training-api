@@ -26,8 +26,8 @@ export class TrainingExamQuestion {
   @Column()
   question!: string;
 
-  @Column()
-  answer!: string;
+  @Column('text', { array: true })
+  answer!: string[];
 
   @Column('text', { array: true })
   propositions!: string[];

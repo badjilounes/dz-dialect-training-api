@@ -5,6 +5,7 @@ import { TrainingAggregate } from '../../../domain/aggregates/training.aggregate
 import { TrainingCreatedEvent } from '../../../domain/events/training-created-event';
 import { TrainingExamQuestion } from '../entities/training-exam-question.entity';
 
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { AppContextService } from '@core/context/app-context.service';
 import { BaseTypeormCommandRepository } from '@ddd/infrastructure/base.typeorm-command-repository';
 import { ExamQuestionEntity } from 'business/training/domain/entities/question.entity';
@@ -52,7 +53,7 @@ export class TrainingTypeormCommandRepository
       examId: examQuestion.exam.id,
       type: examQuestion.type,
       question: examQuestion.question,
-      answer: examQuestion.answer,
+      answer: AnswerValueType.from({ questionType: examQuestion.type, value: examQuestion.answer }),
       propositions: examQuestion.propositions,
     });
   }
@@ -79,7 +80,7 @@ export class TrainingTypeormCommandRepository
         exam: { id: exam.id },
         type: question.type,
         question: question.question,
-        answer: question.answer,
+        answer: question.answer.value,
         propositions: question.propositions,
         order,
       }),

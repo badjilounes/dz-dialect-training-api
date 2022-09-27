@@ -1,6 +1,7 @@
 import { IsEnum, IsString } from 'class-validator';
 
 import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { BaseEntity } from '@ddd/domain/base-entity';
 
 export type ExamQuestionEntityProps = {
@@ -8,7 +9,7 @@ export type ExamQuestionEntityProps = {
   examId: string;
   type: QuestionTypeEnum;
   question: string;
-  answer: string;
+  answer: AnswerValueType;
   propositions: string[];
 };
 
@@ -37,9 +38,8 @@ export class ExamQuestionEntity extends BaseEntity {
     return this._question;
   }
 
-  @IsString()
-  private readonly _answer: string;
-  public get answer(): string {
+  private readonly _answer: AnswerValueType;
+  public get answer(): AnswerValueType {
     return this._answer;
   }
 

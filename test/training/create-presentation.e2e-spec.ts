@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { DataSource, Repository } from 'typeorm';
 
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { AppModule } from 'app.module';
 import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
 import { Training } from 'business/training/infrastructure/database/entities/training.entity';
@@ -20,9 +21,7 @@ describe('(TrainingController) create-presentation', () => {
     repository = moduleFixture.get(DataSource).getRepository(Training);
 
     await app.init();
-  });
 
-  beforeEach(async () => {
     await clearData(repository);
   });
 
@@ -51,7 +50,7 @@ describe('(TrainingController) create-presentation', () => {
           id: question.id,
           type: question.type,
           question: question.question,
-          answer: question.answer,
+          answer: AnswerValueType.from({ value: question.answer, questionType: question.type }).formattedValue,
           propositions: question.propositions,
         })),
       },

@@ -10,6 +10,6 @@ export class ValidateDto {
   @ApiProperty()
   questionId!: string;
 
-  @ApiProperty()
-  response!: string;
+  @ApiProperty({ type: String, isArray: true })
+  response!: string[];
 }

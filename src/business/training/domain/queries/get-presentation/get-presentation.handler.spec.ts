@@ -36,7 +36,7 @@ describe('Get presentation', () => {
               id: questionId,
               type: QuestionTypeEnum.WORD_LIST,
               question: 'el makla rahi el dekhel',
-              answer: "la nourriture est à l'intérieur",
+              answer: ["la nourriture est à l'intérieur"],
               propositions: [
                 'part',
                 'avec',

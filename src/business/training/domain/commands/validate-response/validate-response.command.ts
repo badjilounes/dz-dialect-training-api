@@ -11,7 +11,7 @@ export class ValidateResponseCommand extends Command<ValidateResponseCommandResu
     public readonly trainingId: string,
     public readonly examId: string,
     public readonly questionId: string,
-    public readonly response: string,
+    public readonly response: string[],
   ) {
     super();
   }

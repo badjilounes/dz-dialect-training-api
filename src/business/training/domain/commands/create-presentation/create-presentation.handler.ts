@@ -6,6 +6,7 @@ import { TRAINING_COMMAND_REPOSITORY } from '../../repositories/tokens';
 import { CreatePresentationCommand, CreatePresentationCommandResult } from './create-presentation.command';
 
 import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { SentenceClientApiService } from '@core/client-api/sentence/sentence-client-api.service';
 import { CommandHandler, ICommandHandler } from '@cqrs/command';
 import { EventPublisher } from '@cqrs/event';
@@ -17,6 +18,8 @@ import { TrainingCommandRepository } from 'business/training/domain/repositories
 
 @CommandHandler(CreatePresentationCommand)
 export class CreatePresentationHandler implements ICommandHandler<CreatePresentationCommand> {
+  questionsType: QuestionTypeEnum = QuestionTypeEnum.WORD_LIST;
+
   constructor(
     @Inject(TRAINING_COMMAND_REPOSITORY)
     private readonly trainingCommandRepository: TrainingCommandRepository,
@@ -52,9 +55,9 @@ export class CreatePresentationHandler implements ICommandHandler<CreatePresenta
           questions: sentences.map((sentence) => ({
             id: this.uuidGenerator.generate(),
             examId,
-            type: QuestionTypeEnum.WORD_LIST,
+            type: this.questionsType,
             question: sentence.dz || '',
-            answer: sentence.fr || '',
+            answer: AnswerValueType.createWordListFromValue(sentence.fr || ''),
             propositions: sentence.word_propositions?.fr || [],
           })),
         },
@@ -75,7 +78,7 @@ export class CreatePresentationHandler implements ICommandHandler<CreatePresenta
           id: question.id,
           type: question.type,
           question: question.question,
-          answer: question.answer,
+          answer: question.answer.formattedValue,
           propositions: question.propositions,
         })),
       },

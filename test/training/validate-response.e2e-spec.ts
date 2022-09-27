@@ -1,12 +1,13 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 
 import { generateUserToken } from '../utils/token.utils';
 
 import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { TrainingCategoryEnum } from '@business/training/domain/enums/training-category.enum';
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { ExamCopyResponse } from '@business/training/infrastructure/database/entities/exam-copy-response.entity';
 import { ExamCopy } from '@business/training/infrastructure/database/entities/exam-copy.entity';
 import { AppModule } from 'app.module';
@@ -20,6 +21,7 @@ describe('(TrainingController) validate', () => {
   let trainingRepository: Repository<Training>;
 
   let validateDto: ValidateDto;
+  let training: Training;
 
   const userId = '1c0cb5de-383e-40bc-8555-57611e8c9cf9';
   const token = generateUserToken(userId);
@@ -36,13 +38,13 @@ describe('(TrainingController) validate', () => {
 
     await app.init();
 
-    await clearData(examCopyRepository);
+    await clearData(examCopyRepository, trainingRepository);
 
     validateDto = {
       questionId: '3abb2fa8-d330-486e-963e-47eaefe4c00c',
       examId: '08da1d22-38a3-4681-b663-5846612bfeac',
       trainingId: 'cdcae337-ce85-47db-9ed5-a51630eb39b8',
-      response: 'response',
+      response: ['response'],
     };
   });
 
@@ -58,8 +60,8 @@ describe('(TrainingController) validate', () => {
       .expect(HttpStatus.NOT_FOUND);
   });
 
-  it('should return validation of user response', async () => {
-    const training = await createTraining(trainingRepository);
+  it('should validate the user response', async () => {
+    training = await createTraining(trainingRepository);
 
     validateDto.trainingId = training.id;
     validateDto.examId = training.exams[0].id;
@@ -72,40 +74,61 @@ describe('(TrainingController) validate', () => {
       .send(validateDto)
       .expect(HttpStatus.CREATED);
 
-    const response = await examCopyResponseRepository.findOne({
+    const copyResponse = await examCopyResponseRepository.findOne({
       where: {
         examCopy: { exam: { id: validateDto.examId }, userId },
         question: { id: validateDto.questionId },
       },
     });
 
+    expect(copyResponse).not.toBeNull();
+
     expect(body).toMatchObject({
-      valid: response?.valid,
-      response: validateDto.response,
+      valid: copyResponse?.valid,
+      response: AnswerValueType.from({
+        value: copyResponse?.response ?? [],
+        questionType: training.exams[0].questions[0].type,
+      }).formattedValue,
       answer: body.answer,
     });
   });
 });
 
-async function clearData(repository: Repository<ExamCopy>): Promise<void> {}
+async function clearData(
+  examCopyRepository: Repository<ExamCopy>,
+  trainingRepository: Repository<Training>,
+): Promise<void> {
+  const copyList = await examCopyRepository.find();
+  const copyIdList = copyList.map((copy) => copy.id);
+  const trainingIdList = copyList.map((copy) => copy.exam.training.id);
+
+  if (copyIdList.length) {
+    await examCopyRepository.delete({
+      id: In(copyIdList),
+    });
+  }
+
+  if (trainingIdList.length) {
+    await trainingRepository.delete({
+      id: In(trainingIdList),
+    });
+  }
+}
 
 async function createTraining(repository: Repository<Training>): Promise<Training> {
   const training = repository.create({
-    id: 'cdcae337-ce85-47db-9ed5-a51630eb39b8',
     category: TrainingCategoryEnum.PRESENTATION,
     fromLanguage: 'fr',
     learningLanguage: 'dz',
     exams: [
       {
-        id: '08da1d22-38a3-4681-b663-5846612bfeac',
         name: 'name',
         order: 1,
         questions: [
           {
-            id: '3abb2fa8-d330-486e-963e-47eaefe4c00c',
             type: QuestionTypeEnum.WORD_LIST,
             question: 'question',
-            answer: 'answer',
+            answer: ['answer'],
             propositions: ['proposition'],
             order: 1,
           },

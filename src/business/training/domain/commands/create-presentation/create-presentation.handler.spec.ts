@@ -3,6 +3,7 @@ import { mock, MockProxy } from 'jest-mock-extended';
 import { CreatePresentationHandler } from './create-presentation.handler';
 
 import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
+import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { SentenceClientApiService } from '@core/client-api/sentence/sentence-client-api.service';
 import { EventPublisher } from '@cqrs/event';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
@@ -58,7 +59,7 @@ describe('Create presentation', () => {
               examId,
               type: QuestionTypeEnum.WORD_LIST,
               question: 'el makla rahi el dekhel',
-              answer: "la nourriture est à l'intérieur",
+              answer: AnswerValueType.createWordListFromValue("la nourriture est à l'intérieur"),
               propositions: [
                 'part',
                 'avec',
