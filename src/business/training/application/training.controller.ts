@@ -8,8 +8,9 @@ import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '
 
 import { CreatePresentationCommand } from '../domain/commands/create-presentation/create-presentation.command';
 
-import { TrainingPresentationResponseDto } from './dto/training-presentation-response-dto';
+import { GetTrainingResponseDto } from './dto/get-training-response-dto';
 
+import { CreateTrainingResponseDto } from '@business/training/application/dto/create-training-response-dto';
 import { GuestOrUserAuthGuard } from '@core/auth/guest-or-user-auth.guard';
 import { CommandBus } from '@cqrs/command';
 import { ValidateDto } from 'business/training/application/dto/validate-dto';
@@ -26,15 +27,15 @@ export class TrainingController {
 
   @ApiOperation({ operationId: 'create-training-presentation', summary: 'Create training presentation' })
   @Post('create-presentation')
-  @ApiOkResponse({ type: TrainingPresentationResponseDto })
-  createTrainingPresentation(): Promise<TrainingPresentationResponseDto> {
+  @ApiOkResponse({ type: CreateTrainingResponseDto })
+  createTrainingPresentation(): Promise<CreateTrainingResponseDto> {
     return this.commandBus.execute(new CreatePresentationCommand());
   }
 
   @ApiOperation({ operationId: 'get-training-presentation', summary: 'Get training presentation' })
   @Get('get-presentation')
-  @ApiOkResponse({ type: TrainingPresentationResponseDto })
-  getTrainingPresentation(): Promise<TrainingPresentationResponseDto> {
+  @ApiOkResponse({ type: GetTrainingResponseDto })
+  getTrainingPresentation(): Promise<GetTrainingResponseDto> {
     return this.queryBus.execute(new GetPresentationQuery());
   }
 

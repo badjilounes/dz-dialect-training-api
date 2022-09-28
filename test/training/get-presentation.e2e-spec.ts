@@ -48,7 +48,6 @@ describe('(TrainingController) get-presentation', () => {
           id: question.id,
           type: question.type,
           question: question.question,
-          answer: question.answer,
           propositions: question.propositions,
         })),
       },

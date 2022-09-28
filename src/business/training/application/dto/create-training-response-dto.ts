@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
 
-class TrainingExamQuestionResponseDto {
+class CreateTrainingExamQuestionResponseDto {
   @ApiProperty()
   id!: string;
 
@@ -14,27 +14,27 @@ class TrainingExamQuestionResponseDto {
   question!: string;
 
   @ApiProperty({ type: String, isArray: true })
-  answer!: string[];
+  propositions!: string[];
 }
 
-class TrainingExamResponseDto {
+class CreateTrainingExamResponseDto {
   @ApiProperty()
   id!: string;
 
   @ApiProperty()
   name!: string;
 
-  @ApiProperty({ type: TrainingExamQuestionResponseDto, isArray: true })
-  questions!: TrainingExamQuestionResponseDto[];
+  @ApiProperty({ type: CreateTrainingExamQuestionResponseDto, isArray: true })
+  questions!: CreateTrainingExamQuestionResponseDto[];
 }
 
-export class TrainingPresentationResponseDto {
+export class CreateTrainingResponseDto {
   @ApiProperty()
   id!: string;
 
   @ApiProperty({ enum: TrainingCategoryEnum, enumName: 'TrainingCategoryEnum' })
   category!: TrainingCategoryEnum;
 
-  @ApiProperty({ type: TrainingExamResponseDto })
-  exam!: TrainingExamResponseDto;
+  @ApiProperty({ type: CreateTrainingExamResponseDto })
+  exam!: CreateTrainingExamResponseDto;
 }
