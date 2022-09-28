@@ -35,8 +35,8 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
     response,
   }: ValidateResponseCommand): Promise<ValidateResponseCommandResult> {
     // Find given exam question
-    const questions = await this.trainingCommandRepository.findExamQuestions(trainingId, examId);
-    const question = questions.find((q) => q.id === questionId);
+    const examQuestions = await this.trainingCommandRepository.findExamQuestions(trainingId, examId);
+    const question = examQuestions.find((q) => q.id === questionId);
     if (!question) {
       throw new QuestionNotFoundError(questionId);
     }
@@ -54,7 +54,7 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
     this.eventPublisher.mergeObjectContext(copy);
 
     // Write the response for given question
-    const isLastQuestion = copy.responses.length + 1 === questions.length;
+    const isLastQuestion = copy.responses.length + 1 === examQuestions.length;
     const responseEntity = copy.writeResponse(
       {
         id: this.uuidGenerator.generate(),
