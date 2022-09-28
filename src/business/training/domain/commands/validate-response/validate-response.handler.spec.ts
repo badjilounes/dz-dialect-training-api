@@ -2,6 +2,7 @@ import { mock, MockProxy } from 'jest-mock-extended';
 
 import { ValidateResponseHandler } from './validate-response.handler';
 
+import { ExamCopyStateEnum } from '@business/training/domain/enums/exam-copy-state.enum';
 import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
 import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
 import { EventPublisher } from '@cqrs/event';
@@ -54,12 +55,13 @@ describe('Validate user response', () => {
       answer: AnswerValueType.createWordList({ value: ['answer'] }),
       propositions: ['proposition1', 'proposition2'],
     });
-    trainingCommandRepository.findExamQuestion.mockResolvedValue(examQuestion);
+    trainingCommandRepository.findExamQuestions.mockResolvedValue([examQuestion]);
 
     examCopy = ExamCopyAggregate.from({
       id: examCopyId,
       examId,
       responses: [],
+      state: ExamCopyStateEnum.IN_PROGRESS,
     });
     examCopyCommandRepository.findExamCopy.mockResolvedValue(examCopy);
 
@@ -71,7 +73,7 @@ describe('Validate user response', () => {
   });
 
   it('should throw if question does not exist in given training exam', async () => {
-    trainingCommandRepository.findExamQuestion.mockResolvedValue(undefined);
+    trainingCommandRepository.findExamQuestions.mockResolvedValue([]);
 
     await expect(
       handler.execute({
@@ -148,5 +150,17 @@ describe('Validate user response', () => {
       response: examQuestion.answer.formattedValue,
       answer: examQuestion.answer.formattedValue,
     });
+  });
+
+  it('should mark the exam copy as completed writing the last question response', async () => {
+    uuidGenerator.generate.mockReturnValue(responseId);
+
+    await handler.execute({ trainingId, examId, questionId, response: examQuestion.answer.value });
+
+    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: ExamCopyStateEnum.COMPLETED,
+      }),
+    );
   });
 });

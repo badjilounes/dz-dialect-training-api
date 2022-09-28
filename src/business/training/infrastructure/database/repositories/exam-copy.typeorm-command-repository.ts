@@ -47,6 +47,7 @@ export class ExamCopyTypeormCommandRepository
       id: event.examCopy.id,
       exam: { id: event.examCopy.examId },
       userId: this.context.userId,
+      state: event.examCopy.state,
     });
 
     return this.repository.save(examCopy);

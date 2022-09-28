@@ -7,6 +7,7 @@ export function examCopyToExamCopyAggregate(entity: ExamCopy): ExamCopyAggregate
   return ExamCopyAggregate.from({
     id: entity.id,
     examId: entity.exam.id,
+    state: entity.state,
     responses: entity.responses.map((response) => ({
       id: response.id,
       question: ExamQuestionEntity.from({

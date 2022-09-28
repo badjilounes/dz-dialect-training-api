@@ -34,28 +34,23 @@ export class TrainingTypeormCommandRepository
     super(repository, context);
     this.register(TrainingCreatedEvent, this.createTrainingPresentation);
   }
-  async findExamQuestion(
-    trainingId: string,
-    examId: string,
-    questionId: string,
-  ): Promise<ExamQuestionEntity | undefined> {
-    const examQuestion = await this.examQuestionRepository.findOne({
-      where: { exam: { id: examId, training: { id: trainingId } }, id: questionId },
+  async findExamQuestions(trainingId: string, examId: string): Promise<ExamQuestionEntity[]> {
+    const examQuestions = await this.examQuestionRepository.find({
+      where: { exam: { id: examId, training: { id: trainingId } } },
       relations: ['exam'],
+      order: { order: 'ASC' },
     });
 
-    if (!examQuestion) {
-      return undefined;
-    }
-
-    return ExamQuestionEntity.from({
-      id: examQuestion.id,
-      examId: examQuestion.exam.id,
-      type: examQuestion.type,
-      question: examQuestion.question,
-      answer: AnswerValueType.from({ questionType: examQuestion.type, value: examQuestion.answer }),
-      propositions: examQuestion.propositions,
-    });
+    return examQuestions.map((examQuestion) =>
+      ExamQuestionEntity.from({
+        id: examQuestion.id,
+        examId: examQuestion.exam.id,
+        type: examQuestion.type,
+        question: examQuestion.question,
+        answer: AnswerValueType.from({ questionType: examQuestion.type, value: examQuestion.answer }),
+        propositions: examQuestion.propositions,
+      }),
+    );
   }
 
   async findPresentation(): Promise<TrainingAggregate | undefined> {

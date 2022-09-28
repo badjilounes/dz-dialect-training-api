@@ -5,5 +5,5 @@ import { ExamQuestionEntity } from 'business/training/domain/entities/question.e
 
 export interface TrainingCommandRepository extends IBaseCommandRepository<TrainingAggregate> {
   findPresentation(): Promise<TrainingAggregate | undefined>;
-  findExamQuestion(trainingId: string, examId: string, questionId: string): Promise<ExamQuestionEntity | undefined>;
+  findExamQuestions(trainingId: string, examId: string): Promise<ExamQuestionEntity[]>;
 }
