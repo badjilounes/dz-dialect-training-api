@@ -1,24 +1,15 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
 import * as request from 'supertest';
-import { DataSource, In, Repository } from 'typeorm';
 
+import { initAppTesting } from '../core/setup';
 import { generateUserToken } from '../utils/token.utils';
 
-import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
-import { TrainingCategoryEnum } from '@business/training/domain/enums/training-category.enum';
 import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
-import { ExamCopyResponse } from '@business/training/infrastructure/database/entities/exam-copy-response.entity';
-import { ExamCopy } from '@business/training/infrastructure/database/entities/exam-copy.entity';
-import { AppModule } from 'app.module';
 import { ValidateDto } from 'business/training/application/dto/validate-dto';
 import { Training } from 'business/training/infrastructure/database/entities/training.entity';
 
 describe('(TrainingController) validate', () => {
-  let app: INestApplication;
-  let examCopyRepository: Repository<ExamCopy>;
-  let examCopyResponseRepository: Repository<ExamCopyResponse>;
-  let trainingRepository: Repository<Training>;
+  const testHelper = initAppTesting();
 
   let validateDto: ValidateDto;
   let training: Training;
@@ -27,18 +18,10 @@ describe('(TrainingController) validate', () => {
   const token = generateUserToken(userId);
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const { fixtures } = testHelper();
 
-    app = moduleFixture.createNestApplication();
-    examCopyRepository = moduleFixture.get(DataSource).getRepository(ExamCopy);
-    examCopyResponseRepository = moduleFixture.get(DataSource).getRepository(ExamCopyResponse);
-    trainingRepository = moduleFixture.get(DataSource).getRepository(Training);
-
-    await app.init();
-
-    await clearData(examCopyRepository, trainingRepository);
+    await fixtures.examCopy.clearAll();
+    await fixtures.training.clearAll();
 
     validateDto = {
       questionId: '3abb2fa8-d330-486e-963e-47eaefe4c00c',
@@ -49,10 +32,14 @@ describe('(TrainingController) validate', () => {
   });
 
   it('should throw unauthorized error without user nor guest', async () => {
+    const { app } = testHelper();
+
     await request(app.getHttpServer()).post('/training/validate').send(validateDto).expect(HttpStatus.UNAUTHORIZED);
   });
 
   it('should throw not found error if no question match given question, exam and training identifiers', async () => {
+    const { app } = testHelper();
+
     await request(app.getHttpServer())
       .post('/training/validate')
       .set('Authorization', `Bearer ${token}`)
@@ -61,7 +48,9 @@ describe('(TrainingController) validate', () => {
   });
 
   it('should validate the user response', async () => {
-    training = await createTraining(trainingRepository);
+    const { app, fixtures } = testHelper();
+
+    training = await fixtures.training.createTraining();
 
     validateDto.trainingId = training.id;
     validateDto.examId = training.exams[0].id;
@@ -74,12 +63,7 @@ describe('(TrainingController) validate', () => {
       .send(validateDto)
       .expect(HttpStatus.CREATED);
 
-    const copyResponse = await examCopyResponseRepository.findOne({
-      where: {
-        examCopy: { exam: { id: validateDto.examId }, userId },
-        question: { id: validateDto.questionId },
-      },
-    });
+    const copyResponse = await fixtures.examCopy.findUserResponse(validateDto.examId, validateDto.questionId, userId);
 
     expect(copyResponse).not.toBeNull();
 
@@ -93,49 +77,3 @@ describe('(TrainingController) validate', () => {
     });
   });
 });
-
-async function clearData(
-  examCopyRepository: Repository<ExamCopy>,
-  trainingRepository: Repository<Training>,
-): Promise<void> {
-  const copyList = await examCopyRepository.find();
-  const copyIdList = copyList.map((copy) => copy.id);
-  const trainingIdList = copyList.map((copy) => copy.exam.training.id);
-
-  if (copyIdList.length) {
-    await examCopyRepository.delete({
-      id: In(copyIdList),
-    });
-  }
-
-  if (trainingIdList.length) {
-    await trainingRepository.delete({
-      id: In(trainingIdList),
-    });
-  }
-}
-
-async function createTraining(repository: Repository<Training>): Promise<Training> {
-  const training = repository.create({
-    category: TrainingCategoryEnum.PRESENTATION,
-    fromLanguage: 'fr',
-    learningLanguage: 'dz',
-    exams: [
-      {
-        name: 'name',
-        order: 1,
-        questions: [
-          {
-            type: QuestionTypeEnum.WORD_LIST,
-            question: 'question',
-            answer: ['answer'],
-            propositions: ['proposition'],
-            order: 1,
-          },
-        ],
-      },
-    ],
-  });
-
-  return repository.save(training);
-}

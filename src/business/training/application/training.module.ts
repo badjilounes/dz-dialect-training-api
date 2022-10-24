@@ -5,6 +5,7 @@ import { TrainingCommandHandlers } from '../domain/commands';
 import { TrainingQueryHandlers } from '../domain/queries';
 import {
   EXAM_COPY_COMMAND_REPOSITORY,
+  EXAM_COPY_QUERY_REPOSITORY,
   TRAINING_COMMAND_REPOSITORY,
   TRAINING_QUERY_REPOSITORY,
 } from '../domain/repositories/tokens';
@@ -13,6 +14,7 @@ import { TrainingTypeormCommandRepository } from '../infrastructure/database/rep
 
 import { TrainingController } from './training.controller';
 
+import { ExamCopyTypeormQueryRepository } from '@business/training/infrastructure/database/repositories/exam-copy.typeorm-query-repository';
 import { ExamCopyResponse } from 'business/training/infrastructure/database/entities/exam-copy-response.entity';
 import { ExamCopy } from 'business/training/infrastructure/database/entities/exam-copy.entity';
 import { TrainingExam } from 'business/training/infrastructure/database/entities/training-exam.entity';
@@ -32,6 +34,7 @@ https://docs.nestjs.com/modules
     { provide: TRAINING_COMMAND_REPOSITORY, useClass: TrainingTypeormCommandRepository },
     { provide: EXAM_COPY_COMMAND_REPOSITORY, useClass: ExamCopyTypeormCommandRepository },
     { provide: TRAINING_QUERY_REPOSITORY, useClass: TrainingTypeormQueryRepository },
+    { provide: EXAM_COPY_QUERY_REPOSITORY, useClass: ExamCopyTypeormQueryRepository },
   ],
 })
 export class TrainingModule {}

@@ -22,7 +22,7 @@ export class ExamCopy {
   @Column()
   userId!: string;
 
-  @Column({ type: 'enum', enum: ExamCopyStateEnum })
+  @Column({ type: 'enum', enum: ExamCopyStateEnum, default: ExamCopyStateEnum.IN_PROGRESS })
   state!: ExamCopyStateEnum;
 
   @ManyToOne(() => TrainingExam, { onDelete: 'CASCADE' })

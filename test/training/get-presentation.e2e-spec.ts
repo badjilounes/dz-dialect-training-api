@@ -1,42 +1,33 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
 import * as request from 'supertest';
-import { DataSource, Repository } from 'typeorm';
 
-import { AppModule } from 'app.module';
-import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
-import { Training } from 'business/training/infrastructure/database/entities/training.entity';
+import { initAppTesting } from '../core/setup';
+
+import { TrainingCategoryEnum } from '@business/training/domain/enums/training-category.enum';
 
 describe('(TrainingController) get-presentation', () => {
-  let app: INestApplication;
-  let repository: Repository<Training>;
+  const testHelper = initAppTesting();
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const { fixtures } = testHelper();
 
-    app = moduleFixture.createNestApplication();
-    repository = moduleFixture.get(DataSource).getRepository(Training);
-
-    await app.init();
-
-    await clearData(repository);
+    await fixtures.training.clearAll({ where: { category: TrainingCategoryEnum.PRESENTATION } });
   });
 
   it('should throw not found error if no training presentation exists', async () => {
+    const { app } = testHelper();
+
     await request(app.getHttpServer()).get('/training/get-presentation').expect(HttpStatus.NOT_FOUND);
   });
 
   it('should return existing training presentation', async () => {
+    const { app, fixtures } = testHelper();
+
     await request(app.getHttpServer()).post('/training/create-presentation').expect(HttpStatus.CREATED);
 
     const { body } = await request(app.getHttpServer()).get('/training/get-presentation').expect(HttpStatus.OK);
 
-    const presentation = await repository.findOne({
-      where: { id: body.id },
-      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
-    });
+    const presentation = await fixtures.training.findOneById(body.id);
 
     expect(body).toMatchObject({
       id: presentation?.id,
@@ -54,10 +45,3 @@ describe('(TrainingController) get-presentation', () => {
     });
   });
 });
-
-async function clearData(repository: Repository<Training>): Promise<void> {
-  const presentations = await repository.find({ where: { category: TrainingCategoryEnum.PRESENTATION } });
-  if (presentations.length) {
-    await repository.delete(presentations.map((presentation) => presentation.id));
-  }
-}

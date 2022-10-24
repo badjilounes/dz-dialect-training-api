@@ -1,44 +1,35 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpStatus } from '@nestjs/common';
 import * as request from 'supertest';
-import { DataSource, Repository } from 'typeorm';
 
+import { initAppTesting } from '../core/setup';
+
+import { TrainingCategoryEnum } from '@business/training/domain/enums/training-category.enum';
 import { AnswerValueType } from '@business/training/domain/value-types/answer.value-type';
-import { AppModule } from 'app.module';
-import { TrainingCategoryEnum } from 'business/training/domain/enums/training-category.enum';
-import { Training } from 'business/training/infrastructure/database/entities/training.entity';
 
 describe('(TrainingController) create-presentation', () => {
-  let app: INestApplication;
-  let repository: Repository<Training>;
+  const testHelper = initAppTesting('create_presentation');
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const { fixtures } = testHelper();
 
-    app = moduleFixture.createNestApplication();
-    repository = moduleFixture.get(DataSource).getRepository(Training);
-
-    await app.init();
-
-    await clearData(repository);
+    await fixtures.training.clearAll({ where: { category: TrainingCategoryEnum.PRESENTATION } });
   });
 
   it('should throw conflict error if a training presentation already exist', async () => {
+    const { app } = testHelper();
+
     await request(app.getHttpServer()).post('/training/create-presentation');
     await request(app.getHttpServer()).post('/training/create-presentation').expect(HttpStatus.CONFLICT);
   });
 
   it('should return created training presentation', async () => {
+    const { app, fixtures } = testHelper();
+
     const { body } = await request(app.getHttpServer())
       .post('/training/create-presentation')
       .expect(HttpStatus.CREATED);
 
-    const presentation = await repository.findOne({
-      where: { id: body.id },
-      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
-    });
+    const presentation = await fixtures.training.findOneById(body.id);
 
     expect(body).toMatchObject({
       id: presentation?.id,
@@ -57,10 +48,3 @@ describe('(TrainingController) create-presentation', () => {
     });
   });
 });
-
-async function clearData(repository: Repository<Training>): Promise<void> {
-  const presentations = await repository.find({ where: { category: TrainingCategoryEnum.PRESENTATION } });
-  if (presentations.length) {
-    await repository.delete(presentations.map((presentation) => presentation.id));
-  }
-}
