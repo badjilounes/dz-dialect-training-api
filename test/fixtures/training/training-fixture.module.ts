@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { TrainingFixture } from './training.fixture';
 
-import { Training } from '@business/training/infrastructure/database/entities/training.entity';
+import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Training])],

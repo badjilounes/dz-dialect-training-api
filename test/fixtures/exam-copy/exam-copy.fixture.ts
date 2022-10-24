@@ -4,9 +4,9 @@ import { DeepPartial, FindManyOptions, In, Repository } from 'typeorm';
 
 import { TrainingFixture } from '../training/training.fixture';
 
-import { ExamCopyStateEnum } from '@business/training/domain/enums/exam-copy-state.enum';
-import { ExamCopyResponse } from '@business/training/infrastructure/database/entities/exam-copy-response.entity';
-import { ExamCopy } from '@business/training/infrastructure/database/entities/exam-copy.entity';
+import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
+import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
+import { ExamCopy } from '@business/student/infrastructure/database/entities/exam-copy.entity';
 
 @Injectable()
 export class ExamCopyFixture {

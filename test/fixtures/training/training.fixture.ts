@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindManyOptions, In, Repository } from 'typeorm';
 
-import { QuestionTypeEnum } from '@business/training/domain/enums/question-type.enum';
-import { TrainingCategoryEnum } from '@business/training/domain/enums/training-category.enum';
-import { Training } from '@business/training/infrastructure/database/entities/training.entity';
+import { QuestionTypeEnum } from '@business/professor/domain/enums/question-type.enum';
+import { TrainingCategoryEnum } from '@business/professor/domain/enums/training-category.enum';
+import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
 
 @Injectable()
 export class TrainingFixture {
