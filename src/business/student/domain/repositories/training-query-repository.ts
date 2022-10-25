@@ -5,6 +5,7 @@ type ExamQuestion = {
   type: QuestionTypeEnum;
   question: string;
   answer: string[];
+  order: number;
   propositions: string[];
 };
 

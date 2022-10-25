@@ -35,6 +35,7 @@ describe('Get presentation', () => {
             {
               id: questionId,
               type: QuestionTypeEnum.WORD_LIST,
+              order: 1,
               question: 'el makla rahi el dekhel',
               answer: ["la nourriture est à l'intérieur"],
               propositions: [
@@ -75,6 +76,7 @@ describe('Get presentation', () => {
         questions: training.exams[0].questions.map((question) => ({
           id: question.id,
           type: question.type,
+          order: question.order,
           question: question.question,
           propositions: question.propositions,
         })),

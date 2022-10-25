@@ -13,6 +13,9 @@ class GetTrainingExamQuestionResponseDto {
   @ApiProperty()
   question!: string;
 
+  @ApiProperty()
+  order!: number;
+
   @ApiProperty({ type: String, isArray: true })
   propositions!: string[];
 }

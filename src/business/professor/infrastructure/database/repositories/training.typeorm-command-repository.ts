@@ -69,7 +69,7 @@ export class TrainingTypeormCommandRepository
   private async createTrainingPresentation(event: TrainingCreatedEvent): Promise<Training> {
     const [exam] = event.training.exams;
 
-    const trainingExamQuestions = exam.questions.map((question, order) =>
+    const trainingExamQuestions = exam.questions.map((question, index) =>
       this.examQuestionRepository.create({
         id: question.id,
         exam: { id: exam.id },
@@ -77,7 +77,7 @@ export class TrainingTypeormCommandRepository
         question: question.question,
         answer: question.answer.value,
         propositions: question.propositions,
-        order,
+        order: index + 1,
       }),
     );
 

@@ -40,6 +40,7 @@ describe('Get exm presentation result', () => {
           questions: [
             {
               id: 'questionId',
+              order: 1,
               type: QuestionTypeEnum.WORD_LIST,
               question: 'el makla rahi el dekhel',
               answer: ["la nourriture est à l'intérieur"],

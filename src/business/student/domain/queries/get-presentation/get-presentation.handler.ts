@@ -28,6 +28,7 @@ export class GetPresentationQueryHandler implements IQueryHandler<GetPresentatio
         name: presentation.exams[0].name,
         questions: presentation.exams[0].questions.map((question) => ({
           id: question.id,
+          order: question.order,
           type: question.type,
           question: question.question,
           propositions: question.propositions,

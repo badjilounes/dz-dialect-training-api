@@ -38,6 +38,7 @@ describe('(TrainingController) get-presentation', () => {
         questions: presentation?.exams[0].questions.map((question) => ({
           id: question.id,
           type: question.type,
+          order: question.order,
           question: question.question,
           propositions: question.propositions,
         })),
