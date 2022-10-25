@@ -9,12 +9,14 @@ import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '
 import { GetTrainingResponseDto } from './dto/get-training-response-dto';
 
 import { GetTrainingResultResponseDto } from '@business/student/application/dto/get-training-result-response-dto';
+import { ShouldShowPresentationResponseDto } from '@business/student/application/dto/should-show-presentation-response-dto';
 import { ValidateDto } from '@business/student/application/dto/validate-dto';
 import { ValidateResponseDto } from '@business/student/application/dto/validate-response-dto';
 import { StudentErrorInterceptor } from '@business/student/application/student.error-interceptor';
 import { ValidateResponseCommand } from '@business/student/domain/commands/validate-response/validate-response.command';
 import { GetExamPresentationResultQuery } from '@business/student/domain/queries/get-exam-presentation-result/get-exam-presentation-result.query';
 import { GetPresentationQuery } from '@business/student/domain/queries/get-presentation/get-presentation.query';
+import { ShouldShowPresentationQuery } from '@business/student/domain/queries/should-show-presentation/should-show-presentation.query';
 import { GuestOrUserAuthGuard } from '@core/auth/guest-or-user-auth.guard';
 import { CommandBus } from '@cqrs/command';
 
@@ -23,6 +25,14 @@ import { CommandBus } from '@cqrs/command';
 @UseInterceptors(StudentErrorInterceptor)
 export class StudentController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
+
+  @ApiOperation({ operationId: 'should-show-presentation', summary: 'Whether presentation should be shown or not' })
+  @ApiHeader({ name: 'x-guest-id', required: false })
+  @Get('should-show-presentation')
+  @ApiOkResponse({ type: ShouldShowPresentationResponseDto })
+  async shouldShowPresentation(): Promise<ShouldShowPresentationResponseDto> {
+    return { showPresentation: await this.queryBus.execute(new ShouldShowPresentationQuery()) };
+  }
 
   @ApiOperation({ operationId: 'get-training-presentation', summary: 'Get training presentation' })
   @Get('get-presentation')
