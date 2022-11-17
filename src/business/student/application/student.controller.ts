@@ -6,6 +6,8 @@ import { Body, Controller, Get, Post, UseGuards, UseInterceptors } from '@nestjs
 import { QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { StartPresentationCommand } from '../domain/commands/start-presentation/start-presentation.command';
+
 import { GetTrainingResponseDto } from './dto/get-training-response-dto';
 
 import { GetTrainingResultResponseDto } from '@business/student/application/dto/get-training-result-response-dto';
@@ -60,5 +62,15 @@ export class StudentController {
     return this.commandBus.execute(
       new ValidateResponseCommand(response.trainingId, response.examId, response.questionId, response.response),
     );
+  }
+
+  @UseGuards(GuestOrUserAuthGuard)
+  @ApiBearerAuth()
+  @ApiHeader({ name: 'x-guest-id', required: false })
+  @ApiOperation({ operationId: 'start-presentation', summary: 'Start presentation' })
+  @Post('start-presentation')
+  @ApiOkResponse({ type: GetTrainingResponseDto })
+  startPresentation(): Promise<GetTrainingResponseDto> {
+    return this.commandBus.execute(new StartPresentationCommand());
   }
 }
