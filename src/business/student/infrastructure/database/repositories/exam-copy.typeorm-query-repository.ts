@@ -44,6 +44,7 @@ export class ExamCopyTypeormQueryRepository extends BaseTypeormQueryRepository i
               value: response.question.answer,
             }),
             propositions: response.question.propositions,
+            order: response.question.order,
           }),
           response: AnswerValueType.from({
             questionType: response.question.type,

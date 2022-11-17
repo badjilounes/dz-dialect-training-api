@@ -54,6 +54,7 @@ describe('Validate user response', () => {
       question: 'question',
       answer: AnswerValueType.createWordList({ value: ['answer'] }),
       propositions: ['proposition1', 'proposition2'],
+      order: 1,
     });
     trainingCommandRepository.findExamQuestions.mockResolvedValue([examQuestion]);
 

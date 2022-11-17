@@ -48,6 +48,7 @@ export class TrainingTypeormCommandRepository
         question: examQuestion.question,
         answer: AnswerValueType.from({ questionType: examQuestion.type, value: examQuestion.answer }),
         propositions: examQuestion.propositions,
+        order: examQuestion.order,
       }),
     );
   }

@@ -19,6 +19,7 @@ export function trainingToTrainingAggregate(training: Training): TrainingAggrega
         type: question.type,
         answer: AnswerValueType.from({ questionType: question.type, value: question.answer }),
         propositions: question.propositions,
+        order: question.order,
       })),
     })),
   });

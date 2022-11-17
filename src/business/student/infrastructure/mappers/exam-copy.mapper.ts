@@ -17,6 +17,7 @@ export function examCopyToExamCopyAggregate(entity: ExamCopy): ExamCopyAggregate
         question: response.question.question,
         answer: AnswerValueType.from({ questionType: response.question.type, value: response.question.answer }),
         propositions: response.question.propositions,
+        order: response.question.order,
       }),
       response: AnswerValueType.from({ questionType: response.question.type, value: response.response }),
     })),

@@ -78,6 +78,7 @@ describe('Get exm presentation result', () => {
             question: 'el makla rahi el dekhel',
             answer: AnswerValueType.createWordListFromValue("la nourriture est à l'intérieur"),
             propositions: [],
+            order: 1,
           }),
           response: AnswerValueType.createWordListFromValue("la nourriture est à l'intérieur"),
         }),
