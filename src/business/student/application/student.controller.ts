@@ -15,6 +15,7 @@ import { ShouldShowPresentationResponseDto } from '@business/student/application
 import { ValidateDto } from '@business/student/application/dto/validate-dto';
 import { ValidateResponseDto } from '@business/student/application/dto/validate-response-dto';
 import { StudentErrorInterceptor } from '@business/student/application/student.error-interceptor';
+import { SkipPresentationCommand } from '@business/student/domain/commands/skip-presentation/skip-presentation.command';
 import { ValidateResponseCommand } from '@business/student/domain/commands/validate-response/validate-response.command';
 import { GetExamPresentationResultQuery } from '@business/student/domain/queries/get-exam-presentation-result/get-exam-presentation-result.query';
 import { GetPresentationQuery } from '@business/student/domain/queries/get-presentation/get-presentation.query';
@@ -72,5 +73,15 @@ export class StudentController {
   @ApiOkResponse({ type: GetTrainingResponseDto })
   startPresentation(): Promise<GetTrainingResponseDto> {
     return this.commandBus.execute(new StartPresentationCommand());
+  }
+
+  @UseGuards(GuestOrUserAuthGuard)
+  @ApiBearerAuth()
+  @ApiHeader({ name: 'x-guest-id', required: false })
+  @ApiOperation({ operationId: 'skip-presentation', summary: 'Skip presentation' })
+  @Post('skip-presentation')
+  @ApiOkResponse()
+  skipPresentation(): Promise<void> {
+    return this.commandBus.execute(new SkipPresentationCommand());
   }
 }

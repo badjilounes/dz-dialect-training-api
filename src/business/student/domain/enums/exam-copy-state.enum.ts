@@ -1,4 +1,5 @@
 export enum ExamCopyStateEnum {
-  IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  SKIPPED = 'SKIPPED',
 }

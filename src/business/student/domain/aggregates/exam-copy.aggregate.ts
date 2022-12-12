@@ -6,6 +6,7 @@ import { ResponseEntity, ResponseEntityProps } from '@business/student/domain/en
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
 import { ExamCopyCompletedEvent } from '@business/student/domain/events/exam-copy-completed-event';
 import { ExamCopyResponseAddedEvent } from '@business/student/domain/events/exam-copy-response-added-event';
+import { ExamCopySkippedEvent } from '@business/student/domain/events/exam-copy-skipped-event';
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
 export type ExamCopyAggregateProps = {
@@ -67,5 +68,10 @@ export class ExamCopyAggregate extends BaseAggregateRoot {
   complete(): void {
     this._state = ExamCopyStateEnum.COMPLETED;
     this.apply(new ExamCopyCompletedEvent(this.id));
+  }
+
+  skip() {
+    this._state = ExamCopyStateEnum.SKIPPED;
+    this.apply(new ExamCopySkippedEvent(this.id));
   }
 }

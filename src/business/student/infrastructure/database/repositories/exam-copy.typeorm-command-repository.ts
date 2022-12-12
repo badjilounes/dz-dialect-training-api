@@ -6,6 +6,7 @@ import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-stat
 import { ExamCopyCompletedEvent } from '@business/student/domain/events/exam-copy-completed-event';
 import { ExamCopyCreatedEvent } from '@business/student/domain/events/exam-copy-created-event';
 import { ExamCopyResponseAddedEvent } from '@business/student/domain/events/exam-copy-response-added-event';
+import { ExamCopySkippedEvent } from '@business/student/domain/events/exam-copy-skipped-event';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
 import { ExamCopy } from '@business/student/infrastructure/database/entities/exam-copy.entity';
@@ -30,6 +31,7 @@ export class ExamCopyTypeormCommandRepository
     this.register(ExamCopyCreatedEvent, this.createExamCopy);
     this.register(ExamCopyResponseAddedEvent, this.addExamCopyResponse);
     this.register(ExamCopyCompletedEvent, this.completeExamCopy);
+    this.register(ExamCopySkippedEvent, this.skipExamCopy);
   }
 
   async findExamCopy(examId: string): Promise<ExamCopyAggregate | undefined> {
@@ -48,10 +50,23 @@ export class ExamCopyTypeormCommandRepository
     return examCopyToExamCopyAggregate(examCopy);
   }
 
+  private async addExamCopyResponse(event: ExamCopyResponseAddedEvent): Promise<ExamCopyResponse> {
+    const examCopyResponse = this.responseRepository.create({
+      id: event.response.id,
+      examCopy: { id: event.examCopyId },
+      question: { id: event.response.questionId },
+      response: event.response.response.value,
+      valid: event.response.valid,
+    });
+
+    return this.responseRepository.save(examCopyResponse);
+  }
+
   private async completeExamCopy(event: ExamCopyCompletedEvent): Promise<UpdateResult> {
     const examCopy = await this.repository.findOneOrFail({
       where: {
         id: event.examCopyId,
+        userId: this.context.userId,
       },
     });
 
@@ -69,15 +84,14 @@ export class ExamCopyTypeormCommandRepository
     return this.repository.save(examCopy);
   }
 
-  private async addExamCopyResponse(event: ExamCopyResponseAddedEvent): Promise<ExamCopyResponse> {
-    const examCopyResponse = this.responseRepository.create({
-      id: event.response.id,
-      examCopy: { id: event.examCopyId },
-      question: { id: event.response.questionId },
-      response: event.response.response.value,
-      valid: event.response.valid,
+  private async skipExamCopy(event: ExamCopySkippedEvent): Promise<UpdateResult> {
+    const examCopy = await this.repository.findOneOrFail({
+      where: {
+        id: event.examCopyId,
+        userId: this.context.userId,
+      },
     });
 
-    return this.responseRepository.save(examCopyResponse);
+    return this.repository.update(examCopy.id, { state: ExamCopyStateEnum.SKIPPED });
   }
 }
