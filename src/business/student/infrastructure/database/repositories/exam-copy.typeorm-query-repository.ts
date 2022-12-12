@@ -20,8 +20,11 @@ export class ExamCopyTypeormQueryRepository extends BaseTypeormQueryRepository i
 
   async findExamCopy(examId: string): Promise<ExamCopy | undefined> {
     const copy = await this.repository.findOne({
-      where: { exam: { id: examId } },
-      relations: ['exam', 'responses'],
+      where: { exam: { id: examId }, userId: this.context.userId },
+      relations: ['exam', 'responses', 'responses.question'],
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     if (!copy) {
@@ -36,7 +39,7 @@ export class ExamCopyTypeormQueryRepository extends BaseTypeormQueryRepository i
           id: response.id,
           question: ExamQuestionEntity.from({
             id: response.question.id,
-            examId: response.question.exam.id,
+            examId: copy.exam.id,
             type: response.question.type,
             question: response.question.question,
             answer: AnswerValueType.from({

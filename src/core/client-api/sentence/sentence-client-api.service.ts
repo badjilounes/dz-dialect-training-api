@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { SentenceControllerApi, SentenceDTO } from '@sentence/api';
+import { SentenceApi, SentenceResponseDto } from '@sentence/api';
 
 @Injectable()
 export class SentenceClientApiService {
   protected readonly logger = new Logger(SentenceClientApiService.name);
 
-  constructor(private readonly sentenceApi: SentenceControllerApi) {}
+  constructor(private readonly sentenceApi: SentenceApi) {}
 
-  async getSentences(count: number): Promise<Array<SentenceDTO>> {
-    const response = await this.sentenceApi.generateRandomSentence(count);
+  async getSentences(count: number): Promise<SentenceResponseDto[]> {
+    const response = await this.sentenceApi.getSentenceList(count);
 
     return response.data;
   }

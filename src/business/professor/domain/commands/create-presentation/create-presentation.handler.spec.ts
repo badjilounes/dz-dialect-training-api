@@ -11,7 +11,7 @@ import { AnswerValueType } from '@business/professor/domain/value-types/answer.v
 import { SentenceClientApiService } from '@core/client-api/sentence/sentence-client-api.service';
 import { EventPublisher } from '@cqrs/event';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
-import { SentenceDTO } from '@sentence/api';
+import { SentenceResponseDto } from '@sentence/api';
 
 describe('Create presentation', () => {
   let handler: CreatePresentationHandler;
@@ -22,7 +22,7 @@ describe('Create presentation', () => {
   let eventPublisher: MockProxy<EventPublisher>;
 
   let training: TrainingAggregate;
-  let sentence: SentenceDTO;
+  let sentence: SentenceResponseDto;
 
   const trainingId = 'trainingId';
   const examId = 'examId';
@@ -38,8 +38,15 @@ describe('Create presentation', () => {
 
     sentence = {
       dz: 'el makla rahi el dekhel',
+      dz_ar: 'المكلة راح الدخل',
       fr: "la nourriture est à l'intérieur",
-      word_propositions: { dz: ['part', 'avec', 'nous'], fr: ['intérieur', 'quelque', 'est'] },
+      word_propositions_dz: ['part', 'avec', 'nous'],
+      word_propositions_fr: ['intérieur', 'quelque', 'est'],
+      pronouns: ['nous', 'vous', 'ils'],
+      verbs: ['part', 'est', 'mange'],
+      adjectives: ['quelque', 'intérieur', 'nourriture'],
+      tense: 'present',
+      schema: 'PVA',
     };
     sentenceApi.getSentences.mockResolvedValue([sentence]);
 
@@ -106,7 +113,7 @@ describe('Create presentation', () => {
             type: QuestionTypeEnum.WORD_LIST,
             question: sentence.dz,
             answer: sentence.fr,
-            propositions: sentence.word_propositions?.fr,
+            propositions: sentence.word_propositions_fr,
           },
         ],
       },

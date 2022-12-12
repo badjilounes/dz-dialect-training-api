@@ -13,8 +13,5 @@
   "[javascript][typescript][html]": {
     "editor.formatOnSave": false
   },
-  "cSpell.words": [
-    "nestjs",
-    "Typeorm"
-  ]
+  "cSpell.words": ["nestjs", "Typeorm"]
 }

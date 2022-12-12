@@ -54,18 +54,19 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
     this.eventPublisher.mergeObjectContext(copy);
 
     // Write the response for given question
-    const isLastQuestion = copy.responses.length + 1 === examQuestions.length;
-    const responseEntity = copy.writeResponse(
-      {
-        id: this.uuidGenerator.generate(),
-        question,
-        response: AnswerValueType.from({
-          questionType: question.type,
-          value: response,
-        }),
-      },
-      isLastQuestion,
-    );
+    const responseEntity = copy.writeResponse({
+      id: this.uuidGenerator.generate(),
+      question,
+      response: AnswerValueType.from({
+        questionType: question.type,
+        value: response,
+      }),
+    });
+
+    // If this is the last question, mark the copy as completed
+    if (copy.responses.length === examQuestions.length) {
+      copy.complete();
+    }
 
     await this.trainingExamCopyCommandRepository.persist(copy);
 

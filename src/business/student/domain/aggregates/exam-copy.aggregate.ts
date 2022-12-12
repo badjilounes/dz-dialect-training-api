@@ -57,16 +57,15 @@ export class ExamCopyAggregate extends BaseAggregateRoot {
     return new ExamCopyAggregate(examCopy);
   }
 
-  writeResponse(props: ResponseEntityProps, isLastExamQuestion: boolean): ResponseEntity {
+  writeResponse(props: ResponseEntityProps): ResponseEntity {
     const response = ResponseEntity.from(props);
     this._responses.push(response);
     this.apply(new ExamCopyResponseAddedEvent(this.id, response));
-
-    if (isLastExamQuestion) {
-      this._state = ExamCopyStateEnum.COMPLETED;
-      this.apply(new ExamCopyCompletedEvent(this.id));
-    }
-
     return response;
+  }
+
+  complete(): void {
+    this._state = ExamCopyStateEnum.COMPLETED;
+    this.apply(new ExamCopyCompletedEvent(this.id));
   }
 }

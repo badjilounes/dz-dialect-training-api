@@ -1,7 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 
 import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
+import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
+import { ExamCopyCompletedEvent } from '@business/student/domain/events/exam-copy-completed-event';
 import { ExamCopyCreatedEvent } from '@business/student/domain/events/exam-copy-created-event';
 import { ExamCopyResponseAddedEvent } from '@business/student/domain/events/exam-copy-response-added-event';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
@@ -27,12 +29,16 @@ export class ExamCopyTypeormCommandRepository
     super(repository, context);
     this.register(ExamCopyCreatedEvent, this.createExamCopy);
     this.register(ExamCopyResponseAddedEvent, this.addExamCopyResponse);
+    this.register(ExamCopyCompletedEvent, this.completeExamCopy);
   }
 
   async findExamCopy(examId: string): Promise<ExamCopyAggregate | undefined> {
     const examCopy = await this.repository.findOne({
       where: { exam: { id: examId }, userId: this.context.userId },
       relations: ['exam', 'responses', 'responses.question'],
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     if (!examCopy) {
@@ -40,6 +46,16 @@ export class ExamCopyTypeormCommandRepository
     }
 
     return examCopyToExamCopyAggregate(examCopy);
+  }
+
+  private async completeExamCopy(event: ExamCopyCompletedEvent): Promise<UpdateResult> {
+    const examCopy = await this.repository.findOneOrFail({
+      where: {
+        id: event.examCopyId,
+      },
+    });
+
+    return this.repository.update(examCopy.id, { state: ExamCopyStateEnum.COMPLETED });
   }
 
   private async createExamCopy(event: ExamCopyCreatedEvent): Promise<ExamCopy> {

@@ -7,6 +7,6 @@ export class ValidateResponseDto {
   @ApiProperty()
   response!: string;
 
-  @ApiProperty({ type: String, isArray: true })
-  answer!: string[];
+  @ApiProperty()
+  answer!: string;
 }

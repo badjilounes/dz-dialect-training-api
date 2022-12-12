@@ -20,8 +20,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "dotenv -e .env.test -e .env -- jest --config ./test/jest-e2e.json",
     "db:start": "docker-compose -f docker-compose.yml up",
-    "generate:sentence-api": "rimraf ./src/clients/sentence-api && openapi-generator generate -i https://evening-meadow-36429.herokuapp.com/v3/api-docs -g typescript-axios -o ./src/clients/sentence-api --additional-properties=enumPropertyNaming=UPPERCASE,serviceSuffix=HttpService,fileNaming=kebab-case",
-    "generate:identity-api": "rimraf ./src/clients/identity-api && openapi-generator generate -i https://dz-dialect-identity-api.server.bdsapp.fr/openapi-json -g typescript-axios -o ./src/clients/identity-api --additional-properties=enumPropertyNaming=UPPERCASE,serviceSuffix=HttpService,fileNaming=kebab-case"
+    "generate:sentence-api": "rimraf ./src/clients/sentence-api && openapi-generator generate -i http://localhost:3002/openapi-json -g typescript-axios -o ./src/clients/sentence-api --additional-properties=enumPropertyNaming=UPPERCASE,serviceSuffix=HttpService,fileNaming=kebab-case",
+    "generate:identity-api": "rimraf ./src/clients/identity-api && openapi-generator generate -i http://localhost:3000/openapi-json -g typescript-axios -o ./src/clients/identity-api --additional-properties=enumPropertyNaming=UPPERCASE,serviceSuffix=HttpService,fileNaming=kebab-case"
   },
   "dependencies": {
     "@nestjs/axios": "^0.1.0",

@@ -84,14 +84,14 @@ export class AnswerValueType extends ValueType {
     return new AnswerValueType({
       questionType: QuestionTypeEnum.WORD_LIST,
       value: props.value,
-      formattedValue: props.value.join().replace(/,/g, ''),
+      formattedValue: props.value.join().replace(/,/g, ' '),
     });
   }
 
   static createWordListFromValue(value: string): AnswerValueType {
     return new AnswerValueType({
       questionType: QuestionTypeEnum.WORD_LIST,
-      value: value.split(''),
+      value: value.split(' '),
       formattedValue: value,
     });
   }
