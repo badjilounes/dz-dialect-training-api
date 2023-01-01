@@ -93,7 +93,7 @@ describe('Create presentation', () => {
     await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationAlreadyExistError());
   });
 
-  it('should create a presentation from when no training presentation exist', async () => {
+  it('should create a presentation when no training presentation exist', async () => {
     trainingCommandRepository.findPresentation.mockResolvedValue(undefined);
     uuidGenerator.generate.mockReturnValueOnce(trainingId);
     uuidGenerator.generate.mockReturnValueOnce(examId);
