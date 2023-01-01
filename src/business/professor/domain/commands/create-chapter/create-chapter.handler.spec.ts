@@ -1,8 +1,8 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { TrainingChapterAggregate } from '../../aggregates/training-category.aggregate';
+import { ChapterAggregate } from '../../aggregates/chapter.aggregate';
 import { TrainingChapterNameAlreadyExistError } from '../../errors/training-chapter-name-already-exist-error';
-import { TrainingChapterCommandRepository } from '../../repositories/training-category-command-repository';
+import { ChapterCommandRepository } from '../../repositories/chapter-command-repository';
 
 import { CreateChapterHandler } from './create-chapter.handler';
 
@@ -12,22 +12,22 @@ import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 describe('Create chapter', () => {
   let handler: CreateChapterHandler;
 
-  let trainingChapterCommandRepository: MockProxy<TrainingChapterCommandRepository>;
+  let trainingChapterCommandRepository: MockProxy<ChapterCommandRepository>;
   let uuidGenerator: MockProxy<UuidGenerator>;
   let eventPublisher: MockProxy<EventPublisher>;
 
-  let chapter: TrainingChapterAggregate;
+  let chapter: ChapterAggregate;
 
   const chapterId = 'chapterId';
 
   beforeEach(() => {
-    trainingChapterCommandRepository = mock<TrainingChapterCommandRepository>();
+    trainingChapterCommandRepository = mock<ChapterCommandRepository>();
     uuidGenerator = mock<UuidGenerator>();
     eventPublisher = mock<EventPublisher>();
 
     handler = new CreateChapterHandler(trainingChapterCommandRepository, uuidGenerator, eventPublisher);
 
-    chapter = TrainingChapterAggregate.from({
+    chapter = ChapterAggregate.from({
       id: chapterId,
       name: 'chapter name',
       description: 'chapter description',

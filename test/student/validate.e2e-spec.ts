@@ -51,6 +51,8 @@ describe('(TrainingController) validate', () => {
 
     training = await fixtures.training.createTraining();
 
+    await fixtures.examCopy.createExamCopy(userId, { exam: { id: training.exams[0].id } });
+
     validateDto.trainingId = training.id;
     validateDto.examId = training.exams[0].id;
     validateDto.questionId = training.exams[0].questions[0].id;

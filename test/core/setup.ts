@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
+import { ChapterFixture } from '../fixtures/chapter/chapter.fixture';
 import { ExamCopyFixture } from '../fixtures/exam-copy/exam-copy.fixture';
 import { FixtureModule } from '../fixtures/fixture.module';
 import { TrainingFixture } from '../fixtures/training/training.fixture';
@@ -14,6 +15,7 @@ export type TestingApplication = {
   fixtures: {
     training: TrainingFixture;
     examCopy: ExamCopyFixture;
+    chapter: ChapterFixture;
   };
   userId: string;
   token: string;
@@ -24,6 +26,7 @@ export function initAppTesting(dbSchemaName = 'public'): () => TestingApplicatio
 
   let trainingFixture!: TrainingFixture;
   let examCopyFixture!: ExamCopyFixture;
+  let chapterFixture!: ChapterFixture;
 
   const userId = '1c0cb5de-383e-40bc-8555-57611e8c9cf9';
   const token = generateUserToken(userId);
@@ -41,6 +44,7 @@ export function initAppTesting(dbSchemaName = 'public'): () => TestingApplicatio
 
     trainingFixture = moduleFixture.get(TrainingFixture);
     examCopyFixture = moduleFixture.get(ExamCopyFixture);
+    chapterFixture = moduleFixture.get(ChapterFixture);
   });
 
   afterAll(async () => {
@@ -54,6 +58,7 @@ export function initAppTesting(dbSchemaName = 'public'): () => TestingApplicatio
     fixtures: {
       training: trainingFixture,
       examCopy: examCopyFixture,
+      chapter: chapterFixture,
     },
   });
 }

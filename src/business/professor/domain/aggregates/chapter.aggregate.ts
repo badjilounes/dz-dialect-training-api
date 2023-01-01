@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-import { TrainingCategoryCreatedEvent } from '../events/training-category-created-event';
+import { ChapterCreatedEvent } from '../events/chapter-created-event';
 
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
@@ -10,7 +10,7 @@ export type TrainingChapterAggregateProps = {
   description: string;
 };
 
-export class TrainingChapterAggregate extends BaseAggregateRoot {
+export class ChapterAggregate extends BaseAggregateRoot {
   @IsString()
   private readonly _id: string;
   public get id(): string {
@@ -36,13 +36,13 @@ export class TrainingChapterAggregate extends BaseAggregateRoot {
     this._description = this.props.description;
   }
 
-  static create(props: TrainingChapterAggregateProps): TrainingChapterAggregate {
-    const trainingChapter = TrainingChapterAggregate.from(props);
-    trainingChapter.apply(new TrainingCategoryCreatedEvent(trainingChapter));
+  static create(props: TrainingChapterAggregateProps): ChapterAggregate {
+    const trainingChapter = ChapterAggregate.from(props);
+    trainingChapter.apply(new ChapterCreatedEvent(trainingChapter));
     return trainingChapter;
   }
 
-  static from(exam: TrainingChapterAggregateProps): TrainingChapterAggregate {
-    return new TrainingChapterAggregate(exam);
+  static from(exam: TrainingChapterAggregateProps): ChapterAggregate {
+    return new ChapterAggregate(exam);
   }
 }
