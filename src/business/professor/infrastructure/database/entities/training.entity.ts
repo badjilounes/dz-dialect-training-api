@@ -1,16 +1,26 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 import { TrainingExam } from './training-exam.entity';
 
-import { TrainingCategoryEnum } from '@business/professor/domain/enums/training-category.enum';
+import { Chapter } from '@business/professor/infrastructure/database/entities/chapter.entity';
 
 @Entity()
 export class Training {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ enum: TrainingCategoryEnum })
-  category!: TrainingCategoryEnum;
+  @OneToOne(() => Chapter, { eager: true })
+  @JoinColumn()
+  chapter!: Chapter | null;
 
   @Column()
   learningLanguage!: string;

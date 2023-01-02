@@ -9,7 +9,7 @@ type ExamQuestion = {
   propositions: string[];
 };
 
-type Exam = {
+export type Exam = {
   id: string;
   name: string;
   questions: ExamQuestion[];
@@ -17,10 +17,11 @@ type Exam = {
 
 export type Training = {
   id: string;
-  category: string;
+  chapterId?: string;
   exams: Exam[];
 };
 
 export interface TrainingQueryRepository {
-  findPresentation(): Promise<Training | undefined>;
+  findTrainingById(id: string): Promise<Training | undefined>;
+  findExamById(examId: string): Promise<Exam | undefined>;
 }

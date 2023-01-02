@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GetTrainingResultResponseDto {
+export class GetExamResultResponseDto {
   @ApiProperty()
   note!: number;
 

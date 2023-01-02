@@ -25,7 +25,7 @@ export class CreateChapterHandler implements ICommandHandler<CreateChapterComman
   ) {}
 
   async execute({ payload }: CreateChapterCommand): Promise<CreateChapterCommandResult> {
-    const { name, description } = payload;
+    const { name, description, isPresentation } = payload;
 
     const existingChapter = await this.trainingChapterCommandRepository.findChapterByName(name);
     if (existingChapter) {
@@ -36,6 +36,7 @@ export class CreateChapterHandler implements ICommandHandler<CreateChapterComman
       id: this.uuidGenerator.generate(),
       name,
       description,
+      isPresentation,
     });
     this.eventPublisher.mergeObjectContext(chapter);
 
@@ -45,6 +46,7 @@ export class CreateChapterHandler implements ICommandHandler<CreateChapterComman
       id: chapter.id,
       name: chapter.name,
       description: chapter.description,
+      isPresentation: chapter.isPresentation,
     };
   }
 }

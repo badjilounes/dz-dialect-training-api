@@ -4,12 +4,13 @@ import { Repository } from 'typeorm';
 import { TrainingAggregate } from '../../../domain/aggregates/training.aggregate';
 import { TrainingExamQuestion } from '../entities/training-exam-question.entity';
 
+import { ExamAggregate } from '@business/student/domain/aggregates/exam.aggregate';
 import { ExamQuestionEntity } from '@business/student/domain/entities/question.entity';
-import { TrainingCategoryEnum } from '@business/student/domain/enums/training-category.enum';
 import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
 import { TrainingExam } from '@business/student/infrastructure/database/entities/training-exam.entity';
 import { Training } from '@business/student/infrastructure/database/entities/training.entity';
+import { examToExamAggregate } from '@business/student/infrastructure/mappers/exam.mapper';
 import { trainingToTrainingAggregate } from '@business/student/infrastructure/mappers/training.mapper';
 import { AppContextService } from '@core/context/app-context.service';
 import { BaseTypeormCommandRepository } from '@ddd/infrastructure/base.typeorm-command-repository';
@@ -53,9 +54,9 @@ export class TrainingTypeormCommandRepository
     );
   }
 
-  async findPresentation(): Promise<TrainingAggregate | undefined> {
+  async findTrainingById(id: string): Promise<TrainingAggregate | undefined> {
     const training = await this.repository.findOne({
-      where: { category: TrainingCategoryEnum.PRESENTATION },
+      where: { id },
       order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
     });
 
@@ -64,5 +65,35 @@ export class TrainingTypeormCommandRepository
     }
 
     return trainingToTrainingAggregate(training);
+  }
+
+  async findExamById(id: string): Promise<ExamAggregate | undefined> {
+    const exam = await this.examRepository.findOne({
+      where: { id },
+      order: { questions: { order: 'ASC' } },
+      relations: ['training'],
+    });
+
+    if (!exam) {
+      return undefined;
+    }
+
+    return examToExamAggregate(exam);
+  }
+
+  async findTrainingPresentationExam(): Promise<ExamAggregate | undefined> {
+    const training = await this.repository.findOne({
+      where: { chapter: { isPresentation: true } },
+      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
+    });
+
+    if (!training?.exams.length) {
+      return undefined;
+    }
+
+    return examToExamAggregate({
+      ...training.exams[0],
+      training,
+    });
   }
 }

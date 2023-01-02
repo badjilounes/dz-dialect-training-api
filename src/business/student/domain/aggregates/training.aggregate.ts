@@ -1,16 +1,15 @@
-import { IsEnum, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
-import { ExamEntity, ExamEntityProps } from '../entities/exam.entity';
+import { ExamAggregate, ExamAggregateProps } from './exam.aggregate';
 
-import { TrainingCategoryEnum } from '@business/student/domain/enums/training-category.enum';
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
 export type TrainingAggregateProps = {
   id: string;
-  category: TrainingCategoryEnum;
+  chapterId?: string;
   fromLanguage: string;
   learningLanguage: string;
-  exams: ExamEntityProps[];
+  exams: ExamAggregateProps[];
 };
 
 export class TrainingAggregate extends BaseAggregateRoot {
@@ -20,10 +19,11 @@ export class TrainingAggregate extends BaseAggregateRoot {
     return this._id;
   }
 
-  @IsEnum(TrainingCategoryEnum)
-  private readonly _category: TrainingCategoryEnum;
-  public get category(): TrainingCategoryEnum {
-    return this._category;
+  @IsString()
+  @IsOptional()
+  private readonly _chapterId: string | undefined;
+  public get chapterId(): string | undefined {
+    return this._chapterId;
   }
 
   @IsString()
@@ -38,18 +38,18 @@ export class TrainingAggregate extends BaseAggregateRoot {
     return this._learningLanguage;
   }
 
-  private readonly _exams: ExamEntity[];
-  public get exams(): ExamEntity[] {
+  private readonly _exams: ExamAggregate[];
+  public get exams(): ExamAggregate[] {
     return this._exams;
   }
 
   private constructor(private readonly props: TrainingAggregateProps) {
     super();
     this._id = props.id;
-    this._category = props.category;
+    this._chapterId = props.chapterId;
     this._fromLanguage = props.fromLanguage;
     this._learningLanguage = props.learningLanguage;
-    this._exams = this.props.exams.map(ExamEntity.from);
+    this._exams = this.props.exams.map(ExamAggregate.from);
   }
 
   static from(exam: TrainingAggregateProps): TrainingAggregate {

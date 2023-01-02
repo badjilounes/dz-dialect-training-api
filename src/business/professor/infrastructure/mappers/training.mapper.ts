@@ -5,7 +5,7 @@ import { Training } from '@business/professor/infrastructure/database/entities/t
 export function trainingToTrainingAggregate(training: Training): TrainingAggregate {
   return TrainingAggregate.from({
     id: training.id,
-    category: training.category,
+    chapterId: training.chapter?.id,
     fromLanguage: training.fromLanguage,
     learningLanguage: training.learningLanguage,
     exams: training.exams.map((exam) => ({

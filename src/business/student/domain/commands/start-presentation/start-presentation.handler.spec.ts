@@ -1,13 +1,12 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
 import { TrainingAggregate } from '../../aggregates/training.aggregate';
-import { TrainingCategoryEnum } from '../../enums/training-category.enum';
-import { TrainingPresentationNotFoundError } from '../../errors/training-presentation-not-found-error';
 
 import { StartPresentationHandler } from './start-presentation.handler';
 
 import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
+import { PresentationExamNotFoundError } from '@business/student/domain/errors/exam-presentation-not-found-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
@@ -26,7 +25,7 @@ describe('Start presentation', () => {
   const examId = 'examId';
   const questionId = 'questionId';
 
-  let trainingPresentation: TrainingAggregate;
+  let training: TrainingAggregate;
 
   beforeEach(() => {
     examCopyCommandRepository = mock<ExamCopyCommandRepository>();
@@ -41,9 +40,9 @@ describe('Start presentation', () => {
       eventPublisher,
     );
 
-    trainingPresentation = TrainingAggregate.from({
+    training = TrainingAggregate.from({
       id: trainingId,
-      category: TrainingCategoryEnum.PRESENTATION,
+      chapterId: 'chapterId',
       fromLanguage: 'fr',
       learningLanguage: 'dz',
       exams: [
@@ -78,13 +77,13 @@ describe('Start presentation', () => {
       ],
     });
 
-    trainingCommandRepository.findPresentation.mockResolvedValue(trainingPresentation);
+    trainingCommandRepository.findTrainingPresentationExam.mockResolvedValue(training.exams[0]);
   });
 
-  it('should throw if no training presentation exist', async () => {
-    trainingCommandRepository.findPresentation.mockResolvedValue(undefined);
+  it('should throw if no presentation exam exist', async () => {
+    trainingCommandRepository.findTrainingPresentationExam.mockResolvedValue(undefined);
 
-    await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationNotFoundError());
+    await expect(handler.execute()).rejects.toStrictEqual(new PresentationExamNotFoundError());
   });
 
   it('should create a copy for presentation exam', async () => {

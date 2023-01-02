@@ -16,10 +16,13 @@ describe('(TrainingController) start-presentation', () => {
   it('should throw unauthorized error without user nor guest', async () => {
     const { app } = testHelper();
 
-    await request(app.getHttpServer()).post('/student/training/start-presentation').expect(HttpStatus.UNAUTHORIZED);
+    await request(app.getHttpServer())
+      .post('/student/training/start-presentation')
+      .send()
+      .expect(HttpStatus.UNAUTHORIZED);
   });
 
-  it('should throw not found error if no training presentation exists', async () => {
+  it('should throw not found error if no exam exists for given id', async () => {
     const { app, token } = testHelper();
 
     await request(app.getHttpServer())
@@ -28,10 +31,11 @@ describe('(TrainingController) start-presentation', () => {
       .expect(HttpStatus.NOT_FOUND);
   });
 
-  it('should start presentation', async () => {
+  it('should start exam', async () => {
     const { app, token, fixtures } = testHelper();
 
-    await fixtures.training.createTraining();
+    const chapter = await fixtures.chapter.createChapter({ isPresentation: true });
+    const training = await fixtures.training.createTraining({ chapter });
 
     const { body } = await request(app.getHttpServer())
       .post('/student/training/start-presentation')
@@ -40,22 +44,19 @@ describe('(TrainingController) start-presentation', () => {
 
     expect(body).not.toBeNull();
 
-    const presentation = await fixtures.training.findOneById(body.id);
+    const exam = await fixtures.exam.findOneById(training.exams[0].id);
 
     expect(body).toMatchObject({
-      id: presentation?.id,
-      category: presentation?.category,
-      exam: {
-        id: presentation?.exams[0].id,
-        name: presentation?.exams[0].name,
-        questions: presentation?.exams[0].questions.map((question) => ({
-          id: question.id,
-          type: question.type,
-          order: question.order,
-          question: question.question,
-          propositions: question.propositions,
-        })),
-      },
+      id: exam?.id,
+      name: exam?.name,
+      trainingId: exam?.training.id,
+      questions: exam?.questions.map((question) => ({
+        id: question.id,
+        type: question.type,
+        order: question.order,
+        question: question.question,
+        propositions: question.propositions,
+      })),
     });
   });
 });

@@ -1,14 +1,13 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { GetPresentationQueryHandler } from './get-presentation.handler';
+import { GetExamQueryHandler } from './get-exam.handler';
 
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { TrainingCategoryEnum } from '@business/student/domain/enums/training-category.enum';
-import { TrainingPresentationNotFoundError } from '@business/student/domain/errors/training-presentation-not-found-error';
+import { ExamNotFoundError } from '@business/student/domain/errors/exam-not-found-error';
 import { Training, TrainingQueryRepository } from '@business/student/domain/repositories/training-query-repository';
 
 describe('Get presentation', () => {
-  let handler: GetPresentationQueryHandler;
+  let handler: GetExamQueryHandler;
 
   let trainingQueryRepository: MockProxy<TrainingQueryRepository>;
 
@@ -20,13 +19,13 @@ describe('Get presentation', () => {
 
   beforeEach(() => {
     trainingQueryRepository = mock<TrainingQueryRepository>();
-    trainingQueryRepository.findPresentation.mockResolvedValue(undefined);
+    trainingQueryRepository.findExamById.mockResolvedValue(undefined);
 
-    handler = new GetPresentationQueryHandler(trainingQueryRepository);
+    handler = new GetExamQueryHandler(trainingQueryRepository);
 
     training = {
       id: trainingId,
-      category: TrainingCategoryEnum.PRESENTATION,
+      chapterId: 'chapterId',
       exams: [
         {
           id: examId,
@@ -58,29 +57,25 @@ describe('Get presentation', () => {
     };
   });
 
-  it('should throw if not presentation exists', async () => {
-    await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationNotFoundError());
+  it('should throw if no exam exists for given id', async () => {
+    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new ExamNotFoundError(examId));
   });
 
-  it('should return the presentation', async () => {
-    trainingQueryRepository.findPresentation.mockResolvedValue(training);
+  it('should return the exam', async () => {
+    trainingQueryRepository.findExamById.mockResolvedValue(training.exams[0]);
 
-    const result = await handler.execute();
+    const result = await handler.execute({ payload: { examId } });
 
     expect(result).toEqual({
-      id: training.id,
-      category: training.category,
-      exam: {
-        id: training.exams[0].id,
-        name: training.exams[0].name,
-        questions: training.exams[0].questions.map((question) => ({
-          id: question.id,
-          type: question.type,
-          order: question.order,
-          question: question.question,
-          propositions: question.propositions,
-        })),
-      },
+      id: training.exams[0].id,
+      name: training.exams[0].name,
+      questions: training.exams[0].questions.map((question) => ({
+        id: question.id,
+        type: question.type,
+        order: question.order,
+        question: question.question,
+        propositions: question.propositions,
+      })),
     });
   });
 });

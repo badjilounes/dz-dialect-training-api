@@ -31,6 +31,7 @@ describe('Create chapter', () => {
       id: chapterId,
       name: 'chapter name',
       description: 'chapter description',
+      isPresentation: false,
     });
   });
 
@@ -38,7 +39,9 @@ describe('Create chapter', () => {
     trainingChapterCommandRepository.findChapterByName.mockResolvedValue(chapter);
 
     await expect(
-      handler.execute({ payload: { name: chapter.name, description: chapter.description } }),
+      handler.execute({
+        payload: { name: chapter.name, description: chapter.description, isPresentation: chapter.isPresentation },
+      }),
     ).rejects.toStrictEqual(new TrainingChapterNameAlreadyExistError(chapter.name));
   });
 
@@ -46,12 +49,15 @@ describe('Create chapter', () => {
     trainingChapterCommandRepository.findChapterByName.mockResolvedValue(undefined);
     uuidGenerator.generate.mockReturnValueOnce(chapterId);
 
-    const result = await handler.execute({ payload: { name: chapter.name, description: chapter.description } });
+    const result = await handler.execute({
+      payload: { name: chapter.name, description: chapter.description, isPresentation: chapter.isPresentation },
+    });
 
     expect(result).toEqual({
       id: chapterId,
       name: chapter.name,
       description: chapter.description,
+      isPresentation: chapter.isPresentation,
     });
   });
 });

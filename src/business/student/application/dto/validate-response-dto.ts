@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ValidateResponseDto {
+export class ValidateExamResponseResponseDto {
   @ApiProperty()
   valid!: boolean;
 

@@ -6,7 +6,6 @@ import { TrainingCreatedEvent } from '../../../domain/events/training-created-ev
 import { TrainingExamQuestion } from '../entities/training-exam-question.entity';
 
 import { ExamQuestionEntity } from '@business/professor/domain/entities/question.entity';
-import { TrainingCategoryEnum } from '@business/professor/domain/enums/training-category.enum';
 import { TrainingCommandRepository } from '@business/professor/domain/repositories/training-command-repository';
 import { AnswerValueType } from '@business/professor/domain/value-types/answer.value-type';
 import { TrainingExam } from '@business/professor/infrastructure/database/entities/training-exam.entity';
@@ -53,9 +52,9 @@ export class TrainingTypeormCommandRepository
     );
   }
 
-  async findPresentation(): Promise<TrainingAggregate | undefined> {
+  async findTrainingById(id: string): Promise<TrainingAggregate | undefined> {
     const training = await this.repository.findOne({
-      where: { category: TrainingCategoryEnum.PRESENTATION },
+      where: { id },
       order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
     });
 
@@ -91,7 +90,7 @@ export class TrainingTypeormCommandRepository
 
     const training = this.repository.create({
       id: event.training.id,
-      category: event.training.category,
+      chapter: event.training.chapterId ? { id: event.training.chapterId } : null,
       fromLanguage: 'fr',
       learningLanguage: 'dz',
       exams: [trainingExam],

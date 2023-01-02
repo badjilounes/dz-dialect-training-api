@@ -32,6 +32,7 @@ export class ChapterTypeormCommandRepository
       id: chapter.id,
       name: chapter.name,
       description: chapter.description,
+      isPresentation: chapter.isPresentation,
     });
   }
 

@@ -14,6 +14,7 @@ import { TrainingTypeormCommandRepository } from '../infrastructure/database/rep
 
 import { StudentController } from './student.controller';
 
+import { Chapter } from '@business/student/infrastructure/database/entities/chapter.entity';
 import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
 import { ExamCopy } from '@business/student/infrastructure/database/entities/exam-copy.entity';
 import { TrainingExam } from '@business/student/infrastructure/database/entities/training-exam.entity';
@@ -23,7 +24,9 @@ import { ExamCopyTypeormQueryRepository } from '@business/student/infrastructure
 import { TrainingTypeormQueryRepository } from '@business/student/infrastructure/database/repositories/training.typeorm-query-repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Training, TrainingExam, TrainingExamQuestion, ExamCopy, ExamCopyResponse])],
+  imports: [
+    TypeOrmModule.forFeature([Training, TrainingExam, TrainingExamQuestion, ExamCopy, ExamCopyResponse, Chapter]),
+  ],
   controllers: [StudentController],
   providers: [
     ...TrainingQueryHandlers,

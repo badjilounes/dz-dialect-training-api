@@ -4,11 +4,13 @@ export type CreateChapterCommandResult = {
   id: string;
   name: string;
   description: string;
+  isPresentation: boolean;
 };
 
 export type CreateChapterCommandPayload = {
   name: string;
   description: string;
+  isPresentation: boolean;
 };
 
 export class CreateChapterCommand extends Command<CreateChapterCommandResult> {

@@ -1,12 +1,11 @@
 import { Inject } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 
-import { TrainingPresentationNotFoundError } from '../../errors/training-presentation-not-found-error';
-
 import { StartPresentationCommand, StartPresentationCommandResult } from './start-presentation.command';
 
 import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
+import { PresentationExamNotFoundError } from '@business/student/domain/errors/exam-presentation-not-found-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import {
   EXAM_COPY_COMMAND_REPOSITORY,
@@ -29,13 +28,14 @@ export class StartPresentationHandler implements ICommandHandler<StartPresentati
   ) {}
 
   async execute(): Promise<StartPresentationCommandResult> {
-    const presentation = await this.trainingCommandRepository.findPresentation();
-    if (!presentation) {
-      throw new TrainingPresentationNotFoundError();
+    const exam = await this.trainingCommandRepository.findTrainingPresentationExam();
+    if (!exam) {
+      throw new PresentationExamNotFoundError();
     }
+
     const copy = ExamCopyAggregate.create({
       id: this.uuidGenerator.generate(),
-      examId: presentation.exams[0].id,
+      examId: exam.id,
       responses: [],
       state: ExamCopyStateEnum.IN_PROGRESS,
     });
@@ -44,19 +44,16 @@ export class StartPresentationHandler implements ICommandHandler<StartPresentati
     await this.trainingExamCopyCommandRepository.persist(copy);
 
     return {
-      id: presentation.id,
-      category: presentation.category,
-      exam: {
-        id: presentation.exams[0].id,
-        name: presentation.exams[0].name,
-        questions: presentation.exams[0].questions.map((question) => ({
-          id: question.id,
-          order: question.order,
-          type: question.type,
-          question: question.question,
-          propositions: question.propositions,
-        })),
-      },
+      id: exam.id,
+      name: exam.name,
+      trainingId: exam.trainingId,
+      questions: exam.questions.map((question) => ({
+        id: question.id,
+        order: question.order,
+        type: question.type,
+        question: question.question,
+        propositions: question.propositions,
+      })),
     };
   }
 }

@@ -1,17 +1,17 @@
 import { IsString } from 'class-validator';
 
-import { ExamQuestionEntity, ExamQuestionEntityProps } from './question.entity';
+import { ExamQuestionEntity, ExamQuestionEntityProps } from '../entities/question.entity';
 
-import { BaseEntity } from '@ddd/domain/base-entity';
+import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
-export type ExamEntityProps = {
+export type ExamAggregateProps = {
   id: string;
   trainingId: string;
   name: string;
   questions: ExamQuestionEntityProps[];
 };
 
-export class ExamEntity extends BaseEntity {
+export class ExamAggregate extends BaseAggregateRoot {
   @IsString()
   private readonly _id: string;
   public get id(): string {
@@ -34,7 +34,7 @@ export class ExamEntity extends BaseEntity {
     return this._questions;
   }
 
-  private constructor(private readonly props: ExamEntityProps) {
+  private constructor(private readonly props: ExamAggregateProps) {
     super();
     this._id = props.id;
     this._trainingId = props.trainingId;
@@ -42,11 +42,7 @@ export class ExamEntity extends BaseEntity {
     this._questions = this.props.questions.map(ExamQuestionEntity.from);
   }
 
-  static create(props: ExamEntityProps): ExamEntity {
-    return ExamEntity.from(props);
-  }
-
-  static from(exam: ExamEntityProps): ExamEntity {
-    return new ExamEntity(exam);
+  static from(exam: ExamAggregateProps): ExamAggregate {
+    return new ExamAggregate(exam);
   }
 }

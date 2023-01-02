@@ -1,6 +1,12 @@
-import { StartPresentationHandler } from './start-presentation/start-presentation.handler';
+import { StartExamHandler } from './start-exam/start-exam.handler';
 
-import { SkipPresentationHandler } from '@business/student/domain/commands/skip-presentation/skip-presentation.handler';
+import { SkipExamHandler } from '@business/student/domain/commands/skip-exam/skip-exam.handler';
+import { StartPresentationHandler } from '@business/student/domain/commands/start-presentation/start-presentation.handler';
 import { ValidateResponseHandler } from '@business/student/domain/commands/validate-response/validate-response.handler';
 
-export const TrainingCommandHandlers = [ValidateResponseHandler, StartPresentationHandler, SkipPresentationHandler];
+export const TrainingCommandHandlers = [
+  ValidateResponseHandler,
+  StartExamHandler,
+  SkipExamHandler,
+  StartPresentationHandler,
+];

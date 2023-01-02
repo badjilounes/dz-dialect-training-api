@@ -4,13 +4,13 @@ import * as request from 'supertest';
 import { initAppTesting } from '../core/setup';
 
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
-import { ValidateDto } from '@business/student/application/dto/validate-dto';
+import { ValidateExamResponseDto } from '@business/student/application/dto/validate-exam-response-dto';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
 
-describe('(TrainingController) validate', () => {
-  const testHelper = initAppTesting('validate');
+describe('(TrainingController) validate-exam-response', () => {
+  const testHelper = initAppTesting('validate_exam_response');
 
-  let validateDto: ValidateDto;
+  let validateDto: ValidateExamResponseDto;
   let training: Training;
 
   beforeEach(async () => {
@@ -31,7 +31,7 @@ describe('(TrainingController) validate', () => {
     const { app } = testHelper();
 
     await request(app.getHttpServer())
-      .post('/student/training/validate')
+      .post('/student/training/validate-exam-response')
       .send(validateDto)
       .expect(HttpStatus.UNAUTHORIZED);
   });
@@ -40,7 +40,7 @@ describe('(TrainingController) validate', () => {
     const { app, token } = testHelper();
 
     await request(app.getHttpServer())
-      .post('/student/training/validate')
+      .post('/student/training/validate-exam-response')
       .set('Authorization', `Bearer ${token}`)
       .send(validateDto)
       .expect(HttpStatus.NOT_FOUND);
@@ -59,7 +59,7 @@ describe('(TrainingController) validate', () => {
     validateDto.response = training.exams[0].questions[0].answer;
 
     const { body } = await request(app.getHttpServer())
-      .post('/student/training/validate')
+      .post('/student/training/validate-exam-response')
       .set('Authorization', `Bearer ${token}`)
       .send(validateDto)
       .expect(HttpStatus.CREATED);

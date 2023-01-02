@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 
 import { ChapterFixture } from '../fixtures/chapter/chapter.fixture';
 import { ExamCopyFixture } from '../fixtures/exam-copy/exam-copy.fixture';
+import { ExamFixture } from '../fixtures/exam/exam.fixture';
 import { FixtureModule } from '../fixtures/fixture.module';
 import { TrainingFixture } from '../fixtures/training/training.fixture';
 import { generateUserToken } from '../utils/token.utils';
@@ -14,6 +15,7 @@ export type TestingApplication = {
   app: INestApplication;
   fixtures: {
     training: TrainingFixture;
+    exam: ExamFixture;
     examCopy: ExamCopyFixture;
     chapter: ChapterFixture;
   };
@@ -25,6 +27,7 @@ export function initAppTesting(dbSchemaName = 'public'): () => TestingApplicatio
   let app!: INestApplication;
 
   let trainingFixture!: TrainingFixture;
+  let examFixture!: ExamFixture;
   let examCopyFixture!: ExamCopyFixture;
   let chapterFixture!: ChapterFixture;
 
@@ -43,6 +46,7 @@ export function initAppTesting(dbSchemaName = 'public'): () => TestingApplicatio
     await app.init();
 
     trainingFixture = moduleFixture.get(TrainingFixture);
+    examFixture = moduleFixture.get(ExamFixture);
     examCopyFixture = moduleFixture.get(ExamCopyFixture);
     chapterFixture = moduleFixture.get(ChapterFixture);
   });
@@ -57,6 +61,7 @@ export function initAppTesting(dbSchemaName = 'public'): () => TestingApplicatio
     token,
     fixtures: {
       training: trainingFixture,
+      exam: examFixture,
       examCopy: examCopyFixture,
       chapter: chapterFixture,
     },

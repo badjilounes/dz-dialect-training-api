@@ -6,4 +6,7 @@ export class CreateChapterDto {
 
   @ApiProperty()
   description!: string;
+
+  @ApiProperty()
+  isPresentation!: boolean;
 }

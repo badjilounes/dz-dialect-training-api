@@ -1,14 +1,13 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { GetExamPresentationResultQueryHandler } from './get-exam-presentation-result.handler';
+import { GetExamPresentationResultQueryHandler } from './get-exam-result.handler';
 
 import { ExamQuestionEntity } from '@business/student/domain/entities/question.entity';
 import { ResponseEntity } from '@business/student/domain/entities/response.entity';
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { TrainingCategoryEnum } from '@business/student/domain/enums/training-category.enum';
 import { ExamCopyNotFinishedError } from '@business/student/domain/errors/exam-copy-not-finished-error';
-import { TrainingPresentationNotFoundError } from '@business/student/domain/errors/training-presentation-not-found-error';
+import { ExamNotFoundError } from '@business/student/domain/errors/exam-not-found-error';
 import { ExamCopy, ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
 import { Training, TrainingQueryRepository } from '@business/student/domain/repositories/training-query-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
@@ -32,7 +31,7 @@ describe('Get exm presentation result', () => {
 
     training = {
       id: 'trainingId',
-      category: TrainingCategoryEnum.PRESENTATION,
+      chapterId: 'chapterId',
       exams: [
         {
           id: examId,
@@ -62,7 +61,7 @@ describe('Get exm presentation result', () => {
         },
       ],
     };
-    trainingQueryRepository.findPresentation.mockResolvedValue(training);
+    trainingQueryRepository.findExamById.mockResolvedValue(training.exams[0]);
 
     examCopy = {
       id: 'examCopyId',
@@ -87,21 +86,21 @@ describe('Get exm presentation result', () => {
     examCopyQueryRepository.findExamCopy.mockResolvedValue(examCopy);
   });
 
-  it('should throw if training presentation is not defined', async () => {
-    trainingQueryRepository.findPresentation.mockResolvedValue(undefined);
+  it('should throw if exam does not exist for given id', async () => {
+    trainingQueryRepository.findExamById.mockResolvedValue(undefined);
 
-    await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationNotFoundError());
+    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new ExamNotFoundError(examId));
   });
 
-  it('should throw if the presentation exam is not finished', async () => {
+  it('should throw if the exam is not finished', async () => {
     examCopy.state = ExamCopyStateEnum.IN_PROGRESS;
     examCopyQueryRepository.findExamCopy.mockResolvedValue(examCopy);
 
-    await expect(handler.execute()).rejects.toStrictEqual(new ExamCopyNotFinishedError());
+    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new ExamCopyNotFinishedError());
   });
 
-  it('should the exam presentation result', async () => {
-    const result = await handler.execute();
+  it('should return the exam result', async () => {
+    const result = await handler.execute({ payload: { examId } });
 
     expect(result).toStrictEqual({
       note: 1,

@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindManyOptions, In, Repository } from 'typeorm';
 
 import { QuestionTypeEnum } from '@business/professor/domain/enums/question-type.enum';
-import { TrainingCategoryEnum } from '@business/professor/domain/enums/training-category.enum';
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
 
 @Injectable()
@@ -12,7 +11,7 @@ export class TrainingFixture {
 
   async createTraining(data: DeepPartial<Training> = {}): Promise<Training> {
     const training = this.repository.create({
-      category: TrainingCategoryEnum.PRESENTATION,
+      chapter: data?.chapter?.id ? { id: data?.chapter?.id } : null,
       fromLanguage: 'fr',
       learningLanguage: 'dz',
       exams: [

@@ -8,10 +8,11 @@ import { Chapter } from '@business/professor/infrastructure/database/entities/ch
 export class ChapterFixture {
   constructor(@InjectRepository(Chapter) private readonly repository: Repository<Chapter>) {}
 
-  async createTraining(data: DeepPartial<Chapter> = {}): Promise<Chapter> {
+  async createChapter(data: DeepPartial<Chapter> = {}): Promise<Chapter> {
     const chapter = this.repository.create({
       name: 'Chapter name',
       description: 'Chapter description',
+      isPresentation: false,
       ...data,
     });
 

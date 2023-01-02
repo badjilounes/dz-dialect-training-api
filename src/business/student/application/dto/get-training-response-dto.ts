@@ -1,35 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
+import { GetExamResponseDto } from '@business/student/application/dto/get-exam-response-dto';
 import { TrainingCategoryEnum } from '@business/student/domain/enums/training-category.enum';
-
-class GetTrainingExamQuestionResponseDto {
-  @ApiProperty()
-  id!: string;
-
-  @ApiProperty({ enum: QuestionTypeEnum, enumName: 'QuestionTypeEnum' })
-  type!: QuestionTypeEnum;
-
-  @ApiProperty()
-  question!: string;
-
-  @ApiProperty()
-  order!: number;
-
-  @ApiProperty({ type: String, isArray: true })
-  propositions!: string[];
-}
-
-class GetTrainingExamResponseDto {
-  @ApiProperty()
-  id!: string;
-
-  @ApiProperty()
-  name!: string;
-
-  @ApiProperty({ type: GetTrainingExamQuestionResponseDto, isArray: true })
-  questions!: GetTrainingExamQuestionResponseDto[];
-}
 
 export class GetTrainingResponseDto {
   @ApiProperty()
@@ -38,6 +10,6 @@ export class GetTrainingResponseDto {
   @ApiProperty({ enum: TrainingCategoryEnum, enumName: 'TrainingCategoryEnum' })
   category!: TrainingCategoryEnum;
 
-  @ApiProperty({ type: GetTrainingExamResponseDto })
-  exam!: GetTrainingExamResponseDto;
+  @ApiProperty({ type: GetExamResponseDto })
+  exam!: GetExamResponseDto;
 }

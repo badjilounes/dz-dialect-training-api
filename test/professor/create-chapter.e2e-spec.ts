@@ -18,6 +18,7 @@ describe('(TrainingController) professor/training/create-chapter', () => {
     payload = {
       name: 'Chapter 1',
       description: 'Chapter 1 description',
+      isPresentation: false,
     };
   });
 
@@ -49,6 +50,7 @@ describe('(TrainingController) professor/training/create-chapter', () => {
       id: chapter?.id,
       name: chapter?.name,
       description: chapter?.description,
+      isPresentation: chapter?.isPresentation,
     });
   });
 });

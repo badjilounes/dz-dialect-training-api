@@ -9,4 +9,7 @@ export class CreateChapterResponseDto {
 
   @ApiProperty()
   description!: string;
+
+  @ApiProperty()
+  isPresentation!: boolean;
 }
