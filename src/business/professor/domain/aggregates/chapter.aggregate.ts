@@ -1,4 +1,4 @@
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 import { ChapterCreatedEvent } from '../events/chapter-created-event';
 
@@ -9,6 +9,7 @@ export type TrainingChapterAggregateProps = {
   name: string;
   description: string;
   isPresentation: boolean;
+  order: number;
 };
 
 export class ChapterAggregate extends BaseAggregateRoot {
@@ -36,12 +37,19 @@ export class ChapterAggregate extends BaseAggregateRoot {
     return this._isPresentation;
   }
 
+  @IsNumber()
+  private readonly _order: number;
+  public get order(): number {
+    return this._order;
+  }
+
   private constructor(private readonly props: TrainingChapterAggregateProps) {
     super();
     this._id = this.props.id;
     this._name = this.props.name;
     this._description = this.props.description;
     this._isPresentation = this.props.isPresentation;
+    this._order = this.props.order;
   }
 
   static create(props: TrainingChapterAggregateProps): ChapterAggregate {

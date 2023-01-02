@@ -9,4 +9,7 @@ export class CreateChapterDto {
 
   @ApiProperty()
   isPresentation!: boolean;
+
+  @ApiProperty()
+  order!: number;
 }

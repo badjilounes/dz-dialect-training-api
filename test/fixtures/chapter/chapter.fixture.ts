@@ -13,6 +13,7 @@ export class ChapterFixture {
       name: 'Chapter name',
       description: 'Chapter description',
       isPresentation: false,
+      order: 1,
       ...data,
     });
 

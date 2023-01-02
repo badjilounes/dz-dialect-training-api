@@ -33,6 +33,7 @@ export class ChapterTypeormCommandRepository
       name: chapter.name,
       description: chapter.description,
       isPresentation: chapter.isPresentation,
+      order: chapter.order,
     });
   }
 
@@ -41,6 +42,8 @@ export class ChapterTypeormCommandRepository
       id: event.chapter.id,
       name: event.chapter.name,
       description: event.chapter.description,
+      isPresentation: event.chapter.isPresentation,
+      order: event.chapter.order,
     });
     return this.repository.save(chapter);
   }

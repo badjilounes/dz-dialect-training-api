@@ -19,6 +19,7 @@ describe('(TrainingController) professor/training/create-chapter', () => {
       name: 'Chapter 1',
       description: 'Chapter 1 description',
       isPresentation: false,
+      order: 1,
     };
   });
 
@@ -51,6 +52,7 @@ describe('(TrainingController) professor/training/create-chapter', () => {
       name: chapter?.name,
       description: chapter?.description,
       isPresentation: chapter?.isPresentation,
+      order: chapter?.order,
     });
   });
 });

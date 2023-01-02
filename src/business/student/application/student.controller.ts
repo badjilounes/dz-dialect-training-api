@@ -12,6 +12,7 @@ import { GetExamDto } from '@business/student/application/dto/get-exam-dto';
 import { GetExamResponseDto } from '@business/student/application/dto/get-exam-response-dto';
 import { GetExamResultDto } from '@business/student/application/dto/get-exam-result-dto';
 import { GetExamResultResponseDto } from '@business/student/application/dto/get-result-response-dto';
+import { GetTrainingChapterListResponseDto } from '@business/student/application/dto/get-training-chapter-list-response-dto';
 import { SkipExamDto } from '@business/student/application/dto/skip-exam-dto';
 import { StartExamDto } from '@business/student/application/dto/start-exam-dto';
 import { ValidateExamResponseDto } from '@business/student/application/dto/validate-exam-response-dto';
@@ -22,6 +23,7 @@ import { StartPresentationCommand } from '@business/student/domain/commands/star
 import { ValidateResponseCommand } from '@business/student/domain/commands/validate-response/validate-response.command';
 import { GetExamResultQuery } from '@business/student/domain/queries/get-exam-result/get-exam-result.query';
 import { GetExamQuery } from '@business/student/domain/queries/get-exam/get-exam.query';
+import { GetTrainingChapterListQuery } from '@business/student/domain/queries/get-training-chapter-list/get-training-chapter-list.query';
 import { GuestOrUserAuthGuard } from '@core/auth/guest-or-user-auth.guard';
 import { CommandBus } from '@cqrs/command';
 
@@ -30,6 +32,13 @@ import { CommandBus } from '@cqrs/command';
 @UseInterceptors(StudentErrorInterceptor)
 export class StudentController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
+
+  @ApiOperation({ operationId: 'get-training-chapter-list', summary: 'Get training chapter list' })
+  @Get('get-training-chapter-list')
+  @ApiOkResponse({ type: GetTrainingChapterListResponseDto })
+  getTrainingChapterList(): Promise<GetTrainingChapterListResponseDto> {
+    return this.queryBus.execute(new GetTrainingChapterListQuery());
+  }
 
   @ApiOperation({ operationId: 'get-exam', summary: 'Get exam' })
   @Get('get-exam')

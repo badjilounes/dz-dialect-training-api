@@ -14,6 +14,9 @@ export class Chapter {
   @Column({ default: false })
   isPresentation!: boolean;
 
+  @Column()
+  order!: number;
+
   @CreateDateColumn()
   createdAt!: Date;
 

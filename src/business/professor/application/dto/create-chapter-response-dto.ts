@@ -12,4 +12,7 @@ export class CreateChapterResponseDto {
 
   @ApiProperty()
   isPresentation!: boolean;
+
+  @ApiProperty()
+  order!: number;
 }
