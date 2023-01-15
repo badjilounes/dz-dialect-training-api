@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateChapterDto {
+export class ChapterResponseDto {
+  @ApiProperty()
+  id!: string;
+
   @ApiProperty()
   name!: string;
 
@@ -9,4 +12,10 @@ export class CreateChapterDto {
 
   @ApiProperty()
   isPresentation!: boolean;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
 }

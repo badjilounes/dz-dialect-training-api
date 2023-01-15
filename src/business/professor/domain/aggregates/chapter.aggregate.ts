@@ -1,15 +1,24 @@
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsString } from 'class-validator';
 
 import { ChapterCreatedEvent } from '../events/chapter-created-event';
 
+import { ChapterDeletedEvent } from '@business/professor/domain/events/chapter-deleted-event';
+import { ChapterUpdatedEvent } from '@business/professor/domain/events/chapter-updated-event';
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
+
+export type UpdateTrainingChapterAggregateProps = {
+  name: string;
+  description: string;
+  isPresentation: boolean;
+};
 
 export type TrainingChapterAggregateProps = {
   id: string;
   name: string;
   description: string;
   isPresentation: boolean;
-  order: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export class ChapterAggregate extends BaseAggregateRoot {
@@ -20,27 +29,33 @@ export class ChapterAggregate extends BaseAggregateRoot {
   }
 
   @IsString()
-  private readonly _name: string;
+  private _name: string;
   public get name(): string {
     return this._name;
   }
 
   @IsString()
-  private readonly _description: string;
+  private _description: string;
   public get description(): string {
     return this._description;
   }
 
   @IsBoolean()
-  private readonly _isPresentation: boolean;
+  private _isPresentation: boolean;
   public get isPresentation(): boolean {
     return this._isPresentation;
   }
 
-  @IsNumber()
-  private readonly _order: number;
-  public get order(): number {
-    return this._order;
+  @IsDate()
+  private readonly _createdAt: Date;
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  @IsDate()
+  private readonly _updatedAt: Date;
+  public get updatedAt(): Date {
+    return this._updatedAt;
   }
 
   private constructor(private readonly props: TrainingChapterAggregateProps) {
@@ -49,7 +64,8 @@ export class ChapterAggregate extends BaseAggregateRoot {
     this._name = this.props.name;
     this._description = this.props.description;
     this._isPresentation = this.props.isPresentation;
-    this._order = this.props.order;
+    this._createdAt = this.props.createdAt || new Date();
+    this._updatedAt = this.props.updatedAt || new Date();
   }
 
   static create(props: TrainingChapterAggregateProps): ChapterAggregate {
@@ -60,5 +76,19 @@ export class ChapterAggregate extends BaseAggregateRoot {
 
   static from(exam: TrainingChapterAggregateProps): ChapterAggregate {
     return new ChapterAggregate(exam);
+  }
+
+  update(payload: UpdateTrainingChapterAggregateProps): ChapterAggregate {
+    this._name = payload.name;
+    this._description = payload.description;
+    this._isPresentation = payload.isPresentation;
+
+    this.apply(new ChapterUpdatedEvent(this.id, payload));
+
+    return this;
+  }
+
+  delete(): void {
+    this.apply(new ChapterDeletedEvent(this.id));
   }
 }

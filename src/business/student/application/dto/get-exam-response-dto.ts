@@ -29,6 +29,9 @@ export class GetExamResponseDto {
   @ApiProperty()
   name!: string;
 
+  @ApiProperty({ type: GetExamQuestionResponseDto, required: false })
+  resume?: GetExamQuestionResponseDto;
+
   @ApiProperty({ type: GetExamQuestionResponseDto, isArray: true })
   questions!: GetExamQuestionResponseDto[];
 }

@@ -4,12 +4,16 @@ import { GetExamQueryHandler } from './get-exam.handler';
 
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
 import { ExamNotFoundError } from '@business/student/domain/errors/exam-not-found-error';
+import { ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
 import { Training, TrainingQueryRepository } from '@business/student/domain/repositories/training-query-repository';
+import { AppContextService } from '@core/context/app-context.service';
 
 describe('Get presentation', () => {
   let handler: GetExamQueryHandler;
 
   let trainingQueryRepository: MockProxy<TrainingQueryRepository>;
+  let examCopyQueryRepository: MockProxy<ExamCopyQueryRepository>;
+  let context: MockProxy<AppContextService>;
 
   let training: Training;
 
@@ -21,7 +25,12 @@ describe('Get presentation', () => {
     trainingQueryRepository = mock<TrainingQueryRepository>();
     trainingQueryRepository.findExamById.mockResolvedValue(undefined);
 
-    handler = new GetExamQueryHandler(trainingQueryRepository);
+    examCopyQueryRepository = mock<ExamCopyQueryRepository>();
+    examCopyQueryRepository.findExamCopy.mockResolvedValue(undefined);
+
+    context = mock<AppContextService>({ isUserAuthenticated: false });
+
+    handler = new GetExamQueryHandler(trainingQueryRepository, examCopyQueryRepository, context);
 
     training = {
       id: trainingId,

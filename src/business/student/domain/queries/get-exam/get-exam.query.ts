@@ -11,6 +11,7 @@ type GetExamExamQuestion = {
 export type GetExamQueryResult = {
   id: string;
   name: string;
+  resume?: GetExamExamQuestion;
   questions: GetExamExamQuestion[];
 };
 

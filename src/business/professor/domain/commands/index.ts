@@ -1,5 +1,12 @@
 import { CreateTrainingHandler } from './create-training/create-training.handler';
 
 import { CreateChapterHandler } from '@business/professor/domain/commands/create-chapter/create-chapter.handler';
+import { DeleteChapterHandler } from '@business/professor/domain/commands/delete-chapter/delete-chapter.handler';
+import { EditChapterHandler } from '@business/professor/domain/commands/edit-chapter/edit-chapter.handler';
 
-export const TrainingCommandHandlers = [CreateTrainingHandler, CreateChapterHandler];
+export const TrainingCommandHandlers = [
+  CreateTrainingHandler,
+  CreateChapterHandler,
+  EditChapterHandler,
+  DeleteChapterHandler,
+];

@@ -11,6 +11,10 @@ interface AppContextProps extends ContextProps {
 export class AppContextService {
   constructor(private readonly context: ContextService<AppContextProps>) {}
 
+  get isUserAuthenticated(): boolean {
+    return !!this.context.getProperty('userId');
+  }
+
   get userId(): string {
     const userId = this.context.getProperty('userId');
     if (!userId) {

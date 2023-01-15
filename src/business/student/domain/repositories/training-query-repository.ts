@@ -1,6 +1,6 @@
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
 
-type ExamQuestion = {
+export type ExamQuestion = {
   id: string;
   type: QuestionTypeEnum;
   question: string;
