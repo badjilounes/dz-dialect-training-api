@@ -9,10 +9,12 @@ import { CreateChapterResponseDto } from '@business/professor/application/dto/cr
 import { CreateTrainingDto } from '@business/professor/application/dto/create-training-dto';
 import { CreateTrainingResponseDto } from '@business/professor/application/dto/create-training-response-dto';
 import { PaginatedChapterResponseDto } from '@business/professor/application/dto/paginated-chapter-response-dto';
+import { ReorderChaptersDto } from '@business/professor/application/dto/reorder-chapters-dto';
 import { ProfessorErrorInterceptor } from '@business/professor/application/professor.error-interceptor';
 import { CreateChapterCommand } from '@business/professor/domain/commands/create-chapter/create-chapter.command';
 import { DeleteChapterCommand } from '@business/professor/domain/commands/delete-chapter/delete-chapter.command';
 import { EditChapterCommand } from '@business/professor/domain/commands/edit-chapter/edit-chapter.command';
+import { ReorderChaptersCommand } from '@business/professor/domain/commands/reorder-chapters/reorder-chapters.command';
 import { SearchChapterQuery } from '@business/professor/domain/queries/search-chapter/search-chapter.query';
 import { CommandBus } from '@cqrs/command';
 
@@ -41,6 +43,13 @@ export class ProfessorController {
   @ApiOkResponse({ type: CreateChapterResponseDto })
   editChapter(@Param('id') id: string, @Body() payload: CreateChapterDto): Promise<CreateChapterResponseDto> {
     return this.commandBus.execute(new EditChapterCommand(id, payload));
+  }
+
+  @ApiOperation({ operationId: 'reorder-chapters', summary: 'Reorder chapters' })
+  @Post('reorder-chapters')
+  @ApiOkResponse()
+  reorderChapters(@Body() payload: ReorderChaptersDto): Promise<void> {
+    return this.commandBus.execute(new ReorderChaptersCommand(payload.chapters));
   }
 
   @ApiOperation({ operationId: 'delete-chapter/:id', summary: 'Delete chapter' })

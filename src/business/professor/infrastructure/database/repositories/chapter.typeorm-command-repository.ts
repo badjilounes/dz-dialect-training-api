@@ -1,9 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 
 import { ChapterAggregate } from '@business/professor/domain/aggregates/chapter.aggregate';
 import { ChapterCreatedEvent } from '@business/professor/domain/events/chapter-created-event';
 import { ChapterDeletedEvent } from '@business/professor/domain/events/chapter-deleted-event';
+import { ChapterReorderedEvent } from '@business/professor/domain/events/chapter-reordered-event';
 import { ChapterUpdatedEvent } from '@business/professor/domain/events/chapter-updated-event';
 import { ChapterCommandRepository } from '@business/professor/domain/repositories/chapter-command-repository';
 import { Chapter } from '@business/professor/infrastructure/database/entities/chapter.entity';
@@ -24,6 +25,20 @@ export class ChapterTypeormCommandRepository
     this.register(ChapterCreatedEvent, this.createChapter);
     this.register(ChapterUpdatedEvent, this.updateChapter);
     this.register(ChapterDeletedEvent, this.deleteChapter);
+    this.register(ChapterReorderedEvent, this.reorderChapter);
+  }
+  async findByIdList(idList: string[]): Promise<ChapterAggregate[]> {
+    const chapters = idList.length ? await this.chapterRepository.find({ where: { id: In(idList) } }) : [];
+    return chapters.map((chapter) =>
+      ChapterAggregate.from({
+        id: chapter.id,
+        name: chapter.name,
+        description: chapter.description,
+        isPresentation: chapter.isPresentation,
+        createdAt: chapter.createdAt,
+        updatedAt: chapter.updatedAt,
+      }),
+    );
   }
 
   public async findChapterById(id: string): Promise<ChapterAggregate | undefined> {
@@ -79,5 +94,9 @@ export class ChapterTypeormCommandRepository
 
   private async deleteChapter(event: ChapterDeletedEvent): Promise<void> {
     await this.chapterRepository.delete(event.id);
+  }
+
+  private async reorderChapter(event: ChapterReorderedEvent): Promise<void> {
+    await this.chapterRepository.update(event.id, { order: event.order });
   }
 }

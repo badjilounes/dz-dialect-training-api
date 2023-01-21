@@ -3,6 +3,7 @@ import { IsBoolean, IsDate, IsString } from 'class-validator';
 import { ChapterCreatedEvent } from '../events/chapter-created-event';
 
 import { ChapterDeletedEvent } from '@business/professor/domain/events/chapter-deleted-event';
+import { ChapterReorderedEvent } from '@business/professor/domain/events/chapter-reordered-event';
 import { ChapterUpdatedEvent } from '@business/professor/domain/events/chapter-updated-event';
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
@@ -90,5 +91,9 @@ export class ChapterAggregate extends BaseAggregateRoot {
 
   delete(): void {
     this.apply(new ChapterDeletedEvent(this.id));
+  }
+
+  reorder(order: number): void {
+    this.apply(new ChapterReorderedEvent(this.id, order));
   }
 }
