@@ -35,8 +35,8 @@ export class StudentController {
 
   @ApiOperation({ operationId: 'get-training-chapter-list', summary: 'Get training chapter list' })
   @Get('get-training-chapter-list')
-  @ApiOkResponse({ type: GetTrainingChapterListResponseDto })
-  getTrainingChapterList(): Promise<GetTrainingChapterListResponseDto> {
+  @ApiOkResponse({ type: GetTrainingChapterListResponseDto, isArray: true })
+  getTrainingChapterList(): Promise<GetTrainingChapterListResponseDto[]> {
     return this.queryBus.execute(new GetTrainingChapterListQuery());
   }
 
