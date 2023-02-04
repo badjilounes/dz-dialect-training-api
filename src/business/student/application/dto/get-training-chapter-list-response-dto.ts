@@ -14,7 +14,7 @@ class GetTrainingChapterListChapterResponseDto {
 }
 
 export class GetTrainingChapterListResponseDto {
-  @ApiProperty({ type: GetTrainingChapterListChapterResponseDto, isArray: true })
+  @ApiProperty({ type: GetTrainingChapterListChapterResponseDto })
   chapter!: string;
 
   @ApiProperty({ type: GetTrainingResponseDto, isArray: true })
