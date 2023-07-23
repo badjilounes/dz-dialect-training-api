@@ -17,7 +17,7 @@ export class TrainingExamQuestion {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
+  @Column({ generated: 'increment', default: 1 })
   order!: number;
 
   @Column({ enum: QuestionTypeEnum })

@@ -27,7 +27,7 @@ export class TrainingExam {
   @JoinColumn()
   course!: TrainingCourse;
 
-  @Column({ generated: 'increment' })
+  @Column({ generated: 'increment', default: 1 })
   order!: number;
 
   @CreateDateColumn()
