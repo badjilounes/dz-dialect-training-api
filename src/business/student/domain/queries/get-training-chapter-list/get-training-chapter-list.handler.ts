@@ -14,13 +14,15 @@ export class GetTrainingChapterListQueryHandler implements IQueryHandler<GetTrai
   ) {}
 
   async execute(): Promise<GetTrainingChapterListQueryResult[]> {
-    const chapters = await this.trainingQueryRepository.findChapters();
+    // const chapters = await this.trainingQueryRepository.findChapters();
 
-    return Promise.all(
-      chapters.map(async (chapter) => ({
-        chapter,
-        trainingList: await this.trainingQueryRepository.findTrainingsByChapterId(chapter.id),
-      })),
-    );
+    // return Promise.all(
+    //   chapters.map(async (chapter) => ({
+    //     chapter,
+    //     trainingList: await this.trainingQueryRepository.findCoursesByTrainingId(chapter.id),
+    //   })),
+    // );
+
+    return [];
   }
 }

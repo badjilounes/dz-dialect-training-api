@@ -46,7 +46,7 @@ export class StartExamHandler implements ICommandHandler<StartExamCommand> {
     return {
       id: exam.id,
       name: exam.name,
-      trainingId: exam.trainingId,
+      trainingId: exam.courseId,
       questions: exam.questions.map((question) => ({
         id: question.id,
         order: question.order,

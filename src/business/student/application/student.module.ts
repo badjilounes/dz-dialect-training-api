@@ -9,12 +9,13 @@ import {
   TRAINING_COMMAND_REPOSITORY,
   TRAINING_QUERY_REPOSITORY,
 } from '../domain/repositories/tokens';
+import { TrainingCourse } from '../infrastructure/database/entities/training-course.entity';
 import { TrainingExamQuestion } from '../infrastructure/database/entities/training-exam-question.entity';
+import { TrainingLanguage } from '../infrastructure/database/entities/training-language.entity';
 import { TrainingTypeormCommandRepository } from '../infrastructure/database/repositories/training.typeorm-command-repository';
 
 import { StudentController } from './student.controller';
 
-import { Chapter } from '@business/student/infrastructure/database/entities/chapter.entity';
 import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
 import { ExamCopy } from '@business/student/infrastructure/database/entities/exam-copy.entity';
 import { TrainingExam } from '@business/student/infrastructure/database/entities/training-exam.entity';
@@ -25,7 +26,15 @@ import { TrainingTypeormQueryRepository } from '@business/student/infrastructure
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Training, TrainingExam, TrainingExamQuestion, ExamCopy, ExamCopyResponse, Chapter]),
+    TypeOrmModule.forFeature([
+      Training,
+      TrainingLanguage,
+      TrainingCourse,
+      TrainingExam,
+      TrainingExamQuestion,
+      ExamCopy,
+      ExamCopyResponse,
+    ]),
   ],
   controllers: [StudentController],
   providers: [

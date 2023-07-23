@@ -43,7 +43,7 @@ describe('Start exam', () => {
       exams: [
         {
           id: examId,
-          trainingId,
+          courseId: trainingId,
           name: 'presentation exam',
           questions: [
             {

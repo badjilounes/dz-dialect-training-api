@@ -15,12 +15,6 @@ export type Exam = {
   questions: ExamQuestion[];
 };
 
-export type Training = {
-  id: string;
-  chapterId?: string;
-  exams: Exam[];
-};
-
 export type Chapter = {
   id: string;
   name: string;
@@ -28,9 +22,26 @@ export type Chapter = {
   order: number;
 };
 
+export type Training = {
+  id: string;
+  name: string;
+  description: string;
+  isPresentation: boolean;
+
+  courses: {
+    id: string;
+    name: string;
+    description: string;
+    exams: Exam[];
+  }[];
+
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export interface TrainingQueryRepository {
   findTrainingById(id: string): Promise<Training | undefined>;
   findExamById(examId: string): Promise<Exam | undefined>;
-  findChapters(): Promise<Chapter[]>;
-  findTrainingsByChapterId(chapterId: string): Promise<Training[]>;
+  findTrainingList(): Promise<Training[]>;
 }

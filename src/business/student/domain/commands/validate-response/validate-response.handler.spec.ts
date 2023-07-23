@@ -64,7 +64,7 @@ describe('Validate user response', () => {
       responses: [],
       state: ExamCopyStateEnum.IN_PROGRESS,
     });
-    examCopyCommandRepository.findExamCopy.mockResolvedValue(examCopy);
+    examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(examCopy);
 
     examResponse = ResponseEntity.from({
       id: responseId,
@@ -87,7 +87,7 @@ describe('Validate user response', () => {
   });
 
   it('should create a copy for given exam if no copy exist for this exam', async () => {
-    examCopyCommandRepository.findExamCopy.mockResolvedValue(undefined);
+    examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(undefined);
 
     await handler.execute({ trainingId, examId, questionId, response });
 

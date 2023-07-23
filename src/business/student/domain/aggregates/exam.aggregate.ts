@@ -6,7 +6,7 @@ import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
 export type ExamAggregateProps = {
   id: string;
-  trainingId: string;
+  courseId: string;
   name: string;
   questions: ExamQuestionEntityProps[];
 };
@@ -18,9 +18,9 @@ export class ExamAggregate extends BaseAggregateRoot {
     return this._id;
   }
   @IsString()
-  private readonly _trainingId: string;
-  public get trainingId(): string {
-    return this._trainingId;
+  private readonly _courseId: string;
+  public get courseId(): string {
+    return this._courseId;
   }
 
   @IsString()
@@ -37,7 +37,7 @@ export class ExamAggregate extends BaseAggregateRoot {
   private constructor(private readonly props: ExamAggregateProps) {
     super();
     this._id = props.id;
-    this._trainingId = props.trainingId;
+    this._courseId = props.courseId;
     this._name = props.name;
     this._questions = this.props.questions.map(ExamQuestionEntity.from);
   }

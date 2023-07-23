@@ -49,14 +49,14 @@ export class ExamQuestionEntity extends BaseEntity {
     return this._propositions;
   }
 
-  private constructor(private readonly props: ExamQuestionEntityProps) {
+  private constructor(readonly props: ExamQuestionEntityProps) {
     super();
-    this._id = this.props.id;
-    this._examId = this.props.examId;
-    this._type = this.props.type;
-    this._question = this.props.question;
-    this._answer = this.props.answer;
-    this._propositions = this.props.propositions;
+    this._id = props.id;
+    this._examId = props.examId;
+    this._type = props.type;
+    this._question = props.question;
+    this._answer = props.answer;
+    this._propositions = props.propositions;
   }
 
   static create(props: ExamQuestionEntityProps): ExamQuestionEntity {

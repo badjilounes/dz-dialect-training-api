@@ -3,12 +3,12 @@ import * as request from 'supertest';
 
 import { initAppTesting } from '../core/setup';
 
-import { CreateChapterDto } from '@business/professor/application/dto/create-chapter-dto';
+import { CreateCourseDto } from '@business/professor/application/dto/course/create-course-dto';
 
 describe('(TrainingController) professor/training/create-chapter', () => {
   const testHelper = initAppTesting('create_chapter');
 
-  let payload: CreateChapterDto;
+  let payload: CreateCourseDto;
 
   beforeEach(async () => {
     const { fixtures } = testHelper();

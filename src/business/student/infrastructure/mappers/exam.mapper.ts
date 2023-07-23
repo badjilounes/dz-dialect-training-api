@@ -6,7 +6,7 @@ export function examToExamAggregate(exam: TrainingExam): ExamAggregate {
   return ExamAggregate.from({
     id: exam.id,
     name: exam.name,
-    trainingId: exam.training.id,
+    courseId: exam.course.id,
     questions: exam.questions.map((question) => ({
       id: question.id,
       examId: exam.id,

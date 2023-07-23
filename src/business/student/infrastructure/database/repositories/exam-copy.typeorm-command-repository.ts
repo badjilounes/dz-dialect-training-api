@@ -34,7 +34,7 @@ export class ExamCopyTypeormCommandRepository
     this.register(ExamCopySkippedEvent, this.skipExamCopy);
   }
 
-  async findExamCopy(examId: string): Promise<ExamCopyAggregate | undefined> {
+  async findExamCopyByExamId(examId: string): Promise<ExamCopyAggregate | undefined> {
     const examCopy = await this.repository.findOne({
       where: { exam: { id: examId }, userId: this.context.userId },
       relations: ['exam', 'responses', 'responses.question'],

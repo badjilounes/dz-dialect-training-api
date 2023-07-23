@@ -42,7 +42,7 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
     }
 
     // Find existing copy of exam otherwise create a new one
-    let copy = await this.trainingExamCopyCommandRepository.findExamCopy(examId);
+    let copy = await this.trainingExamCopyCommandRepository.findExamCopyByExamId(examId);
     if (!copy) {
       copy = ExamCopyAggregate.create({
         id: this.uuidGenerator.generate(),

@@ -17,9 +17,6 @@ export class TrainingExamQuestion {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
-  order!: number;
-
   @Column({ enum: QuestionTypeEnum })
   type!: QuestionTypeEnum;
 
@@ -35,6 +32,9 @@ export class TrainingExamQuestion {
   @ManyToOne(() => TrainingExam, { onDelete: 'CASCADE' })
   @JoinColumn()
   exam!: TrainingExam;
+
+  @Column({ generated: 'increment', default: 1 })
+  order!: number;
 
   @CreateDateColumn()
   createdAt!: Date;

@@ -1,16 +1,26 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsString } from 'class-validator';
 
-import { ExamEntity, ExamEntityProps } from '../entities/exam.entity';
-import { TrainingCreatedEvent } from '../events/training-created-event';
+import { TrainingCreatedEvent } from '../events/training/training-created-event';
+import { TrainingDeletedEvent } from '../events/training/training-deleted-event';
+import { TrainingReorderedEvent } from '../events/training/training-reordered-event';
+import { TrainingUpdatedEvent } from '../events/training/training-updated-event';
+
+import { CourseAggregate, CourseAggregateProps } from './course.aggregate';
 
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
+export type UpdateTrainingAggregateProps = {
+  name: string;
+  description: string;
+  isPresentation: boolean;
+};
+
 export type TrainingAggregateProps = {
   id: string;
-  chapterId?: string;
-  fromLanguage: string;
-  learningLanguage: string;
-  exams: ExamEntityProps[];
+  name: string;
+  description: string;
+  courses: CourseAggregateProps[];
+  isPresentation: boolean;
 };
 
 export class TrainingAggregate extends BaseAggregateRoot {
@@ -21,45 +31,61 @@ export class TrainingAggregate extends BaseAggregateRoot {
   }
 
   @IsString()
-  @IsOptional()
-  private readonly _chapterId: string | undefined;
-  public get chapterId(): string | undefined {
-    return this._chapterId;
+  private _name: string;
+  public get name(): string {
+    return this._name;
   }
 
   @IsString()
-  private readonly _fromLanguage: string;
-  public get fromLanguage(): string {
-    return this._fromLanguage;
+  private _description: string;
+  public get description(): string {
+    return this._description;
   }
 
-  @IsString()
-  private readonly _learningLanguage: string;
-  public get learningLanguage(): string {
-    return this._learningLanguage;
+  @IsBoolean()
+  private _isPresentation: boolean;
+  public get isPresentation(): boolean {
+    return this._isPresentation;
   }
 
-  private readonly _exams: ExamEntity[];
-  public get exams(): ExamEntity[] {
-    return this._exams;
+  private readonly _courses: CourseAggregate[];
+  public get courses(): CourseAggregate[] {
+    return this._courses;
   }
 
   private constructor(private readonly props: TrainingAggregateProps) {
     super();
     this._id = props.id;
-    this._chapterId = props.chapterId;
-    this._fromLanguage = props.fromLanguage;
-    this._learningLanguage = props.learningLanguage;
-    this._exams = this.props.exams.map(ExamEntity.from);
+    this._name = props.name;
+    this._description = props.description;
+    this._courses = this.props.courses.map(CourseAggregate.from);
+    this._isPresentation = props.isPresentation;
   }
 
-  static create(props: TrainingAggregateProps): TrainingAggregate {
-    const training = TrainingAggregate.from(props);
+  static create(props: Omit<TrainingAggregateProps, 'courses'>): TrainingAggregate {
+    const training = TrainingAggregate.from({ ...props, courses: [] });
     training.apply(new TrainingCreatedEvent(training));
     return training;
   }
 
   static from(exam: TrainingAggregateProps): TrainingAggregate {
     return new TrainingAggregate(exam);
+  }
+
+  delete(): void {
+    this.apply(new TrainingDeletedEvent(this.id));
+  }
+
+  reorder(order: number): void {
+    this.apply(new TrainingReorderedEvent(this.id, order));
+  }
+
+  update(props: UpdateTrainingAggregateProps): TrainingAggregate {
+    this._name = props.name;
+    this._description = props.description;
+
+    this.apply(new TrainingUpdatedEvent(this.id, props));
+
+    return this;
   }
 }

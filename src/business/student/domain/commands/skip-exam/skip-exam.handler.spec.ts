@@ -47,7 +47,7 @@ describe('Skip presentation', () => {
       exams: [
         {
           id: examId,
-          trainingId,
+          courseId: trainingId,
           name: 'presentation exam',
           questions: [
             {
@@ -84,7 +84,7 @@ describe('Skip presentation', () => {
       responses: [],
       state: ExamCopyStateEnum.IN_PROGRESS,
     });
-    examCopyCommandRepository.findExamCopy.mockResolvedValue(examCopy);
+    examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(examCopy);
   });
 
   it('should throw if no training exist for given id', async () => {
@@ -94,13 +94,13 @@ describe('Skip presentation', () => {
   });
 
   it('should throw if given copy is not in progress', async () => {
-    examCopyCommandRepository.findExamCopy.mockResolvedValue(undefined);
+    examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(undefined);
 
     await expect(handler.execute({ id: examId })).rejects.toStrictEqual(new ExamCopyNotStartedError());
   });
 
   it('should skip given copy', async () => {
-    examCopyCommandRepository.findExamCopy.mockResolvedValue(examCopy);
+    examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(examCopy);
 
     await handler.execute({ id: examId });
 

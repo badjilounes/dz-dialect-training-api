@@ -1,35 +1,26 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-import { TrainingExam } from './training-exam.entity';
-
-import { Chapter } from '@business/student/infrastructure/database/entities/chapter.entity';
+import { TrainingCourse } from './training-course.entity';
 
 @Entity()
 export class Training {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @OneToOne(() => Chapter, { eager: true })
-  @JoinColumn()
-  chapter!: Chapter | null;
+  @Column()
+  name!: string;
 
   @Column()
-  learningLanguage!: string;
+  description!: string;
 
   @Column()
-  fromLanguage!: string;
+  isPresentation!: boolean;
 
-  @OneToMany(() => TrainingExam, (step) => step.training, { eager: true, cascade: true })
-  exams!: TrainingExam[];
+  @OneToMany(() => TrainingCourse, (course) => course.training, { eager: true, cascade: true })
+  courses!: TrainingCourse[];
+
+  @Column({ generated: 'increment' })
+  order!: number;
 
   @CreateDateColumn()
   createdAt!: Date;

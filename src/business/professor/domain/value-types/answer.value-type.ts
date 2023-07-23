@@ -3,25 +3,25 @@ import { IsEnum } from 'class-validator';
 import { QuestionTypeEnum } from '@business/professor/domain/enums/question-type.enum';
 import { ValueType } from '@ddd/domain/base-value-type';
 
-export type AnswerValueTypeProps = {
+type AnswerValueTypeProps = {
   questionType: QuestionTypeEnum;
   value: string[];
   formattedValue: string;
 };
 
-export type SingleChoiceValueTypeProps = {
+type SingleChoiceValueTypeProps = {
   value: string[];
 };
 
-export type MultipleChoiceValueTypeProps = {
+type MultipleChoiceValueTypeProps = {
   value: string[];
 };
 
-export type WordListValueTypeProps = {
+type WordListValueTypeProps = {
   value: string[];
 };
 
-export type AnswerValueTypeFromProps = {
+type AnswerValueTypeFromProps = {
   questionType: QuestionTypeEnum;
   value: string[];
 };
@@ -68,7 +68,7 @@ export class AnswerValueType extends ValueType {
     return new AnswerValueType({
       questionType: QuestionTypeEnum.SINGLE_CHOICE,
       value: props.value,
-      formattedValue: props.value.join(),
+      formattedValue: props.value[0],
     });
   }
 
@@ -84,15 +84,7 @@ export class AnswerValueType extends ValueType {
     return new AnswerValueType({
       questionType: QuestionTypeEnum.WORD_LIST,
       value: props.value,
-      formattedValue: props.value.join().replace(/,/g, ' '),
-    });
-  }
-
-  static createWordListFromValue(value: string): AnswerValueType {
-    return new AnswerValueType({
-      questionType: QuestionTypeEnum.WORD_LIST,
-      value: value.split(' '),
-      formattedValue: value,
+      formattedValue: props.value.join(',').replace(/,/g, ' '),
     });
   }
 

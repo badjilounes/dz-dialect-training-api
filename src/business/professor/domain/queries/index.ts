@@ -1,3 +1,6 @@
-import { SearchChapterQueryHandler } from '@business/professor/domain/queries/search-chapter/search-chapter.handler';
+import { SearchExamQueryHandler } from './search-exam/search-exam.handler';
+import { SearchTrainingQueryHandler } from './search-training/search-training.handler';
 
-export const ProfessorQueryHandlers = [SearchChapterQueryHandler];
+import { SearchCourseQueryHandler } from '@business/professor/domain/queries/search-course/search-course.handler';
+
+export const ProfessorQueryHandlers = [SearchCourseQueryHandler, SearchTrainingQueryHandler, SearchExamQueryHandler];

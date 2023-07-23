@@ -34,9 +34,9 @@ export class TrainingTypeormCommandRepository
     super(repository, context);
   }
 
-  async findExamQuestions(trainingId: string, examId: string): Promise<ExamQuestionEntity[]> {
+  async findExamQuestions(examId: string): Promise<ExamQuestionEntity[]> {
     const examQuestions = await this.examQuestionRepository.find({
-      where: { exam: { id: examId, training: { id: trainingId } } },
+      where: { exam: { id: examId } },
       relations: ['exam'],
       order: { order: 'ASC' },
     });
@@ -57,7 +57,15 @@ export class TrainingTypeormCommandRepository
   async findTrainingById(id: string): Promise<TrainingAggregate | undefined> {
     const training = await this.repository.findOne({
       where: { id },
-      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
+      order: {
+        courses: {
+          order: 'ASC',
+          exams: {
+            order: 'ASC',
+            questions: { order: 'ASC' },
+          },
+        },
+      },
     });
 
     if (!training) {
@@ -83,17 +91,25 @@ export class TrainingTypeormCommandRepository
 
   async findTrainingPresentationExam(): Promise<ExamAggregate | undefined> {
     const training = await this.repository.findOne({
-      where: { chapter: { isPresentation: true } },
-      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
+      where: { isPresentation: true },
+      order: {
+        courses: {
+          order: 'ASC',
+          exams: {
+            order: 'ASC',
+            questions: { order: 'ASC' },
+          },
+        },
+      },
     });
 
-    if (!training?.exams.length) {
+    if (!training?.courses.length && !training?.courses[0].exams.length) {
       return undefined;
     }
 
-    return examToExamAggregate({
-      ...training.exams[0],
-      training,
-    });
+    const [course] = training.courses;
+    const [exam] = course.exams;
+
+    return examToExamAggregate({ ...exam, course });
   }
 }

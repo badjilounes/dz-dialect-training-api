@@ -1,15 +1,15 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsString } from 'class-validator';
 
-import { ExamAggregate, ExamAggregateProps } from './exam.aggregate';
+import { CourseEntity, CourseEntityProps } from '../entities/course.entity';
 
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
 export type TrainingAggregateProps = {
   id: string;
-  chapterId?: string;
-  fromLanguage: string;
-  learningLanguage: string;
-  exams: ExamAggregateProps[];
+  name: string;
+  description: string;
+  courses: CourseEntityProps[];
+  isPresentation: boolean;
 };
 
 export class TrainingAggregate extends BaseAggregateRoot {
@@ -20,36 +20,35 @@ export class TrainingAggregate extends BaseAggregateRoot {
   }
 
   @IsString()
-  @IsOptional()
-  private readonly _chapterId: string | undefined;
-  public get chapterId(): string | undefined {
-    return this._chapterId;
+  private readonly _name: string;
+  public get name(): string {
+    return this._name;
   }
 
   @IsString()
-  private readonly _fromLanguage: string;
-  public get fromLanguage(): string {
-    return this._fromLanguage;
+  private readonly _description: string;
+  public get description(): string {
+    return this._description;
   }
 
-  @IsString()
-  private readonly _learningLanguage: string;
-  public get learningLanguage(): string {
-    return this._learningLanguage;
+  private readonly _courses: CourseEntity[];
+  public get courses(): CourseEntity[] {
+    return this._courses;
   }
 
-  private readonly _exams: ExamAggregate[];
-  public get exams(): ExamAggregate[] {
-    return this._exams;
+  @IsBoolean()
+  private readonly _isPresentation: boolean;
+  public get isPresentation(): boolean {
+    return this._isPresentation;
   }
 
   private constructor(private readonly props: TrainingAggregateProps) {
     super();
     this._id = props.id;
-    this._chapterId = props.chapterId;
-    this._fromLanguage = props.fromLanguage;
-    this._learningLanguage = props.learningLanguage;
-    this._exams = this.props.exams.map(ExamAggregate.from);
+    this._name = props.name;
+    this._description = props.description;
+    this._courses = this.props.courses.map(CourseEntity.from);
+    this._isPresentation = props.isPresentation;
   }
 
   static from(exam: TrainingAggregateProps): TrainingAggregate {

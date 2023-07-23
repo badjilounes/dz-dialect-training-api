@@ -6,7 +6,6 @@ import {
   Training,
   TrainingQueryRepository,
 } from '@business/student/domain/repositories/training-query-repository';
-import { Chapter } from '@business/student/infrastructure/database/entities/chapter.entity';
 import { TrainingExam } from '@business/student/infrastructure/database/entities/training-exam.entity';
 import { Training as TrainingEntity } from '@business/student/infrastructure/database/entities/training.entity';
 import { AppContextService } from '@core/context/app-context.service';
@@ -21,28 +20,30 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
 
     @InjectRepository(TrainingExam)
     protected readonly examRepository: Repository<TrainingExam>,
-
-    @InjectRepository(Chapter)
-    protected readonly chapterRepository: Repository<Chapter>,
   ) {
     super(context);
   }
 
-  findChapters(): Promise<Chapter[]> {
-    return this.chapterRepository.find({ order: { order: 'ASC' } });
-  }
-
-  findTrainingsByChapterId(chapterId: string): Promise<Training[]> {
+  findTrainingList(): Promise<Training[]> {
     return this.repository.find({
-      where: { chapter: { id: chapterId } },
-      order: { createdAt: 'ASC' },
+      order: {
+        order: 'ASC',
+      },
     });
   }
 
   async findTrainingById(id: string): Promise<Training | undefined> {
     const training = await this.repository.findOne({
       where: { id },
-      order: { exams: { order: 'ASC', questions: { order: 'ASC' } } },
+      order: {
+        courses: {
+          order: 'ASC',
+          exams: {
+            order: 'ASC',
+            questions: { order: 'ASC' },
+          },
+        },
+      },
     });
 
     if (!training) {

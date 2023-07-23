@@ -70,7 +70,7 @@ describe('Get training chapter list', () => {
 
   it('should return the training chapter list', async () => {
     trainingQueryRepository.findChapters.mockResolvedValue([chapter]);
-    trainingQueryRepository.findTrainingsByChapterId.mockResolvedValue([training]);
+    trainingQueryRepository.findTrainingList.mockResolvedValue([training]);
 
     const result = await handler.execute();
 

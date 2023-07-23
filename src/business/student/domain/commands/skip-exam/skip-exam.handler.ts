@@ -1,11 +1,12 @@
 import { Inject } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 
+import { ExamNotFoundError } from '../../errors/exam-not-found-error';
+
 import { SkipExamCommand, SkipExamCommandResult } from './skip-exam.command';
 
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
 import { ExamCopyNotStartedError } from '@business/student/domain/errors/exam-copy-not-started-error';
-import { TrainingNotFoundError } from '@business/student/domain/errors/training-not-found-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import {
   EXAM_COPY_COMMAND_REPOSITORY,
@@ -13,8 +14,6 @@ import {
 } from '@business/student/domain/repositories/tokens';
 import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
 import { CommandHandler, ICommandHandler } from '@cqrs/command';
-import { UUID_GENERATOR } from '@ddd/domain/uuid/tokens';
-import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 
 @CommandHandler(SkipExamCommand)
 export class SkipExamHandler implements ICommandHandler<SkipExamCommand> {
@@ -23,17 +22,16 @@ export class SkipExamHandler implements ICommandHandler<SkipExamCommand> {
     private readonly trainingExamCopyCommandRepository: ExamCopyCommandRepository,
     @Inject(TRAINING_COMMAND_REPOSITORY)
     private readonly trainingCommandRepository: TrainingCommandRepository,
-    @Inject(UUID_GENERATOR) private readonly uuidGenerator: UuidGenerator,
     private readonly eventPublisher: EventPublisher,
   ) {}
 
   async execute({ id }: SkipExamCommand): Promise<SkipExamCommandResult> {
-    const exam = await this.trainingCommandRepository.findTrainingById(id);
+    const exam = await this.trainingCommandRepository.findExamById(id);
     if (!exam) {
-      throw new TrainingNotFoundError(id);
+      throw new ExamNotFoundError(id);
     }
 
-    const copy = await this.trainingExamCopyCommandRepository.findExamCopy(exam.exams[0].id);
+    const copy = await this.trainingExamCopyCommandRepository.findExamCopyByExamId(id);
     if (copy?.state !== ExamCopyStateEnum.IN_PROGRESS) {
       throw new ExamCopyNotStartedError();
     }

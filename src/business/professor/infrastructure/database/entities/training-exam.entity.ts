@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { TrainingCourse } from './training-course.entity';
 import { TrainingExamQuestion } from './training-exam-question.entity';
-import { Training } from './training.entity';
 
 @Entity()
 export class TrainingExam {
@@ -18,17 +18,17 @@ export class TrainingExam {
   id!: string;
 
   @Column()
-  order!: number;
-
-  @Column()
   name!: string;
 
   @OneToMany(() => TrainingExamQuestion, (step) => step.exam, { eager: true, cascade: true })
   questions!: TrainingExamQuestion[];
 
-  @ManyToOne(() => Training, { onDelete: 'CASCADE' })
+  @ManyToOne(() => TrainingCourse, { onDelete: 'CASCADE' })
   @JoinColumn()
-  training!: Training;
+  course!: TrainingCourse;
+
+  @Column({ generated: 'increment', default: 1 })
+  order!: number;
 
   @CreateDateColumn()
   createdAt!: Date;
