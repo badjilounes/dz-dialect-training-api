@@ -28,14 +28,9 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
     private readonly eventPublisher: EventPublisher,
   ) {}
 
-  async execute({
-    trainingId,
-    examId,
-    questionId,
-    response,
-  }: ValidateResponseCommand): Promise<ValidateResponseCommandResult> {
+  async execute({ examId, questionId, response }: ValidateResponseCommand): Promise<ValidateResponseCommandResult> {
     // Find given exam question
-    const examQuestions = await this.trainingCommandRepository.findExamQuestions(trainingId, examId);
+    const examQuestions = await this.trainingCommandRepository.findExamQuestions(examId);
     const question = examQuestions.find((q) => q.id === questionId);
     if (!question) {
       throw new QuestionNotFoundError(questionId);

@@ -8,5 +8,5 @@ export interface TrainingCommandRepository extends IBaseCommandRepository<Traini
   findTrainingById(id: string): Promise<TrainingAggregate | undefined>;
   findTrainingPresentationExam(): Promise<ExamAggregate | undefined>;
   findExamById(id: string): Promise<ExamAggregate | undefined>;
-  findExamQuestions(trainingId: string, examId: string): Promise<ExamQuestionEntity[]>;
+  findExamQuestions(examId: string): Promise<ExamQuestionEntity[]>;
 }
