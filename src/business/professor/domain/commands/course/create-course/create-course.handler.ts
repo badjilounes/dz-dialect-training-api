@@ -1,9 +1,10 @@
 import { Inject } from '@nestjs/common';
 
-import { CourseAggregate } from '../../../aggregates/course.aggregate';
+import { CourseEntity } from '../../../entities/course.entity';
 import { TrainingCourseNameAlreadyExistError } from '../../../errors/training-course-name-already-exist-error';
-import { CourseCommandRepository } from '../../../repositories/course-command-repository';
-import { COURSE_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
+import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
 import { CreateCourseCommand, CreateCourseCommandResult } from './create-course.command';
 
@@ -15,8 +16,8 @@ import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 @CommandHandler(CreateCourseCommand)
 export class CreateCourseHandler implements ICommandHandler<CreateCourseCommand> {
   constructor(
-    @Inject(COURSE_COMMAND_REPOSITORY)
-    private readonly trainingCourseCommandRepository: CourseCommandRepository,
+    @Inject(TRAINING_COMMAND_REPOSITORY)
+    private readonly trainingCommandRepository: TrainingCommandRepository,
 
     @Inject(UUID_GENERATOR)
     private readonly uuidGenerator: UuidGenerator,
@@ -27,26 +28,41 @@ export class CreateCourseHandler implements ICommandHandler<CreateCourseCommand>
   async execute({ payload }: CreateCourseCommand): Promise<CreateCourseCommandResult> {
     const { name, description, trainingId } = payload;
 
-    const existingCourse = await this.trainingCourseCommandRepository.findTrainingCourseByName(trainingId, name);
-    if (existingCourse) {
+    const training = await this.trainingCommandRepository.findTrainingById(trainingId);
+    if (!training) {
+      throw new TrainingNotFoundError(trainingId);
+    }
+
+    const hasCourseWithName = training.courses.some((course) => course.name === name);
+    if (hasCourseWithName) {
       throw new TrainingCourseNameAlreadyExistError(trainingId, name);
     }
 
-    const course = CourseAggregate.create({
+    this.eventPublisher.mergeObjectContext(training);
+
+    const nextOrder = Math.max(...training.courses.map((course) => course.order), 0) + 1;
+    const course = CourseEntity.create({
       id: this.uuidGenerator.generate(),
+      trainingId,
       name,
       description,
-      trainingId,
+      order: nextOrder,
+      exams: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
-    this.eventPublisher.mergeObjectContext(course);
+    training.addCourse(course);
 
-    await this.trainingCourseCommandRepository.persist(course);
+    await this.trainingCommandRepository.persist(training);
 
     return {
       id: course.id,
       name: course.name,
       description: course.description,
+      order: course.order,
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
     };
   }
 }

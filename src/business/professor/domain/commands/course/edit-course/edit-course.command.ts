@@ -5,6 +5,9 @@ export type EditCourseCommandResult = {
   name: string;
   description: string;
   trainingId: string;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type EditCourseCommandPayload = {
@@ -14,7 +17,7 @@ export type EditCourseCommandPayload = {
 };
 
 export class EditCourseCommand extends Command<EditCourseCommandResult> {
-  constructor(public readonly id: string, public readonly payload: EditCourseCommandPayload) {
+  constructor(public readonly courseId: string, public readonly payload: EditCourseCommandPayload) {
     super();
   }
 }

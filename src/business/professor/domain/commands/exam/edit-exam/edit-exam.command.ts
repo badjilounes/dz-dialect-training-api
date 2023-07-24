@@ -6,14 +6,23 @@ export type EditExamCommandResult = {
   id: string;
   name: string;
   questions: {
+    id: string;
     type: QuestionTypeEnum;
     question: string;
     propositions: string[];
     answer: string[];
+    order: number;
+    createdAt: Date;
+    updatedAt: Date;
   }[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type EditExamCommandPayload = {
+  examId: string;
+  trainingId: string;
   name: string;
   courseId: string;
   questions: {
@@ -22,11 +31,14 @@ export type EditExamCommandPayload = {
     question: string;
     propositions: string[];
     answer: string[];
+    order: number;
+    createdAt: Date;
+    updatedAt: Date;
   }[];
 };
 
 export class EditExamCommand extends Command<EditExamCommandResult> {
-  constructor(public readonly id: string, public readonly payload: EditExamCommandPayload) {
+  constructor(public readonly payload: EditExamCommandPayload) {
     super();
   }
 }

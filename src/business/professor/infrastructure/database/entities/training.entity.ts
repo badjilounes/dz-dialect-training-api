@@ -19,7 +19,7 @@ export class Training {
   @OneToMany(() => TrainingCourse, (course) => course.training, { eager: true, cascade: true })
   courses!: TrainingCourse[];
 
-  @Column({ generated: 'increment', default: 1 })
+  @Column()
   order!: number;
 
   @CreateDateColumn()

@@ -1,5 +1,5 @@
-import { ExamAggregate } from '../../aggregates/exam.aggregate';
+import { ExamEntity } from '../../entities/exam.entity';
 
 export class ExamCreatedEvent {
-  constructor(public exam: ExamAggregate) {}
+  constructor(public exam: ExamEntity) {}
 }

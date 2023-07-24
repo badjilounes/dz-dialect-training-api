@@ -1,8 +1,8 @@
 import { Inject } from '@nestjs/common';
 
-import { CourseAggregate } from '../../../aggregates/course.aggregate';
-import { CourseCommandRepository } from '../../../repositories/course-command-repository';
-import { COURSE_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
+import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
 import { DeleteCourseCommand } from './delete-course.command';
 
@@ -13,29 +13,27 @@ import { EventPublisher } from '@cqrs/event';
 @CommandHandler(DeleteCourseCommand)
 export class DeleteCourseHandler implements ICommandHandler<DeleteCourseCommand> {
   constructor(
-    @Inject(COURSE_COMMAND_REPOSITORY)
-    private readonly trainingCourseCommandRepository: CourseCommandRepository,
+    @Inject(TRAINING_COMMAND_REPOSITORY)
+    private readonly trainingCommandRepository: TrainingCommandRepository,
 
     private readonly eventPublisher: EventPublisher,
   ) {}
 
-  async execute({ id }: DeleteCourseCommand): Promise<void> {
-    const courseById = await this.trainingCourseCommandRepository.findCourseById(id);
-    if (!courseById) {
-      throw new TrainingCourseNotFoundError(id);
+  async execute({ trainingId, courseId }: DeleteCourseCommand): Promise<void> {
+    const training = await this.trainingCommandRepository.findTrainingById(trainingId);
+    if (!training) {
+      throw new TrainingNotFoundError(trainingId);
     }
 
-    const course = CourseAggregate.from({
-      id: courseById.name,
-      name: courseById.name,
-      description: courseById.description,
-      trainingId: courseById.trainingId,
-      exams: courseById.exams,
-    });
-    this.eventPublisher.mergeObjectContext(course);
+    const hasCourseWithId = training.courses.some((course) => course.id === courseId);
+    if (!hasCourseWithId) {
+      throw new TrainingCourseNotFoundError(trainingId, courseId);
+    }
 
-    courseById.delete();
+    this.eventPublisher.mergeObjectContext(training);
 
-    return this.trainingCourseCommandRepository.persist(courseById);
+    training.deleteCourse(courseId);
+
+    return this.trainingCommandRepository.persist(training);
   }
 }

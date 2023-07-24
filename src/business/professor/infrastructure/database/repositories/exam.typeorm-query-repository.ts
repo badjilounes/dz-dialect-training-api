@@ -27,7 +27,7 @@ export class ExamTypeormQueryRepository extends BaseTypeormQueryRepository imple
     };
 
     if (query) {
-      options.where = [{ name: ILike(`%${query}%`) }];
+      options.where = [{ course: { id: courseId }, name: ILike(`%${query}%`) }];
     }
 
     const [elements, length] = await this.examRepository.findAndCount(options);
@@ -44,7 +44,11 @@ export class ExamTypeormQueryRepository extends BaseTypeormQueryRepository imple
           propositions: q.propositions,
           answer: q.answer,
           order: q.order,
+          createdAt: q.createdAt,
+          updatedAt: q.updatedAt,
         })),
+        createdAt: e.createdAt,
+        updatedAt: e.updatedAt,
       })),
       length,
       pageIndex,

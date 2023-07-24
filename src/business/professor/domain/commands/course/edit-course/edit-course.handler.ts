@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
 
-import { CourseAggregate } from '../../../aggregates/course.aggregate';
 import { TrainingCourseNameAlreadyExistError } from '../../../errors/training-course-name-already-exist-error';
-import { CourseCommandRepository } from '../../../repositories/course-command-repository';
-import { COURSE_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
+import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
 import { EditCourseCommand, EditCourseCommandResult } from './edit-course.command';
 
@@ -14,45 +14,48 @@ import { EventPublisher } from '@cqrs/event';
 @CommandHandler(EditCourseCommand)
 export class EditCourseHandler implements ICommandHandler<EditCourseCommand> {
   constructor(
-    @Inject(COURSE_COMMAND_REPOSITORY)
-    private readonly trainingCourseCommandRepository: CourseCommandRepository,
+    @Inject(TRAINING_COMMAND_REPOSITORY)
+    private readonly trainingCommandRepository: TrainingCommandRepository,
 
     private readonly eventPublisher: EventPublisher,
   ) {}
 
-  async execute({ id, payload }: EditCourseCommand): Promise<EditCourseCommandResult> {
-    const courseById = await this.trainingCourseCommandRepository.findCourseById(id);
-    if (!courseById) {
-      throw new TrainingCourseNotFoundError(id);
+  async execute({ courseId, payload }: EditCourseCommand): Promise<EditCourseCommandResult> {
+    const { trainingId } = payload;
+
+    const training = await this.trainingCommandRepository.findTrainingById(trainingId);
+    if (!training) {
+      throw new TrainingNotFoundError(trainingId);
     }
 
-    const courseByName = await this.trainingCourseCommandRepository.findTrainingCourseByName(
-      payload.trainingId,
-      payload.name,
-      id,
-    );
-    if (courseByName) {
-      throw new TrainingCourseNameAlreadyExistError(payload.trainingId, payload.name);
+    const courseWithId = training.courses.find((course) => course.id === courseId);
+    if (!courseWithId) {
+      throw new TrainingCourseNotFoundError(trainingId, courseId);
     }
 
-    let course = CourseAggregate.from({
-      id: courseById.id,
-      name: courseById.name,
-      description: courseById.description,
-      trainingId: courseById.trainingId,
-      exams: courseById.exams,
+    const hasCourseWithName = training.courses.some((course) => course.name === payload.name && course.id !== courseId);
+    if (hasCourseWithName) {
+      throw new TrainingCourseNameAlreadyExistError(trainingId, payload.name);
+    }
+
+    this.eventPublisher.mergeObjectContext(training);
+
+    training.updateCourse(courseId, {
+      name: payload.name,
+      description: payload.description,
+      order: courseWithId.order,
     });
-    this.eventPublisher.mergeObjectContext(course);
 
-    course = course.update({ name: payload.name, description: payload.description });
-
-    await this.trainingCourseCommandRepository.persist(course);
+    await this.trainingCommandRepository.persist(training);
 
     return {
-      id: course.id,
-      name: course.name,
-      description: course.description,
-      trainingId: course.trainingId,
+      id: courseWithId.id,
+      name: courseWithId.name,
+      description: courseWithId.description,
+      trainingId: courseWithId.trainingId,
+      order: courseWithId.order,
+      createdAt: courseWithId.createdAt,
+      updatedAt: courseWithId.updatedAt,
     };
   }
 }

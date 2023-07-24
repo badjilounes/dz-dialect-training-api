@@ -1,23 +1,27 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Not, Repository } from 'typeorm';
 
-import { ExamAggregate } from '../../../domain/aggregates/exam.aggregate';
 import { TrainingAggregate } from '../../../domain/aggregates/training.aggregate';
-import { LanguageEntity } from '../../../domain/entities/language.entity';
+import { TrainingCourseAddedEvent } from '../../../domain/events/training/training-course-added-event';
+import { TrainingCourseDeletedEvent } from '../../../domain/events/training/training-course-deleted-event';
+import { TrainingCourseExamAddedEvent } from '../../../domain/events/training/training-course-exam-added-event';
+import { TrainingCourseExamDeletedEvent } from '../../../domain/events/training/training-course-exam-deleted-event';
+import { TrainingCourseExamReorderedEvent } from '../../../domain/events/training/training-course-exam-reordered-event';
+import { TrainingCourseExamUpdatedEvent } from '../../../domain/events/training/training-course-exam-udpated-event';
+import { TrainingCourseReorderedEvent } from '../../../domain/events/training/training-course-reordered-event';
+import { TrainingCourseUpdatedEvent } from '../../../domain/events/training/training-course-updated-event';
 import { TrainingCreatedEvent } from '../../../domain/events/training/training-created-event';
 import { TrainingDeletedEvent } from '../../../domain/events/training/training-deleted-event';
 import { TrainingReorderedEvent } from '../../../domain/events/training/training-reordered-event';
 import { TrainingUpdatedEvent } from '../../../domain/events/training/training-updated-event';
+import { trainingAggregateToTraining } from '../../mappers/training-aggregate-to-training.mapper';
 import { TrainingCourse } from '../entities/training-course.entity';
 import { TrainingExamQuestion } from '../entities/training-exam-question.entity';
-import { TrainingLanguage } from '../entities/training-language.entity';
 
-import { ExamQuestionEntity } from '@business/professor/domain/entities/question.entity';
 import { TrainingCommandRepository } from '@business/professor/domain/repositories/training-command-repository';
-import { AnswerValueType } from '@business/professor/domain/value-types/answer.value-type';
 import { TrainingExam } from '@business/professor/infrastructure/database/entities/training-exam.entity';
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
-import { trainingToTrainingAggregate } from '@business/professor/infrastructure/mappers/training.mapper';
+import { trainingToTrainingAggregate } from '@business/professor/infrastructure/mappers/training-to-training-aggregate.mapper';
 import { AppContextService } from '@core/context/app-context.service';
 import { BaseTypeormCommandRepository } from '@ddd/infrastructure/base.typeorm-command-repository';
 
@@ -28,9 +32,6 @@ export class TrainingTypeormCommandRepository
   constructor(
     @InjectRepository(Training)
     protected readonly repository: Repository<Training>,
-
-    @InjectRepository(TrainingLanguage)
-    protected readonly trainingLanguageRepository: Repository<TrainingLanguage>,
 
     @InjectRepository(TrainingCourse)
     protected readonly trainingCourseRepository: Repository<TrainingCourse>,
@@ -48,13 +49,28 @@ export class TrainingTypeormCommandRepository
     this.register(TrainingUpdatedEvent, this.updateTraining);
     this.register(TrainingDeletedEvent, this.deleteTraining);
     this.register(TrainingReorderedEvent, this.reorderTraining);
+    this.register(TrainingCourseAddedEvent, this.addCourse);
+    this.register(TrainingCourseUpdatedEvent, this.updateCourse);
+    this.register(TrainingCourseDeletedEvent, this.deleteCourse);
+    this.register(TrainingCourseReorderedEvent, this.reorderCourses);
+    this.register(TrainingCourseExamAddedEvent, this.addCourseExam);
+    this.register(TrainingCourseExamUpdatedEvent, this.updateCourseExam);
+    this.register(TrainingCourseExamDeletedEvent, this.deleteCourseExam);
+    this.register(TrainingCourseExamReorderedEvent, this.reorderCourseExams);
+  }
+
+  async findByIdList(ids: string[]): Promise<TrainingAggregate[]> {
+    const trainings = await this.repository.find({
+      where: { id: In(ids) },
+    });
+
+    return trainings.map(trainingToTrainingAggregate);
   }
 
   async findTrainingById(id: string): Promise<TrainingAggregate | undefined> {
     const training = await this.repository.findOne({
       where: { id },
       order: { courses: { order: 'ASC', exams: { order: 'ASC', questions: { order: 'ASC' } } } },
-      relations: ['courses.training'],
     });
 
     if (!training) {
@@ -64,94 +80,21 @@ export class TrainingTypeormCommandRepository
     return trainingToTrainingAggregate(training);
   }
 
-  async findByIdList(ids: string[]): Promise<TrainingAggregate[]> {
-    const trainings = await this.repository.find({
-      where: { id: In(ids) },
-      relations: ['courses.training', 'courses.exams.course'],
-    });
-
-    return trainings.map(trainingToTrainingAggregate);
+  async getNextOrder(): Promise<number> {
+    const [latestTraining] = await this.repository.find({ order: { order: 'DESC' }, take: 1 });
+    return (latestTraining?.order ?? 0) + 1;
   }
 
-  async findTrainingByName(name: string, id?: string): Promise<TrainingAggregate | undefined> {
-    const course = id
-      ? await this.repository.findOne({ where: { name, id: Not(id) } })
-      : await this.repository.findOne({ where: { name } });
+  async hasTrainingWithName(name: string, trainingId?: string | undefined): Promise<boolean> {
+    const countWithSameName = trainingId
+      ? await this.repository.count({ where: { name, id: Not(trainingId) } })
+      : await this.repository.count({ where: { name } });
 
-    if (!course) {
-      return undefined;
-    }
-
-    return trainingToTrainingAggregate(course);
-  }
-
-  async findExamQuestions(examId: string): Promise<ExamQuestionEntity[]> {
-    const examQuestions = await this.examQuestionRepository.find({
-      where: { exam: { id: examId } },
-      relations: ['exam'],
-      order: { order: 'ASC' },
-    });
-
-    return examQuestions.map((examQuestion) =>
-      ExamQuestionEntity.from({
-        id: examQuestion.id,
-        examId: examQuestion.exam.id,
-        type: examQuestion.type,
-        question: examQuestion.question,
-        answer: AnswerValueType.from({ questionType: examQuestion.type, value: examQuestion.answer }),
-        propositions: examQuestion.propositions,
-      }),
-    );
-  }
-
-  async findTrainingLanguage(from: string, learning: string): Promise<LanguageEntity | undefined> {
-    const trainingLanguage = await this.trainingLanguageRepository.findOne({ where: { from, learning } });
-
-    if (!trainingLanguage) {
-      return undefined;
-    }
-
-    return LanguageEntity.from({
-      id: trainingLanguage.id,
-      from: trainingLanguage.from,
-      learning: trainingLanguage.learning,
-    });
+    return countWithSameName > 0;
   }
 
   private async createTraining(event: TrainingCreatedEvent): Promise<Training> {
-    const courses = event.training.courses.map((course) =>
-      this.trainingCourseRepository.create({
-        id: course.id,
-        name: course.name,
-        description: course.description,
-        training: { id: event.training.id },
-        exams: course.exams.map((exam: ExamAggregate) =>
-          this.examRepository.create({
-            id: exam.id,
-            name: exam.name,
-            questions: exam.questions.map((question) =>
-              this.examQuestionRepository.create({
-                id: question.id,
-                type: question.type,
-                question: question.question,
-                answer: question.answer.value,
-                propositions: question.propositions,
-              }),
-            ),
-          }),
-        ),
-      }),
-    );
-
-    const training = this.repository.create({
-      id: event.training.id,
-      name: event.training.name,
-      description: event.training.description,
-      isPresentation: event.training.isPresentation,
-      courses,
-    });
-
-    return this.repository.save(training);
+    return this.persistTrainingFromAggregate(event.training);
   }
 
   private async deleteTraining(event: TrainingDeletedEvent): Promise<void> {
@@ -164,5 +107,42 @@ export class TrainingTypeormCommandRepository
 
   private async updateTraining(event: TrainingUpdatedEvent): Promise<void> {
     await this.repository.update(event.id, event.payload);
+  }
+
+  private async addCourse(event: TrainingCourseAddedEvent): Promise<void> {
+    await this.persistTrainingFromAggregate(event.training);
+  }
+
+  private async updateCourse(event: TrainingCourseUpdatedEvent): Promise<void> {
+    await this.persistTrainingFromAggregate(event.training);
+  }
+
+  private async deleteCourse(event: TrainingCourseDeletedEvent): Promise<void> {
+    await this.persistTrainingFromAggregate(event.training);
+  }
+
+  private async reorderCourses(event: TrainingCourseReorderedEvent): Promise<void> {
+    await this.persistTrainingFromAggregate(event.training);
+  }
+
+  private async addCourseExam(event: TrainingCourseExamAddedEvent): Promise<void> {
+    await this.persistTrainingFromAggregate(event.training);
+  }
+
+  private async updateCourseExam(event: TrainingCourseExamUpdatedEvent): Promise<void> {
+    await this.persistTrainingFromAggregate(event.training);
+  }
+
+  private async deleteCourseExam(event: TrainingCourseExamDeletedEvent): Promise<void> {
+    await this.persistTrainingFromAggregate(event.training);
+  }
+
+  private async reorderCourseExams(event: TrainingCourseExamReorderedEvent): Promise<void> {
+    await this.persistTrainingFromAggregate(event.training);
+  }
+
+  private persistTrainingFromAggregate(training: TrainingAggregate): Promise<Training> {
+    const trainingEntity = trainingAggregateToTraining(training);
+    return this.repository.save(trainingEntity);
   }
 }

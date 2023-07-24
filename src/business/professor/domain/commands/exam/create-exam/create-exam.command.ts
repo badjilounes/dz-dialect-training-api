@@ -16,9 +16,13 @@ export type CreateExamCommandResult = {
       formattedValue: string;
     };
   }[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type CreateExamCommandPayload = {
+  trainingId: string;
   name: string;
   courseId: string;
   questions: {

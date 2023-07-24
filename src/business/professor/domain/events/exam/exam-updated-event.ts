@@ -1,5 +1,5 @@
-import { UpdateExamAggregateProps } from '../../aggregates/exam.aggregate';
+import { UpdateExamEntityProps } from '../../entities/exam.entity';
 
 export class ExamUpdatedEvent {
-  constructor(public readonly id: string, public payload: UpdateExamAggregateProps) {}
+  constructor(public readonly id: string, public payload: UpdateExamEntityProps) {}
 }

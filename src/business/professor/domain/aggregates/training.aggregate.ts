@@ -1,11 +1,18 @@
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 
+import { CourseEntity, CourseEntityProps, UpdateCourseEntityProps } from '../entities/course.entity';
+import { ExamEntity, UpdateExamEntityProps } from '../entities/exam.entity';
+import { TrainingCourseAddedEvent } from '../events/training/training-course-added-event';
+import { TrainingCourseDeletedEvent } from '../events/training/training-course-deleted-event';
+import { TrainingCourseExamAddedEvent } from '../events/training/training-course-exam-added-event';
+import { TrainingCourseExamDeletedEvent } from '../events/training/training-course-exam-deleted-event';
+import { TrainingCourseExamReorderedEvent } from '../events/training/training-course-exam-reordered-event';
+import { TrainingCourseExamUpdatedEvent } from '../events/training/training-course-exam-udpated-event';
+import { TrainingCourseUpdatedEvent } from '../events/training/training-course-updated-event';
 import { TrainingCreatedEvent } from '../events/training/training-created-event';
 import { TrainingDeletedEvent } from '../events/training/training-deleted-event';
 import { TrainingReorderedEvent } from '../events/training/training-reordered-event';
 import { TrainingUpdatedEvent } from '../events/training/training-updated-event';
-
-import { CourseAggregate, CourseAggregateProps } from './course.aggregate';
 
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 
@@ -13,14 +20,18 @@ export type UpdateTrainingAggregateProps = {
   name: string;
   description: string;
   isPresentation: boolean;
+  updatedAt: Date;
 };
 
 export type TrainingAggregateProps = {
   id: string;
   name: string;
   description: string;
-  courses: CourseAggregateProps[];
+  courses: CourseEntityProps[];
   isPresentation: boolean;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export class TrainingAggregate extends BaseAggregateRoot {
@@ -48,9 +59,27 @@ export class TrainingAggregate extends BaseAggregateRoot {
     return this._isPresentation;
   }
 
-  private readonly _courses: CourseAggregate[];
-  public get courses(): CourseAggregate[] {
+  private readonly _courses: CourseEntity[];
+  public get courses(): CourseEntity[] {
     return this._courses;
+  }
+
+  @IsNumber()
+  private _order: number;
+  public get order(): number {
+    return this._order;
+  }
+
+  @IsDate()
+  private _createdAt: Date;
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  @IsDate()
+  private _updatedAt: Date;
+  public get updatedAt(): Date {
+    return this._updatedAt;
   }
 
   private constructor(private readonly props: TrainingAggregateProps) {
@@ -58,12 +87,15 @@ export class TrainingAggregate extends BaseAggregateRoot {
     this._id = props.id;
     this._name = props.name;
     this._description = props.description;
-    this._courses = this.props.courses.map(CourseAggregate.from);
+    this._courses = this.props.courses.map(CourseEntity.from);
     this._isPresentation = props.isPresentation;
+    this._order = props.order;
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
   }
 
-  static create(props: Omit<TrainingAggregateProps, 'courses'>): TrainingAggregate {
-    const training = TrainingAggregate.from({ ...props, courses: [] });
+  static create(props: TrainingAggregateProps): TrainingAggregate {
+    const training = TrainingAggregate.from(props);
     training.apply(new TrainingCreatedEvent(training));
     return training;
   }
@@ -83,9 +115,84 @@ export class TrainingAggregate extends BaseAggregateRoot {
   update(props: UpdateTrainingAggregateProps): TrainingAggregate {
     this._name = props.name;
     this._description = props.description;
+    this._isPresentation = props.isPresentation;
+    this._updatedAt = new Date();
 
-    this.apply(new TrainingUpdatedEvent(this.id, props));
+    this.apply(
+      new TrainingUpdatedEvent(this.id, {
+        name: this.name,
+        description: this.description,
+        isPresentation: this.isPresentation,
+        updatedAt: this.updatedAt,
+      }),
+    );
 
+    return this;
+  }
+
+  addCourse(course: CourseEntity): TrainingAggregate {
+    this._courses.push(course);
+
+    this.apply(new TrainingCourseAddedEvent(this));
+
+    return this;
+  }
+
+  deleteCourse(courseId: string): TrainingAggregate {
+    this._courses.splice(
+      this._courses.findIndex((c) => c.id === courseId),
+      1,
+    );
+
+    this.apply(new TrainingCourseDeletedEvent(this));
+
+    return this;
+  }
+
+  updateCourse(courseId: string, props: UpdateCourseEntityProps): TrainingAggregate {
+    const course = this._courses.find((c) => c.id === courseId);
+    if (!course) {
+      throw new Error('Course not found');
+    }
+    course.update(props);
+    this.apply(new TrainingCourseUpdatedEvent(this));
+    return this;
+  }
+
+  reorderCourses(newOrders: { id: string; order: number }[]): TrainingAggregate {
+    this._courses.forEach((courseToReorder) => {
+      const courseWithNewOrder = newOrders.find((current) => current.id === courseToReorder.id);
+      this.updateCourse(courseToReorder.id, {
+        name: courseToReorder.name,
+        description: courseToReorder.description,
+        order: courseWithNewOrder?.order ?? courseToReorder.order,
+      });
+    });
+
+    return this;
+  }
+
+  addCourseExam(course: CourseEntity, exam: ExamEntity): TrainingAggregate {
+    course.addExam(exam);
+    this.apply(new TrainingCourseExamAddedEvent(this));
+    return this;
+  }
+
+  updateCourseExam(course: CourseEntity, examId: string, props: UpdateExamEntityProps): TrainingAggregate {
+    course.updateExam(examId, props);
+    this.apply(new TrainingCourseExamUpdatedEvent(this));
+    return this;
+  }
+
+  deleteCourseExam(course: CourseEntity, examId: string): TrainingAggregate {
+    course.deleteExam(examId);
+    this.apply(new TrainingCourseExamDeletedEvent(this));
+    return this;
+  }
+
+  reorderCourseExams(course: CourseEntity, newOrders: { id: string; order: number }[]): TrainingAggregate {
+    course.reorderExams(newOrders);
+    this.apply(new TrainingCourseExamReorderedEvent(this));
     return this;
   }
 }

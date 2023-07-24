@@ -8,6 +8,8 @@ type ExamQuestionQueryResult = {
   question: string;
   propositions: string[];
   answer: string[];
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ExamQueryResult = {
@@ -15,6 +17,8 @@ export type ExamQueryResult = {
   name: string;
   questions: ExamQuestionQueryResult[];
   order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type SearchExamQueryResult = {

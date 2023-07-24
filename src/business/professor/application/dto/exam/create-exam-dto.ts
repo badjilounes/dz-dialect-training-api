@@ -18,6 +18,9 @@ class CreateExamQuestionDto {
 
 export class CreateExamDto {
   @ApiProperty()
+  trainingId!: string;
+
+  @ApiProperty()
   name!: string;
 
   @ApiProperty()

@@ -4,6 +4,9 @@ export type CreateCourseCommandResult = {
   id: string;
   name: string;
   description: string;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type CreateCourseCommandPayload = {

@@ -1,9 +1,10 @@
 import { Inject } from '@nestjs/common';
 
-import { ExamAggregate } from '../../../aggregates/exam.aggregate';
-import { CourseExamNotFoundError } from '../../../errors/course-exam-not-found-error';
-import { ExamCommandRepository } from '../../../repositories/exam-command-repository';
-import { EXAM_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingCourseExamNotFoundError } from '../../../errors/training-course-exam-not-found-error';
+import { TrainingCourseNotFoundError } from '../../../errors/training-course-not-found-error';
+import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
+import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
 import { DeleteExamCommand } from './delete-exam.command';
 
@@ -13,28 +14,32 @@ import { EventPublisher } from '@cqrs/event';
 @CommandHandler(DeleteExamCommand)
 export class DeleteExamHandler implements ICommandHandler<DeleteExamCommand> {
   constructor(
-    @Inject(EXAM_COMMAND_REPOSITORY)
-    private readonly courseExamCommandRepository: ExamCommandRepository,
+    @Inject(TRAINING_COMMAND_REPOSITORY)
+    private readonly trainingCommandRepository: TrainingCommandRepository,
 
     private readonly eventPublisher: EventPublisher,
   ) {}
 
-  async execute({ id }: DeleteExamCommand): Promise<void> {
-    const examById = await this.courseExamCommandRepository.findExamById(id);
-    if (!examById) {
-      throw new CourseExamNotFoundError(id);
+  async execute({ trainingId, courseId, examId }: DeleteExamCommand): Promise<void> {
+    const training = await this.trainingCommandRepository.findTrainingById(trainingId);
+    if (!training) {
+      throw new TrainingNotFoundError(trainingId);
     }
 
-    const exam = ExamAggregate.from({
-      id: examById.name,
-      courseId: examById.courseId,
-      name: examById.name,
-      questions: examById.questions,
-    });
-    this.eventPublisher.mergeObjectContext(exam);
+    const course = training.courses.find((c) => c.id === courseId);
+    if (!course) {
+      throw new TrainingCourseNotFoundError(trainingId, courseId);
+    }
 
-    examById.delete();
+    const exam = course.exams.find((e) => e.id === examId);
+    if (!exam) {
+      throw new TrainingCourseExamNotFoundError(examId);
+    }
 
-    return this.courseExamCommandRepository.persist(examById);
+    this.eventPublisher.mergeObjectContext(training);
+
+    training.deleteCourseExam(course, examId);
+
+    return this.trainingCommandRepository.persist(training);
   }
 }

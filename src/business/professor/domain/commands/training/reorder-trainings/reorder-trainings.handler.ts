@@ -23,22 +23,25 @@ export class ReorderTrainingsHandler implements ICommandHandler<ReorderTrainings
 
     await Promise.all(
       trainingList.map((training) => {
-        const trainingAggregate = TrainingAggregate.from({
+        const aggregate = TrainingAggregate.from({
           id: training.id,
           name: training.name,
           description: training.description,
           isPresentation: training.isPresentation,
           courses: training.courses,
+          order: training.order,
+          createdAt: training.createdAt,
+          updatedAt: training.updatedAt,
         });
-        this.eventPublisher.mergeObjectContext(trainingAggregate);
+        this.eventPublisher.mergeObjectContext(aggregate);
 
-        const newOrder = payload.find((c) => c.id === trainingAggregate.id)?.order;
+        const newOrder = payload.find((c) => c.id === aggregate.id)?.order;
 
         if (newOrder !== undefined) {
-          trainingAggregate.reorder(newOrder);
+          aggregate.reorder(newOrder);
         }
 
-        return this.trainingCommandRepository.persist(trainingAggregate);
+        return this.trainingCommandRepository.persist(aggregate);
       }),
     );
   }

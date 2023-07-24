@@ -32,7 +32,10 @@ export class CourseTypeormQueryRepository extends BaseTypeormQueryRepository imp
     };
 
     if (query) {
-      options.where = [{ name: ILike(`%${query}%`) }, { description: ILike(`%${query}%`) }];
+      options.where = [
+        { training: { id: trainingId }, name: ILike(`%${query}%`) },
+        { training: { id: trainingId }, description: ILike(`%${query}%`) },
+      ];
     }
 
     const [elements, length] = await this.courseRepository.findAndCount(options);

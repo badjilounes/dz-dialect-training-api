@@ -42,4 +42,13 @@ export class CreateExamResponseDto {
 
   @ApiProperty()
   questions: CreateExamResponseQuestionDto[] = [];
+
+  @ApiProperty()
+  order!: number;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
 }

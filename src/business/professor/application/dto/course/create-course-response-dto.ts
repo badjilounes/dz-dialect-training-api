@@ -12,4 +12,13 @@ export class CreateCourseResponseDto {
 
   @ApiProperty()
   trainingId!: string;
+
+  @ApiProperty()
+  order!: number;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
 }

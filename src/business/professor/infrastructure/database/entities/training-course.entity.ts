@@ -30,11 +30,12 @@ export class TrainingCourse {
   @OneToMany(() => TrainingExam, (step) => step.course, { eager: true, cascade: true })
   exams!: TrainingExam[];
 
-  @Column({ generated: 'increment', default: 1 })
+  @Column()
   order!: number;
 
   @CreateDateColumn()
   createdAt!: Date;
+  
 
   @UpdateDateColumn()
   updatedAt!: Date;

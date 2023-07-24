@@ -1,6 +1,5 @@
 import { Inject } from '@nestjs/common';
 
-import { TrainingAggregate } from '../../../aggregates/training.aggregate';
 import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
 import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
 import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
@@ -20,18 +19,11 @@ export class DeleteTrainingHandler implements ICommandHandler<DeleteTrainingComm
   ) {}
 
   async execute({ id }: DeleteTrainingCommand): Promise<void> {
-    const trainingById = await this.trainingCommandRepository.findTrainingById(id);
-    if (!trainingById) {
+    const training = await this.trainingCommandRepository.findTrainingById(id);
+    if (!training) {
       throw new TrainingNotFoundError(id);
     }
 
-    const training = TrainingAggregate.from({
-      id: trainingById.id,
-      name: trainingById.name,
-      courses: trainingById.courses,
-      description: trainingById.description,
-      isPresentation: trainingById.isPresentation,
-    });
     this.eventPublisher.mergeObjectContext(training);
 
     training.delete();

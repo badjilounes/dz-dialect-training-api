@@ -1,6 +1,7 @@
 import { Inject } from '@nestjs/common';
 
 import { TrainingAggregate } from '../../../aggregates/training.aggregate';
+import { TrainingNameAlreadyExistError } from '../../../errors/training-name-already-exist-error';
 import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
 
 import { CreateTrainingCommand, CreateTrainingCommandResult } from './create-training.command';
@@ -29,11 +30,22 @@ export class CreateTrainingHandler implements ICommandHandler<CreateTrainingComm
   async execute({ payload }: CreateTrainingCommand): Promise<CreateTrainingCommandResult> {
     const trainingId = this.uuidGenerator.generate();
 
+    const hasTrainingWithName = await this.trainingCommandRepository.hasTrainingWithName(payload.name);
+    if (hasTrainingWithName) {
+      throw new TrainingNameAlreadyExistError(payload.name);
+    }
+
+    const nextOrder = await this.trainingCommandRepository.getNextOrder();
+
     const training = TrainingAggregate.create({
       id: trainingId,
       name: payload.name,
       description: payload.description,
       isPresentation: payload.isPresentation,
+      courses: [],
+      order: nextOrder,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     this.eventPublisher.mergeObjectContext(training);
@@ -45,6 +57,9 @@ export class CreateTrainingHandler implements ICommandHandler<CreateTrainingComm
       name: training.name,
       description: training.description,
       isPresentation: training.isPresentation,
+      order: training.order,
+      createdAt: training.createdAt,
+      updatedAt: training.updatedAt,
     };
   }
 }

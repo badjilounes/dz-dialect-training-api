@@ -14,9 +14,11 @@ import { SearchExamQuery } from '../domain/queries/search-exam/search-exam.query
 import { SearchTrainingQuery } from '../domain/queries/search-training/search-training.query';
 
 import { CourseResponseDto } from './dto/course/course-response-dto';
+import { DeleteCourseDto } from './dto/course/delete-course-dto';
 import { EditCourseDto } from './dto/course/edit-course-dto';
 import { CreateExamDto } from './dto/exam/create-exam-dto';
 import { CreateExamResponseDto } from './dto/exam/create-exam-response-dto';
+import { DeleteExamDto } from './dto/exam/delete-exam-dto';
 import { EditExamDto } from './dto/exam/edit-exam-dto';
 import { ExamResponseDto } from './dto/exam/exam-response-dto';
 import { PaginatedExamsResponseDto } from './dto/exam/paginated-exam-response-dto';
@@ -110,14 +112,14 @@ export class ProfessorController {
   @Post('reorder-courses')
   @ApiOkResponse()
   reorderCourses(@Body() payload: ReorderCoursesDto): Promise<void> {
-    return this.commandBus.execute(new ReorderCoursesCommand(payload.courses));
+    return this.commandBus.execute(new ReorderCoursesCommand(payload.trainingId, payload.courses));
   }
 
   @ApiOperation({ operationId: 'delete-course', summary: 'Delete course' })
-  @Delete('delete-course/:id')
+  @Delete('delete-course')
   @ApiOkResponse()
-  deleteCourse(@Param('id') id: string): Promise<void> {
-    return this.commandBus.execute(new DeleteCourseCommand(id));
+  deleteCourse(@Body() payload: DeleteCourseDto): Promise<void> {
+    return this.commandBus.execute(new DeleteCourseCommand(payload.trainingId, payload.courseId));
   }
 
   @Get('search-course')
@@ -148,24 +150,24 @@ export class ProfessorController {
   }
 
   @ApiOperation({ operationId: 'edit-exam', summary: 'Edit exam' })
-  @Post('edit-exam/:id')
+  @Post('edit-exam')
   @ApiOkResponse({ type: ExamResponseDto })
-  editExam(@Param('id') id: string, @Body() payload: EditExamDto): Promise<ExamResponseDto> {
-    return this.commandBus.execute(new EditExamCommand(id, payload));
+  editExam(@Body() payload: EditExamDto): Promise<ExamResponseDto> {
+    return this.commandBus.execute(new EditExamCommand(payload));
   }
 
   @ApiOperation({ operationId: 'reorder-exams', summary: 'Reorder exams' })
   @Post('reorder-exams')
   @ApiOkResponse()
   reorderExams(@Body() payload: ReorderExamsDto): Promise<void> {
-    return this.commandBus.execute(new ReorderExamsCommand(payload.exams));
+    return this.commandBus.execute(new ReorderExamsCommand(payload.trainingId, payload.courseId, payload.exams));
   }
 
   @ApiOperation({ operationId: 'delete-exam', summary: 'Delete exam' })
-  @Delete('delete-exam/:id')
+  @Delete('delete-exam')
   @ApiOkResponse()
-  deleteExam(@Param('id') id: string): Promise<void> {
-    return this.commandBus.execute(new DeleteExamCommand(id));
+  deleteExam(@Body() payload: DeleteExamDto): Promise<void> {
+    return this.commandBus.execute(new DeleteExamCommand(payload.trainingId, payload.courseId, payload.examId));
   }
 
   @Get('search-exam')

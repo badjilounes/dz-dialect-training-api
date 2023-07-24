@@ -1,4 +1,4 @@
-import { IsEnum, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
 
 import { QuestionTypeEnum } from '@business/professor/domain/enums/question-type.enum';
 import { AnswerValueType } from '@business/professor/domain/value-types/answer.value-type';
@@ -11,6 +11,9 @@ export type ExamQuestionEntityProps = {
   question: string;
   answer: AnswerValueType;
   propositions: string[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export class ExamQuestionEntity extends BaseEntity {
@@ -49,6 +52,24 @@ export class ExamQuestionEntity extends BaseEntity {
     return this._propositions;
   }
 
+  @IsNumber()
+  private readonly _order: number;
+  public get order(): number {
+    return this._order;
+  }
+
+  @IsDate()
+  private readonly _createdAt: Date;
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  @IsDate()
+  private readonly _updatedAt: Date;
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
   private constructor(readonly props: ExamQuestionEntityProps) {
     super();
     this._id = props.id;
@@ -57,6 +78,9 @@ export class ExamQuestionEntity extends BaseEntity {
     this._question = props.question;
     this._answer = props.answer;
     this._propositions = props.propositions;
+    this._order = props.order;
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
   }
 
   static create(props: ExamQuestionEntityProps): ExamQuestionEntity {

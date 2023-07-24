@@ -7,6 +7,8 @@ type ExamQuestion = {
   question: string;
   propositions: string[];
   answer: string[];
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type Exam = {
@@ -14,6 +16,8 @@ export type Exam = {
   name: string;
   questions: ExamQuestion[];
   order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type ExamPaginatedResult = {

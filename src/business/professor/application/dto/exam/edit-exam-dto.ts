@@ -17,9 +17,24 @@ class EditExamQuestionDto {
 
   @ApiProperty({ type: [String] })
   answer!: string[];
+
+  @ApiProperty()
+  order!: number;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
 }
 
 export class EditExamDto {
+  @ApiProperty()
+  trainingId!: string;
+
+  @ApiProperty()
+  examId!: string;
+
   @ApiProperty()
   name!: string;
 

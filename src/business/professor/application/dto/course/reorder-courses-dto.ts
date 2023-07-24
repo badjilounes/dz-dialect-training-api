@@ -9,6 +9,9 @@ class ReorderCourseDto {
 }
 
 export class ReorderCoursesDto {
+  @ApiProperty()
+  trainingId!: string;
+
   @ApiProperty({ type: [ReorderCourseDto] })
   courses!: ReorderCourseDto[];
 }

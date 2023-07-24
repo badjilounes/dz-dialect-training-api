@@ -1,8 +1,9 @@
 import { Inject } from '@nestjs/common';
 
-import { ExamAggregate } from '../../../aggregates/exam.aggregate';
-import { ExamCommandRepository } from '../../../repositories/exam-command-repository';
-import { EXAM_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingCourseNotFoundError } from '../../../errors/training-course-not-found-error';
+import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
+import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
+import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
 import { ReorderCoursesCommandResult, ReorderExamsCommand } from './reorder-exams.command';
 
@@ -12,33 +13,27 @@ import { EventPublisher } from '@cqrs/event';
 @CommandHandler(ReorderExamsCommand)
 export class ReorderExamsHandler implements ICommandHandler<ReorderExamsCommand> {
   constructor(
-    @Inject(EXAM_COMMAND_REPOSITORY)
-    private readonly courseExamCommandRepository: ExamCommandRepository,
+    @Inject(TRAINING_COMMAND_REPOSITORY)
+    private readonly trainingCommandRepository: TrainingCommandRepository,
 
     private readonly eventPublisher: EventPublisher,
   ) {}
 
-  async execute({ payload }: ReorderExamsCommand): Promise<ReorderCoursesCommandResult> {
-    const examList = await this.courseExamCommandRepository.findByIdList(payload.map((exam) => exam.id));
+  async execute({ trainingId, courseId, payload }: ReorderExamsCommand): Promise<ReorderCoursesCommandResult> {
+    const training = await this.trainingCommandRepository.findTrainingById(trainingId);
+    if (!training) {
+      throw new TrainingNotFoundError(trainingId);
+    }
 
-    await Promise.all(
-      examList.map((exam) => {
-        const examAggregate = ExamAggregate.from({
-          id: exam.id,
-          name: exam.name,
-          courseId: exam.courseId,
-          questions: exam.questions,
-        });
-        this.eventPublisher.mergeObjectContext(examAggregate);
+    const course = training.courses.find((c) => c.id === courseId);
+    if (!course) {
+      throw new TrainingCourseNotFoundError(trainingId, courseId);
+    }
 
-        const newOrder = payload.find((c) => c.id === examAggregate.id)?.order;
+    this.eventPublisher.mergeObjectContext(training);
 
-        if (newOrder !== undefined) {
-          examAggregate.reorder(newOrder);
-        }
+    training.reorderCourseExams(course, payload);
 
-        return this.courseExamCommandRepository.persist(examAggregate);
-      }),
-    );
+    await this.trainingCommandRepository.persist(training);
   }
 }

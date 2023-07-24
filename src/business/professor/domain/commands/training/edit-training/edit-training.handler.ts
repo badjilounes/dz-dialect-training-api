@@ -1,6 +1,5 @@
 import { Inject } from '@nestjs/common';
 
-import { TrainingAggregate } from '../../../aggregates/training.aggregate';
 import { TrainingNameAlreadyExistError } from '../../../errors/training-name-already-exist-error';
 import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
 import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
@@ -21,26 +20,24 @@ export class EditTrainingHandler implements ICommandHandler<EditTrainingCommand>
   ) {}
 
   async execute({ id, payload }: EditTrainingCommand): Promise<EditTrainingCommandResult> {
-    const trainingById = await this.trainingCommandRepository.findTrainingById(id);
-    if (!trainingById) {
+    const training = await this.trainingCommandRepository.findTrainingById(id);
+    if (!training) {
       throw new TrainingNotFoundError(id);
     }
 
-    const trainingByName = await this.trainingCommandRepository.findTrainingByName(payload.name, id);
-    if (trainingByName) {
+    const hasTrainingWithName = await this.trainingCommandRepository.hasTrainingWithName(payload.name, id);
+    if (hasTrainingWithName) {
       throw new TrainingNameAlreadyExistError(payload.name);
     }
 
-    let training = TrainingAggregate.from({
-      id: trainingById.id,
-      name: trainingById.name,
-      description: trainingById.description,
-      isPresentation: trainingById.isPresentation,
-      courses: trainingById.courses,
-    });
     this.eventPublisher.mergeObjectContext(training);
 
-    training = training.update(payload);
+    training.update({
+      name: payload.name,
+      description: payload.description,
+      isPresentation: payload.isPresentation,
+      updatedAt: new Date(),
+    });
 
     await this.trainingCommandRepository.persist(training);
 

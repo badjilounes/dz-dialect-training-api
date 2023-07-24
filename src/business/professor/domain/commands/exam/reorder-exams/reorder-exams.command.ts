@@ -10,7 +10,11 @@ export type ReorderExam = {
 export type ReorderExamsCommandPayload = ReorderExam[];
 
 export class ReorderExamsCommand extends Command<ReorderCoursesCommandResult> {
-  constructor(public readonly payload: ReorderExamsCommandPayload) {
+  constructor(
+    public readonly trainingId: string,
+    public readonly courseId: string,
+    public readonly payload: ReorderExamsCommandPayload,
+  ) {
     super();
   }
 }

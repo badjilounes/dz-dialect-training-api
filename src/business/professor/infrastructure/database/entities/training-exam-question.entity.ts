@@ -33,7 +33,7 @@ export class TrainingExamQuestion {
   @JoinColumn()
   exam!: TrainingExam;
 
-  @Column({ generated: 'increment', default: 1 })
+  @Column()
   order!: number;
 
   @CreateDateColumn()
