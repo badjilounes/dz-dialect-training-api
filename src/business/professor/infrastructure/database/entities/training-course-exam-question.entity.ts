@@ -8,12 +8,12 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { TrainingExam } from './training-exam.entity';
+import { TrainingCourseExam } from './training-course-exam.entity';
 
 import { QuestionTypeEnum } from '@business/professor/domain/enums/question-type.enum';
 
 @Entity()
-export class TrainingExamQuestion {
+export class TrainingCourseExamQuestion {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -29,9 +29,9 @@ export class TrainingExamQuestion {
   @Column('text', { array: true })
   propositions!: string[];
 
-  @ManyToOne(() => TrainingExam, { onDelete: 'CASCADE' })
+  @ManyToOne(() => TrainingCourseExam, { onDelete: 'CASCADE' })
   @JoinColumn()
-  exam!: TrainingExam;
+  exam!: TrainingCourseExam;
 
   @Column()
   order!: number;

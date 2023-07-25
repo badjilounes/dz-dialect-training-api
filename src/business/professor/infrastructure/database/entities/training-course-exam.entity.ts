@@ -9,19 +9,19 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { TrainingCourseExamQuestion } from './training-course-exam-question.entity';
 import { TrainingCourse } from './training-course.entity';
-import { TrainingExamQuestion } from './training-exam-question.entity';
 
 @Entity()
-export class TrainingExam {
+export class TrainingCourseExam {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Column()
   name!: string;
 
-  @OneToMany(() => TrainingExamQuestion, (step) => step.exam, { eager: true, cascade: true })
-  questions!: TrainingExamQuestion[];
+  @OneToMany(() => TrainingCourseExamQuestion, (step) => step.exam, { eager: true, cascade: true })
+  questions!: TrainingCourseExamQuestion[];
 
   @ManyToOne(() => TrainingCourse, { onDelete: 'CASCADE' })
   @JoinColumn()

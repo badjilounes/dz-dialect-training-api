@@ -2,9 +2,9 @@ import { CourseEntity } from '../../domain/entities/course.entity';
 import { ExamEntity } from '../../domain/entities/exam.entity';
 import { ExamQuestionEntity } from '../../domain/entities/question.entity';
 import { AnswerValueType } from '../../domain/value-types/answer.value-type';
+import { TrainingCourseExamQuestion } from '../database/entities/training-course-exam-question.entity';
+import { TrainingCourseExam } from '../database/entities/training-course-exam.entity';
 import { TrainingCourse } from '../database/entities/training-course.entity';
-import { TrainingExamQuestion } from '../database/entities/training-exam-question.entity';
-import { TrainingExam } from '../database/entities/training-exam.entity';
 
 import { TrainingAggregate } from '@business/professor/domain/aggregates/training.aggregate';
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
@@ -35,7 +35,7 @@ export function courseToCourseEntity(trainingId: string, course: TrainingCourse)
   });
 }
 
-export function examToExamEntity(courseId: string, exam: TrainingExam): ExamEntity {
+export function examToExamEntity(courseId: string, exam: TrainingCourseExam): ExamEntity {
   return ExamEntity.from({
     id: exam.id,
     name: exam.name,
@@ -47,7 +47,7 @@ export function examToExamEntity(courseId: string, exam: TrainingExam): ExamEnti
   });
 }
 
-export function questionToQuestionEntity(examId: string, question: TrainingExamQuestion): ExamQuestionEntity {
+export function questionToQuestionEntity(examId: string, question: TrainingCourseExamQuestion): ExamQuestionEntity {
   return ExamQuestionEntity.from({
     id: question.id,
     examId,

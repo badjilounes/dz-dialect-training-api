@@ -3,9 +3,9 @@ import { DeepPartial } from 'typeorm';
 import { CourseEntity } from '../../domain/entities/course.entity';
 import { ExamEntity } from '../../domain/entities/exam.entity';
 import { ExamQuestionEntity } from '../../domain/entities/question.entity';
+import { TrainingCourseExamQuestion } from '../database/entities/training-course-exam-question.entity';
+import { TrainingCourseExam } from '../database/entities/training-course-exam.entity';
 import { TrainingCourse } from '../database/entities/training-course.entity';
-import { TrainingExamQuestion } from '../database/entities/training-exam-question.entity';
-import { TrainingExam } from '../database/entities/training-exam.entity';
 
 import { TrainingAggregate } from '@business/professor/domain/aggregates/training.aggregate';
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
@@ -36,7 +36,7 @@ export function courseEntityToCourse(trainingId: string, course: CourseEntity): 
   };
 }
 
-export function examEntityToExam(courseId: string, exam: ExamEntity): DeepPartial<TrainingExam> {
+export function examEntityToExam(courseId: string, exam: ExamEntity): DeepPartial<TrainingCourseExam> {
   return {
     id: exam.id,
     name: exam.name,
@@ -51,7 +51,7 @@ export function examEntityToExam(courseId: string, exam: ExamEntity): DeepPartia
 export function questionToQuestionEntity(
   examId: string,
   question: ExamQuestionEntity,
-): DeepPartial<TrainingExamQuestion> {
+): DeepPartial<TrainingCourseExamQuestion> {
   return {
     id: question.id,
     exam: { id: examId },

@@ -1,8 +1,8 @@
-import { TrainingExam } from '@business/professor/infrastructure/database/entities/training-exam.entity';
+import { TrainingCourseExam } from '@business/professor/infrastructure/database/entities/training-course-exam.entity';
 import { ExamAggregate } from '@business/student/domain/aggregates/exam.aggregate';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
 
-export function examToExamAggregate(exam: TrainingExam): ExamAggregate {
+export function examToExamAggregate(exam: TrainingCourseExam): ExamAggregate {
   return ExamAggregate.from({
     id: exam.id,
     name: exam.name,

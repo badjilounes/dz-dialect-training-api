@@ -15,11 +15,11 @@ import { TrainingDeletedEvent } from '../../../domain/events/training/training-d
 import { TrainingReorderedEvent } from '../../../domain/events/training/training-reordered-event';
 import { TrainingUpdatedEvent } from '../../../domain/events/training/training-updated-event';
 import { trainingAggregateToTraining } from '../../mappers/training-aggregate-to-training.mapper';
+import { TrainingCourseExamQuestion } from '../entities/training-course-exam-question.entity';
 import { TrainingCourse } from '../entities/training-course.entity';
-import { TrainingExamQuestion } from '../entities/training-exam-question.entity';
 
 import { TrainingCommandRepository } from '@business/professor/domain/repositories/training-command-repository';
-import { TrainingExam } from '@business/professor/infrastructure/database/entities/training-exam.entity';
+import { TrainingCourseExam } from '@business/professor/infrastructure/database/entities/training-course-exam.entity';
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
 import { trainingToTrainingAggregate } from '@business/professor/infrastructure/mappers/training-to-training-aggregate.mapper';
 import { AppContextService } from '@core/context/app-context.service';
@@ -36,11 +36,11 @@ export class TrainingTypeormCommandRepository
     @InjectRepository(TrainingCourse)
     protected readonly trainingCourseRepository: Repository<TrainingCourse>,
 
-    @InjectRepository(TrainingExam)
-    protected readonly examRepository: Repository<TrainingExam>,
+    @InjectRepository(TrainingCourseExam)
+    protected readonly examRepository: Repository<TrainingCourseExam>,
 
-    @InjectRepository(TrainingExamQuestion)
-    protected readonly examQuestionRepository: Repository<TrainingExamQuestion>,
+    @InjectRepository(TrainingCourseExamQuestion)
+    protected readonly examQuestionRepository: Repository<TrainingCourseExamQuestion>,
 
     protected readonly context: AppContextService,
   ) {

@@ -5,8 +5,8 @@ import { SearchCourseQueryResult } from '../../../domain/queries/search-course/s
 import { SearchExamQueryResult } from '../../../domain/queries/search-exam/search-exam.query';
 import { SearchTrainingQueryResult } from '../../../domain/queries/search-training/search-training.query';
 import { TrainingQueryRepository } from '../../../domain/repositories/training-query-repository';
+import { TrainingCourseExam } from '../entities/training-course-exam.entity';
 import { TrainingCourse } from '../entities/training-course.entity';
-import { TrainingExam } from '../entities/training-exam.entity';
 import { Training } from '../entities/training.entity';
 
 import { AppContextService } from '@core/context/app-context.service';
@@ -20,8 +20,8 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
     @InjectRepository(TrainingCourse)
     protected readonly courseRepository: Repository<TrainingCourse>,
 
-    @InjectRepository(TrainingExam)
-    protected readonly examRepository: Repository<TrainingExam>,
+    @InjectRepository(TrainingCourseExam)
+    protected readonly examRepository: Repository<TrainingCourseExam>,
 
     protected readonly context: AppContextService,
   ) {
@@ -85,7 +85,7 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
   }
 
   async searchExam(courseId: string, pageIndex: number, pageSize: number, query = ''): Promise<SearchExamQueryResult> {
-    const options: FindManyOptions<TrainingExam> = {
+    const options: FindManyOptions<TrainingCourseExam> = {
       where: { course: { id: courseId } },
       order: { order: 'ASC' },
       skip: pageIndex * pageSize,

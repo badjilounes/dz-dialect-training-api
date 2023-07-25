@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { TrainingExam } from './training-exam.entity';
+import { TrainingCourseExam } from './training-course-exam.entity';
 import { Training } from './training.entity';
 
 @Entity()
@@ -27,8 +27,8 @@ export class TrainingCourse {
   @JoinColumn()
   training!: TrainingCourse;
 
-  @OneToMany(() => TrainingExam, (step) => step.course, { eager: true, cascade: true })
-  exams!: TrainingExam[];
+  @OneToMany(() => TrainingCourseExam, (step) => step.course, { eager: true, cascade: true })
+  exams!: TrainingCourseExam[];
 
   @Column()
   order!: number;

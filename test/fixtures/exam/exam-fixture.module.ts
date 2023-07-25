@@ -3,11 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { ExamFixture } from './exam.fixture';
 
-import { TrainingExam } from '@business/professor/infrastructure/database/entities/training-exam.entity';
+import { TrainingCourseExam } from '@business/professor/infrastructure/database/entities/training-course-exam.entity';
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Training, TrainingExam])],
+  imports: [TypeOrmModule.forFeature([Training, TrainingCourseExam])],
   providers: [ExamFixture],
   exports: [ExamFixture],
 })
