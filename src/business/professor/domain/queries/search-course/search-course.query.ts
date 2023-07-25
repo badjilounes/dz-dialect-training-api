@@ -6,12 +6,19 @@ type GetExamExamQuestion = {
   type: QuestionTypeEnum;
   question: string;
   propositions: string[];
+  answer: string[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type GetExamQueryResult = {
   id: string;
   name: string;
   questions: GetExamExamQuestion[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type CourseQueryResult = {
@@ -19,6 +26,9 @@ type CourseQueryResult = {
   name: string;
   description: string;
   exams: GetExamQueryResult[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type SearchCourseQueryResult = {

@@ -35,7 +35,6 @@ export class TrainingCourse {
 
   @CreateDateColumn()
   createdAt!: Date;
-  
 
   @UpdateDateColumn()
   updatedAt!: Date;

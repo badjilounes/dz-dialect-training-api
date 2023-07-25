@@ -1,3 +1,5 @@
+import { QuestionTypeEnum } from '../../enums/question-type.enum';
+
 import { Query } from '@cqrs/query';
 
 type TrainingQueryResult = {
@@ -9,6 +11,23 @@ type TrainingQueryResult = {
     id: string;
     name: string;
     description: string;
+    exams: {
+      id: string;
+      name: string;
+      questions: {
+        id: string;
+        type: QuestionTypeEnum;
+        question: string;
+        answer: string[];
+        propositions: string[];
+        order: number;
+        createdAt: Date;
+        updatedAt: Date;
+      }[];
+      order: number;
+      createdAt: Date;
+      updatedAt: Date;
+    }[];
     order: number;
     createdAt: Date;
     updatedAt: Date;
