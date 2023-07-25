@@ -1,23 +1,22 @@
 import { Inject } from '@nestjs/common';
 
+import { ProfessorGateway } from '../../gateways/professor-gateway';
+import { PROFESSOR_GATEWAY } from '../../gateways/tokens';
+
 import { GetExamQuery, GetExamQueryResult } from './get-exam.query';
 
 import { ExamNotFoundError } from '@business/student/domain/errors/exam-not-found-error';
 import { ExamCopy, ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
-import { EXAM_COPY_QUERY_REPOSITORY, TRAINING_QUERY_REPOSITORY } from '@business/student/domain/repositories/tokens';
-import {
-  Exam,
-  ExamQuestion,
-  TrainingQueryRepository,
-} from '@business/student/domain/repositories/training-query-repository';
+import { EXAM_COPY_QUERY_REPOSITORY } from '@business/student/domain/repositories/tokens';
+import { Exam, ExamQuestion } from '@business/student/domain/repositories/training-query-repository';
 import { AppContextService } from '@core/context/app-context.service';
 import { IQueryHandler, QueryHandler } from '@cqrs/query';
 
 @QueryHandler(GetExamQuery)
 export class GetExamQueryHandler implements IQueryHandler<GetExamQuery> {
   constructor(
-    @Inject(TRAINING_QUERY_REPOSITORY)
-    private readonly trainingQueryRepository: TrainingQueryRepository,
+    @Inject(PROFESSOR_GATEWAY)
+    private readonly professorGateway: ProfessorGateway,
 
     @Inject(EXAM_COPY_QUERY_REPOSITORY)
     private readonly examCopyQueryRepository: ExamCopyQueryRepository,
@@ -26,15 +25,16 @@ export class GetExamQueryHandler implements IQueryHandler<GetExamQuery> {
   ) {}
 
   async execute({ payload }: GetExamQuery): Promise<GetExamQueryResult> {
-    const exam = await this.trainingQueryRepository.findExamById(payload.examId);
+    const { trainingId, courseId, examId } = payload;
+    const exam = await this.professorGateway.getExamById(trainingId, courseId, examId);
     if (!exam) {
-      throw new ExamNotFoundError(payload.examId);
+      throw new ExamNotFoundError(examId);
     }
 
     let resume: ExamQuestion | undefined;
 
     if (this.context.isUserAuthenticated) {
-      const examCopy = await this.examCopyQueryRepository.findExamCopy(payload.examId);
+      const examCopy = await this.examCopyQueryRepository.findExamCopy(examId);
       if (examCopy?.responses.length) {
         resume = this.findNextQuestion(exam, examCopy);
       }

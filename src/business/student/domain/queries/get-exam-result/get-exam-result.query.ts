@@ -6,6 +6,8 @@ export type GetExamResultQueryResult = {
 };
 
 export type GetExamResultQueryPayload = {
+  trainingId: string;
+  courseId: string;
   examId: string;
 };
 

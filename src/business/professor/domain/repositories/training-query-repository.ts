@@ -49,6 +49,10 @@ type PaginatedResult<T> = {
 };
 
 export interface TrainingQueryRepository {
+  getTrainingCourseExamById(trainingId: string, courseId: string, examId: string): Promise<Exam | null>;
+  getTrainingPresentation(): Promise<Training | null>;
+  getTrainingById(trainingid: string): Promise<Training | null>;
+  getTrainingList(): Promise<Training[]>;
   searchTraining(pageIndex: number, pageSize: number, search?: string): Promise<PaginatedResult<Training>>;
   searchCourse(
     trainingId: string,

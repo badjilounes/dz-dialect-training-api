@@ -3,8 +3,8 @@ import { Query } from '@cqrs/query';
 
 type ExamQuestionQueryResult = {
   id: string;
-  order: number;
   type: QuestionTypeEnum;
+  order: number;
   question: string;
   propositions: string[];
   answer: string[];
@@ -12,7 +12,7 @@ type ExamQuestionQueryResult = {
   updatedAt: Date;
 };
 
-export type ExamQueryResult = {
+type ExamQueryResult = {
   id: string;
   name: string;
   questions: ExamQuestionQueryResult[];

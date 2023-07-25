@@ -90,19 +90,19 @@ describe('Skip presentation', () => {
   it('should throw if no training exist for given id', async () => {
     trainingCommandRepository.findTrainingById.mockResolvedValue(undefined);
 
-    await expect(handler.execute({ id: examId })).rejects.toStrictEqual(new TrainingNotFoundError(examId));
+    await expect(handler.execute({ trainingId: examId })).rejects.toStrictEqual(new TrainingNotFoundError(examId));
   });
 
   it('should throw if given copy is not in progress', async () => {
     examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(undefined);
 
-    await expect(handler.execute({ id: examId })).rejects.toStrictEqual(new ExamCopyNotStartedError());
+    await expect(handler.execute({ trainingId: examId })).rejects.toStrictEqual(new ExamCopyNotStartedError());
   });
 
   it('should skip given copy', async () => {
     examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(examCopy);
 
-    await handler.execute({ id: examId });
+    await handler.execute({ trainingId: examId });
 
     expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(expect.any(ExamCopyAggregate));
     expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(

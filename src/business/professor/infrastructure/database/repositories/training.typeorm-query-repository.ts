@@ -1,6 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, ILike, Repository } from 'typeorm';
 
+import { GetExamByIdQueryResult } from '../../../domain/queries/get-exam-by-id/get-exam-by-id.query';
+import { GetTrainingByIdQueryResult } from '../../../domain/queries/get-training-by-id/get-training-by-id.query';
+import { GetTrainingListQueryResult } from '../../../domain/queries/get-training-list/get-training-list.query';
+import { GetTrainingPresentationQueryResult } from '../../../domain/queries/get-training-presentation/get-training-presentation.query';
 import { SearchCourseQueryResult } from '../../../domain/queries/search-course/search-course.query';
 import { SearchExamQueryResult } from '../../../domain/queries/search-exam/search-exam.query';
 import { SearchTrainingQueryResult } from '../../../domain/queries/search-training/search-training.query';
@@ -28,6 +32,27 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
     super(context);
   }
 
+  getTrainingList(): Promise<GetTrainingListQueryResult> {
+    return this.trainingRepository.find({
+      order: { order: 'ASC' },
+    });
+  }
+
+  async getTrainingById(trainingId: string): Promise<GetTrainingByIdQueryResult> {
+    return this.trainingRepository.findOneBy({ id: trainingId });
+  }
+
+  getTrainingPresentation(): Promise<GetTrainingPresentationQueryResult> {
+    return this.trainingRepository.findOneBy({ isPresentation: true });
+  }
+
+  getTrainingCourseExamById(trainingId: string, courseId: string, examId: string): Promise<GetExamByIdQueryResult> {
+    return this.examRepository.findOne({
+      where: { id: examId, course: { id: courseId, training: { id: trainingId } } },
+      relations: ['course', 'course.training'],
+    });
+  }
+
   async searchTraining(pageIndex: number, pageSize: number, query = ''): Promise<SearchTrainingQueryResult> {
     const options: FindManyOptions<Training> = {
       order: { order: 'ASC' },
@@ -36,12 +61,7 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
     };
 
     if (query) {
-      options.where = [
-        { name: ILike(`%${query}%`) },
-        { description: ILike(`%${query}%`) },
-        { courses: { name: ILike(`%${query}%`) } },
-        { courses: { description: ILike(`%${query}%`) } },
-      ];
+      options.where = [{ name: ILike(`%${query}%`) }, { description: ILike(`%${query}%`) }];
     }
 
     const [elements, length] = await this.trainingRepository.findAndCount(options);

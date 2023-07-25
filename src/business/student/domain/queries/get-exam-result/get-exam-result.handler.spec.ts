@@ -1,6 +1,6 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { GetExamPresentationResultQueryHandler } from './get-exam-result.handler';
+import { GetExamResultQueryHandler } from './get-exam-result.handler';
 
 import { ExamQuestionEntity } from '@business/student/domain/entities/question.entity';
 import { ResponseEntity } from '@business/student/domain/entities/response.entity';
@@ -13,7 +13,7 @@ import { Training, TrainingQueryRepository } from '@business/student/domain/repo
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
 
 describe('Get exm presentation result', () => {
-  let handler: GetExamPresentationResultQueryHandler;
+  let handler: GetExamResultQueryHandler;
 
   let trainingQueryRepository: MockProxy<TrainingQueryRepository>;
   let examCopyQueryRepository: MockProxy<ExamCopyQueryRepository>;
@@ -27,7 +27,7 @@ describe('Get exm presentation result', () => {
     trainingQueryRepository = mock<TrainingQueryRepository>();
     examCopyQueryRepository = mock<ExamCopyQueryRepository>();
 
-    handler = new GetExamPresentationResultQueryHandler(trainingQueryRepository, examCopyQueryRepository);
+    handler = new GetExamResultQueryHandler(trainingQueryRepository, examCopyQueryRepository);
 
     training = {
       id: 'trainingId',

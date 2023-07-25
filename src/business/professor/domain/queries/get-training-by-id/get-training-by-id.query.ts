@@ -32,7 +32,7 @@ type TrainingCourseQueryResult = {
   updatedAt: Date;
 };
 
-type TrainingQueryResult = {
+export type TrainingByIdQueryResult = {
   id: string;
   name: string;
   description: string;
@@ -43,15 +43,10 @@ type TrainingQueryResult = {
   updatedAt: Date;
 };
 
-export type SearchTrainingQueryResult = {
-  elements: TrainingQueryResult[];
-  length: number;
-  pageIndex: number;
-  pageSize: number;
-};
+export type GetTrainingByIdQueryResult = TrainingByIdQueryResult | null;
 
-export class SearchTrainingQuery extends Query<SearchTrainingQueryResult> {
-  constructor(public readonly pageIndex: number, public readonly pageSize: number, public readonly search?: string) {
+export class GetTrainingByIdQuery extends Query<GetTrainingByIdQueryResult> {
+  constructor(public readonly trainingId: string) {
     super();
   }
 }

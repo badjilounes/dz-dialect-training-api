@@ -1,7 +1,7 @@
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
 import { Query } from '@cqrs/query';
 
-type GetExamExamQuestion = {
+type CourseExamQuestionQueryResult = {
   id: string;
   type: QuestionTypeEnum;
   question: string;
@@ -12,10 +12,10 @@ type GetExamExamQuestion = {
   updatedAt: Date;
 };
 
-export type GetExamQueryResult = {
+export type CourseExamQueryResult = {
   id: string;
   name: string;
-  questions: GetExamExamQuestion[];
+  questions: CourseExamQuestionQueryResult[];
   order: number;
   createdAt: Date;
   updatedAt: Date;
@@ -25,7 +25,7 @@ type CourseQueryResult = {
   id: string;
   name: string;
   description: string;
-  exams: GetExamQueryResult[];
+  exams: CourseExamQueryResult[];
   order: number;
   createdAt: Date;
   updatedAt: Date;

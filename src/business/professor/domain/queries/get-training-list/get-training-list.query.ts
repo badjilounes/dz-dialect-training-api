@@ -43,15 +43,10 @@ type TrainingQueryResult = {
   updatedAt: Date;
 };
 
-export type SearchTrainingQueryResult = {
-  elements: TrainingQueryResult[];
-  length: number;
-  pageIndex: number;
-  pageSize: number;
-};
+export type GetTrainingListQueryResult = TrainingQueryResult[];
 
-export class SearchTrainingQuery extends Query<SearchTrainingQueryResult> {
-  constructor(public readonly pageIndex: number, public readonly pageSize: number, public readonly search?: string) {
+export class GetTrainingListQuery extends Query<GetTrainingListQueryResult> {
+  constructor() {
     super();
   }
 }

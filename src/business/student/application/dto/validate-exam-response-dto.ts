@@ -5,6 +5,9 @@ export class ValidateExamResponseDto {
   trainingId!: string;
 
   @ApiProperty()
+  courseId!: string;
+
+  @ApiProperty()
   examId!: string;
 
   @ApiProperty()

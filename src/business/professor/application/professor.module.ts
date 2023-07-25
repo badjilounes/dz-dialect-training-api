@@ -8,6 +8,7 @@ import { TrainingCourse } from '../infrastructure/database/entities/training-cou
 import { TrainingTypeormCommandRepository } from '../infrastructure/database/repositories/training.typeorm-command-repository';
 import { TrainingTypeormQueryRepository } from '../infrastructure/database/repositories/training.typeorm-query-repository';
 
+import { ProfessorFacadeModule } from './facade/professor-facade.module';
 import { ProfessorController } from './professor.controller';
 
 import { ProfessorQueryHandlers } from '@business/professor/domain/queries';
@@ -15,7 +16,10 @@ import { TrainingCourseExam } from '@business/professor/infrastructure/database/
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Training, TrainingCourse, TrainingCourseExam, TrainingCourseExamQuestion])],
+  imports: [
+    ProfessorFacadeModule,
+    TypeOrmModule.forFeature([Training, TrainingCourse, TrainingCourseExam, TrainingCourseExamQuestion]),
+  ],
   controllers: [ProfessorController],
   providers: [
     ...TrainingCommandHandlers,

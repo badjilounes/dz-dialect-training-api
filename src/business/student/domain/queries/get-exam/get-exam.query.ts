@@ -16,6 +16,8 @@ export type GetExamQueryResult = {
 };
 
 export type GetExamQueryPayload = {
+  trainingId: string;
+  courseId: string;
   examId: string;
 };
 

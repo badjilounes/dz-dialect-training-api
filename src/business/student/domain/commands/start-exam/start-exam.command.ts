@@ -17,6 +17,8 @@ export type StartExamCommandResult = {
 };
 
 export type StartExamCommandPayload = {
+  trainingId: string;
+  courseId: string;
   examId: string;
 };
 

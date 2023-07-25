@@ -1,18 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { ProfessorFacadeModule } from '../../professor/application/facade/professor-facade.module';
 import { TrainingCommandHandlers } from '../domain/commands';
+import { PROFESSOR_GATEWAY } from '../domain/gateways/tokens';
 import { TrainingQueryHandlers } from '../domain/queries';
-import {
-  EXAM_COPY_COMMAND_REPOSITORY,
-  EXAM_COPY_QUERY_REPOSITORY,
-  TRAINING_COMMAND_REPOSITORY,
-  TRAINING_QUERY_REPOSITORY,
-} from '../domain/repositories/tokens';
+import { EXAM_COPY_COMMAND_REPOSITORY, EXAM_COPY_QUERY_REPOSITORY } from '../domain/repositories/tokens';
 import { TrainingCourse } from '../infrastructure/database/entities/training-course.entity';
 import { TrainingExamQuestion } from '../infrastructure/database/entities/training-exam-question.entity';
-import { TrainingLanguage } from '../infrastructure/database/entities/training-language.entity';
-import { TrainingTypeormCommandRepository } from '../infrastructure/database/repositories/training.typeorm-command-repository';
+import { ProfessorFacadeGateway } from '../infrastructure/database/gateways/professor.facade-gateway';
 
 import { StudentController } from './student.controller';
 
@@ -22,13 +18,12 @@ import { TrainingExam } from '@business/student/infrastructure/database/entities
 import { Training } from '@business/student/infrastructure/database/entities/training.entity';
 import { ExamCopyTypeormCommandRepository } from '@business/student/infrastructure/database/repositories/exam-copy.typeorm-command-repository';
 import { ExamCopyTypeormQueryRepository } from '@business/student/infrastructure/database/repositories/exam-copy.typeorm-query-repository';
-import { TrainingTypeormQueryRepository } from '@business/student/infrastructure/database/repositories/training.typeorm-query-repository';
 
 @Module({
   imports: [
+    ProfessorFacadeModule,
     TypeOrmModule.forFeature([
       Training,
-      TrainingLanguage,
       TrainingCourse,
       TrainingExam,
       TrainingExamQuestion,
@@ -40,10 +35,9 @@ import { TrainingTypeormQueryRepository } from '@business/student/infrastructure
   providers: [
     ...TrainingQueryHandlers,
     ...TrainingCommandHandlers,
-    { provide: TRAINING_COMMAND_REPOSITORY, useClass: TrainingTypeormCommandRepository },
     { provide: EXAM_COPY_COMMAND_REPOSITORY, useClass: ExamCopyTypeormCommandRepository },
-    { provide: TRAINING_QUERY_REPOSITORY, useClass: TrainingTypeormQueryRepository },
     { provide: EXAM_COPY_QUERY_REPOSITORY, useClass: ExamCopyTypeormQueryRepository },
+    { provide: PROFESSOR_GATEWAY, useClass: ProfessorFacadeGateway },
   ],
 })
 export class StudentModule {}
