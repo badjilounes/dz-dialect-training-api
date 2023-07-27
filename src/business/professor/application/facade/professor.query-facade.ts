@@ -16,6 +16,7 @@ export type ExamFacadeResponse = {
   id: string;
   courseId: string;
   name: string;
+  description: string;
   questions: ExamQuestionFacadeResponse[];
   order: number;
   createdAt: Date;

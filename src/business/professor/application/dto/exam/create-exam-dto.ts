@@ -24,6 +24,9 @@ export class CreateExamDto {
   name!: string;
 
   @ApiProperty()
+  description!: string;
+
+  @ApiProperty()
   courseId!: string;
 
   @ApiProperty({ type: CreateExamQuestionDto, isArray: true })

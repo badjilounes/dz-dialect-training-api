@@ -124,6 +124,7 @@ export class CourseEntity extends BaseEntity {
       const examWithNewOrder = newOrders.find((current) => current.id === examToReorder.id);
       this.updateExam(examToReorder.id, {
         name: examToReorder.name,
+        description: examToReorder.description,
         questions: examToReorder.questions,
         order: examWithNewOrder?.order ?? examToReorder.order,
       });

@@ -15,6 +15,7 @@ type CourseExamQuestionQueryResult = {
 export type CourseExamQueryResult = {
   id: string;
   name: string;
+  description: string;
   questions: CourseExamQuestionQueryResult[];
   order: number;
   createdAt: Date;

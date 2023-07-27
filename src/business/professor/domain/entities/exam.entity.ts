@@ -6,6 +6,7 @@ import { ExamQuestionEntity, ExamQuestionEntityProps } from './question.entity';
 
 export type UpdateExamEntityProps = {
   name: string;
+  description: string;
   order: number;
   questions: ExamQuestionEntityProps[];
 };
@@ -14,6 +15,7 @@ export type ExamEntityProps = {
   id: string;
   courseId: string;
   name: string;
+  description: string;
   order: number;
   questions: ExamQuestionEntityProps[];
   createdAt: Date;
@@ -36,6 +38,12 @@ export class ExamEntity extends BaseEntity {
   private _name: string;
   public get name(): string {
     return this._name;
+  }
+
+  @IsString()
+  private _description: string;
+  public get description(): string {
+    return this._description;
   }
 
   @IsNumber()
@@ -66,6 +74,7 @@ export class ExamEntity extends BaseEntity {
     this._id = props.id;
     this._courseId = props.courseId;
     this._name = props.name;
+    this._description = props.description;
     this._order = props.order;
     this._questions = props.questions.map(ExamQuestionEntity.from);
     this._createdAt = props.createdAt;

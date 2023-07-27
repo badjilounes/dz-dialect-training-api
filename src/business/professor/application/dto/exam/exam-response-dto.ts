@@ -2,17 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { QuestionTypeEnum } from '../../../domain/enums/question-type.enum';
 
-class AnswerResponseDto {
-  @ApiProperty({ enum: QuestionTypeEnum })
-  questionType!: QuestionTypeEnum;
-
-  @ApiProperty({ isArray: true, type: String })
-  value!: string[];
-
-  @ApiProperty()
-  formattedValue!: string;
-}
-
 class CreateExamResponseQuestionDto {
   @ApiProperty()
   id!: string;
@@ -36,6 +25,9 @@ export class ExamResponseDto {
 
   @ApiProperty()
   name!: string;
+
+  @ApiProperty()
+  description!: string;
 
   @ApiProperty()
   courseId!: string;

@@ -16,6 +16,7 @@ type TrainingCourseExamQuestionQueryResult = {
 type TrainingCourseExamQueryResult = {
   id: string;
   name: string;
+  description: string;
   questions: TrainingCourseExamQuestionQueryResult[];
   order: number;
   createdAt: Date;

@@ -120,6 +120,7 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
       elements: elements.map((e) => ({
         id: e.id,
         name: e.name,
+        description: e.description,
         order: e.order,
         questions: e.questions.map((q) => ({
           id: q.id,

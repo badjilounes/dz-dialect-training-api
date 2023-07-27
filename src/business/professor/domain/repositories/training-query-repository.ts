@@ -14,6 +14,7 @@ type ExamQuestion = {
 type Exam = {
   id: string;
   name: string;
+  description: string;
   questions: ExamQuestion[];
   order: number;
   createdAt: Date;

@@ -38,6 +38,9 @@ export class CreateExamResponseDto {
   name!: string;
 
   @ApiProperty()
+  description!: string;
+
+  @ApiProperty()
   courseId!: string;
 
   @ApiProperty()

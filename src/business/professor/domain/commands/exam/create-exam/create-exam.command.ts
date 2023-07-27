@@ -5,6 +5,7 @@ import { Command } from '@cqrs/command';
 export type CreateExamCommandResult = {
   id: string;
   name: string;
+  description: string;
   questions: {
     id: string;
     type: QuestionTypeEnum;
@@ -24,6 +25,7 @@ export type CreateExamCommandResult = {
 export type CreateExamCommandPayload = {
   trainingId: string;
   name: string;
+  description: string;
   courseId: string;
   questions: {
     type: QuestionTypeEnum;

@@ -40,6 +40,7 @@ export function examEntityToExam(courseId: string, exam: ExamEntity): DeepPartia
   return {
     id: exam.id,
     name: exam.name,
+    description: exam.description,
     course: { id: courseId },
     createdAt: exam.createdAt,
     updatedAt: exam.updatedAt,

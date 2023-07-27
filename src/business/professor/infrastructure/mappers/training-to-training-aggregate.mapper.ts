@@ -39,6 +39,7 @@ export function examToExamEntity(courseId: string, exam: TrainingCourseExam): Ex
   return ExamEntity.from({
     id: exam.id,
     name: exam.name,
+    description: exam.description,
     courseId,
     questions: exam.questions.map((question) => questionToQuestionEntity(exam.id, question)),
     order: exam.order,

@@ -16,6 +16,7 @@ export type Exam = {
   id: string;
   courseId: string;
   name: string;
+  description: string;
   questions: ExamQuestion[];
   order: number;
   createdAt: Date;

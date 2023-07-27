@@ -7,6 +7,9 @@ import { QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { StartExamCommand } from '../domain/commands/start-exam/start-exam.command';
+import { GetExerciseListQuery } from '../domain/queries/get-exercise-list/get-exercise-list.query';
+
+import { GetExerciseResponseDto } from './dto/get-exercise-response-dto';
 
 import { GetExamCopyDto } from '@business/student/application/dto/get-exam-copy-dto';
 import { GetExamCopyResponseDto } from '@business/student/application/dto/get-exam-copy-response-dto';
@@ -29,6 +32,16 @@ import { CommandBus } from '@cqrs/command';
 @UseInterceptors(StudentErrorInterceptor)
 export class StudentController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
+
+  @UseGuards(GuestOrUserAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ operationId: 'get-exercise-list', summary: 'Get the user exercise list' })
+  @ApiHeader({ name: 'x-guest-id', required: false })
+  @Get('get-exercise-list')
+  @ApiOkResponse({ type: GetExerciseResponseDto, isArray: true })
+  getExamList(): Promise<GetExerciseResponseDto[]> {
+    return this.queryBus.execute(new GetExerciseListQuery());
+  }
 
   @ApiOperation({ operationId: 'get-exam-copy', summary: 'Get the user copy of given exam' })
   @Get('get-exam-copy')
@@ -74,7 +87,7 @@ export class StudentController {
   @ApiOperation({ operationId: 'start-presentation', summary: 'Start exam' })
   @Post('start-presentation')
   @ApiOkResponse({ type: GetExamCopyResponseDto })
-  startPresentation(): Promise<GetExamCopyResponseDto> {
+  async startPresentation(): Promise<GetExamCopyResponseDto> {
     return this.commandBus.execute(new StartPresentationCommand());
   }
 

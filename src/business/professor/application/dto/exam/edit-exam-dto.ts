@@ -39,6 +39,9 @@ export class EditExamDto {
   name!: string;
 
   @ApiProperty()
+  description!: string;
+
+  @ApiProperty()
   courseId!: string;
 
   @ApiProperty({ type: [EditExamQuestionDto] })

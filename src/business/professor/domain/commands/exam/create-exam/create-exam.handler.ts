@@ -28,7 +28,7 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
   ) {}
 
   async execute({ payload }: CreateExamCommand): Promise<CreateExamCommandResult> {
-    const { trainingId, name, courseId, questions } = payload;
+    const { trainingId, name, description, courseId, questions } = payload;
 
     const training = await this.trainingCommandRepository.findTrainingById(trainingId);
     if (!training) {
@@ -52,6 +52,7 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
     const exam = ExamEntity.create({
       id: examId,
       name,
+      description,
       courseId,
       order: nextOrder,
       createdAt: new Date(),
@@ -76,6 +77,7 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
     return {
       id: exam.id,
       name: exam.name,
+      description: exam.description,
       questions: exam.questions,
       order: exam.order,
       createdAt: exam.createdAt,

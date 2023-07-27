@@ -53,6 +53,7 @@ export class EditExamHandler implements ICommandHandler<EditExamCommand> {
 
     training.updateCourseExam(course, examId, {
       name: payload.name,
+      description: payload.description,
       order: exam.order,
       questions: payload.questions.map((question, index) => ({
         id: question.id ?? this.uuidGenerator.generate(),
@@ -72,6 +73,7 @@ export class EditExamHandler implements ICommandHandler<EditExamCommand> {
     return {
       id: exam.id,
       name: exam.name,
+      description: exam.description,
       questions: exam.questions.map((q) => ({
         id: q.id,
         type: q.type,

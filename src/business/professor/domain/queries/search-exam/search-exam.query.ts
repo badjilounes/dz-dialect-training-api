@@ -15,6 +15,7 @@ type ExamQuestionQueryResult = {
 type ExamQueryResult = {
   id: string;
   name: string;
+  description: string;
   questions: ExamQuestionQueryResult[];
   order: number;
   createdAt: Date;

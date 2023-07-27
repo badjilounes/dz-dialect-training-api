@@ -20,6 +20,9 @@ export class TrainingCourseExam {
   @Column()
   name!: string;
 
+  @Column({ default: '' })
+  description!: string;
+
   @OneToMany(() => TrainingCourseExamQuestion, (step) => step.exam, { eager: true, cascade: true })
   questions!: TrainingCourseExamQuestion[];
 
