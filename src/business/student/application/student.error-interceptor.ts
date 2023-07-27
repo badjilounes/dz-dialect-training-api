@@ -1,21 +1,22 @@
 import { NotAcceptableException, NotFoundException } from '@nestjs/common';
 
+import { ExamCopyNotFoundError } from '../domain/errors/exam-copy-not-found-error';
+
 import { ExamCopyNotFinishedError } from '@business/student/domain/errors/exam-copy-not-finished-error';
 import { ExamCopyNotStartedError } from '@business/student/domain/errors/exam-copy-not-started-error';
-import { ExamNotFoundError } from '@business/student/domain/errors/exam-not-found-error';
-import { PresentationExamNotFoundError } from '@business/student/domain/errors/exam-presentation-not-found-error';
-import { QuestionNotFoundError } from '@business/student/domain/errors/question-not-found-error';
-import { TrainingNotFoundError } from '@business/student/domain/errors/training-not-found-error';
+import { ExamCopyQuestionNotFoundError } from '@business/student/domain/errors/exam-copy-question-not-found-error';
+import { TrainingExamNotFoundError } from '@business/student/domain/errors/training-exam-not-found-error';
+import { TrainingPresentationExamNotFoundError } from '@business/student/domain/errors/training-presentation-exam-not-found-error';
 import { DomainErrorInterceptor } from '@ddd/domain/error/domain-error.interceptor';
 
 export class StudentErrorInterceptor extends DomainErrorInterceptor {
   constructor() {
     super();
-    this.register(QuestionNotFoundError, (error) => new NotFoundException(error.message));
-    this.register(ExamNotFoundError, (error) => new NotFoundException(error.message));
-    this.register(TrainingNotFoundError, (error) => new NotFoundException(error.message));
-    this.register(PresentationExamNotFoundError, (error) => new NotFoundException(error.message));
     this.register(ExamCopyNotFinishedError, (error) => new NotAcceptableException(error.message));
+    this.register(ExamCopyNotFoundError, (error) => new NotFoundException(error.message));
     this.register(ExamCopyNotStartedError, (error) => new NotAcceptableException(error.message));
+    this.register(ExamCopyQuestionNotFoundError, (error) => new NotFoundException(error.message));
+    this.register(TrainingExamNotFoundError, (error) => new NotFoundException(error.message));
+    this.register(TrainingPresentationExamNotFoundError, (error) => new NotFoundException(error.message));
   }
 }

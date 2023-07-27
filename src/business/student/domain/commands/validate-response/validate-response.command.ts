@@ -1,16 +1,18 @@
+import { ExamCopyStateEnum } from '../../enums/exam-copy-state.enum';
+
 import { Command } from '@cqrs/command';
 
 export type ValidateResponseCommandResult = {
   valid: boolean;
   answer: string;
   response: string;
+  nextQuestionIndex: number;
+  examCopyState: ExamCopyStateEnum;
 };
 
 export class ValidateResponseCommand extends Command<ValidateResponseCommandResult> {
   constructor(
-    public readonly trainingId: string,
-    public readonly courseId: string,
-    public readonly examId: string,
+    public readonly examCopyId: string,
     public readonly questionId: string,
     public readonly response: string[],
   ) {

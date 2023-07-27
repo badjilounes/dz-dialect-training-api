@@ -6,7 +6,7 @@ import { StartExamHandler } from './start-exam.handler';
 
 import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { ExamNotFoundError } from '@business/student/domain/errors/exam-not-found-error';
+import { TrainingExamNotFoundError } from '@business/student/domain/errors/training-exam-not-found-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
@@ -78,7 +78,7 @@ describe('Start exam', () => {
   it('should throw if no exam exist for given id', async () => {
     trainingCommandRepository.findExamById.mockResolvedValue(undefined);
 
-    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new ExamNotFoundError(examId));
+    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new TrainingExamNotFoundError(examId));
   });
 
   it('should create a copy for given exam', async () => {

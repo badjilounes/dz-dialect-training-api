@@ -1,15 +1,15 @@
+import { Training, TrainingQueryRepository } from '@business/student/domain/repositories/training-query-repository';
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { GetExamQueryHandler } from './get-exam.handler';
+import { GetExamCopyQueryHandler } from './get-exam-copy.handler';
 
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { ExamNotFoundError } from '@business/student/domain/errors/exam-not-found-error';
+import { TrainingExamNotFoundError } from '@business/student/domain/errors/training-exam-not-found-error';
 import { ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
-import { Training, TrainingQueryRepository } from '@business/student/domain/repositories/training-query-repository';
 import { AppContextService } from '@core/context/app-context.service';
 
 describe('Get presentation', () => {
-  let handler: GetExamQueryHandler;
+  let handler: GetExamCopyQueryHandler;
 
   let trainingQueryRepository: MockProxy<TrainingQueryRepository>;
   let examCopyQueryRepository: MockProxy<ExamCopyQueryRepository>;
@@ -26,11 +26,11 @@ describe('Get presentation', () => {
     trainingQueryRepository.findExamById.mockResolvedValue(undefined);
 
     examCopyQueryRepository = mock<ExamCopyQueryRepository>();
-    examCopyQueryRepository.findExamCopy.mockResolvedValue(undefined);
+    examCopyQueryRepository.findExamCopyByExamId.mockResolvedValue(undefined);
 
     context = mock<AppContextService>({ isUserAuthenticated: false });
 
-    handler = new GetExamQueryHandler(trainingQueryRepository, examCopyQueryRepository, context);
+    handler = new GetExamCopyQueryHandler(trainingQueryRepository, examCopyQueryRepository, context);
 
     training = {
       id: trainingId,
@@ -67,7 +67,7 @@ describe('Get presentation', () => {
   });
 
   it('should throw if no exam exists for given id', async () => {
-    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new ExamNotFoundError(examId));
+    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new TrainingExamNotFoundError(examId));
   });
 
   it('should return the exam', async () => {

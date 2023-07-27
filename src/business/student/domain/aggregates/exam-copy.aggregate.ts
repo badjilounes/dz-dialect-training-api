@@ -1,8 +1,11 @@
-import { IsEnum, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
 
+import { ExamCopyQuestionEntity, ExamCopyQuestionEntityProps } from '../entities/exam-copy-question.entity';
+import { ExamCopyNotFinishedError } from '../errors/exam-copy-not-finished-error';
+import { ExamCopyNotStartedError } from '../errors/exam-copy-not-started-error';
 import { ExamCopyCreatedEvent } from '../events/exam-copy-created-event';
 
-import { ResponseEntity, ResponseEntityProps } from '@business/student/domain/entities/response.entity';
+import { ExamCopyQuestionResponseEntityProps } from '@business/student/domain/entities/exam-copy-question-response.entity';
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
 import { ExamCopyCompletedEvent } from '@business/student/domain/events/exam-copy-completed-event';
 import { ExamCopyResponseAddedEvent } from '@business/student/domain/events/exam-copy-response-added-event';
@@ -13,7 +16,10 @@ export type ExamCopyAggregateProps = {
   id: string;
   examId: string;
   state: ExamCopyStateEnum;
-  responses: ResponseEntityProps[];
+  questions: ExamCopyQuestionEntityProps[];
+  currentQuestionIndex: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export class ExamCopyAggregate extends BaseAggregateRoot {
@@ -35,17 +41,38 @@ export class ExamCopyAggregate extends BaseAggregateRoot {
     return this._state;
   }
 
-  private readonly _responses: ResponseEntity[];
-  public get responses(): ResponseEntity[] {
-    return this._responses;
+  private readonly _questions: ExamCopyQuestionEntity[];
+  public get questions(): ExamCopyQuestionEntity[] {
+    return this._questions;
   }
 
-  private constructor(private readonly props: ExamCopyAggregateProps) {
+  @IsNumber()
+  private _currentQuestionIndex: number;
+  public get currentQuestionIndex(): number {
+    return this._currentQuestionIndex;
+  }
+
+  @IsDate()
+  private readonly _createdAt: Date;
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  @IsDate()
+  private _updatedAt: Date;
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  private constructor(readonly props: ExamCopyAggregateProps) {
     super();
     this._id = props.id;
     this._examId = props.examId;
     this._state = props.state;
-    this._responses = this.props.responses.map(ResponseEntity.from);
+    this._questions = props.questions.map(ExamCopyQuestionEntity.from);
+    this._currentQuestionIndex = props.currentQuestionIndex;
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
   }
 
   static create(props: ExamCopyAggregateProps): ExamCopyAggregate {
@@ -58,19 +85,42 @@ export class ExamCopyAggregate extends BaseAggregateRoot {
     return new ExamCopyAggregate(examCopy);
   }
 
-  writeResponse(props: ResponseEntityProps): ResponseEntity {
-    const response = ResponseEntity.from(props);
-    this._responses.push(response);
-    this.apply(new ExamCopyResponseAddedEvent(this.id, response));
-    return response;
+  writeQuestionResponse(
+    question: ExamCopyQuestionEntity,
+    props: ExamCopyQuestionResponseEntityProps,
+  ): ExamCopyAggregate {
+    question.writeResponse(props);
+
+    this._currentQuestionIndex++;
+    this._updatedAt = new Date();
+
+    this.apply(new ExamCopyResponseAddedEvent(this));
+
+    if (this.currentQuestionIndex === this.questions.length) {
+      this.complete();
+    }
+
+    return this;
   }
 
   complete(): void {
+    if (this.state !== ExamCopyStateEnum.IN_PROGRESS) {
+      throw new ExamCopyNotStartedError(this.examId);
+    }
+
+    if (this.questions.some((q) => !q.response)) {
+      throw new ExamCopyNotFinishedError(this.examId);
+    }
+
     this._state = ExamCopyStateEnum.COMPLETED;
     this.apply(new ExamCopyCompletedEvent(this.id));
   }
 
   skip() {
+    if (this.state !== ExamCopyStateEnum.IN_PROGRESS) {
+      throw new ExamCopyNotStartedError(this.examId);
+    }
+
     this._state = ExamCopyStateEnum.SKIPPED;
     this.apply(new ExamCopySkippedEvent(this.id));
   }

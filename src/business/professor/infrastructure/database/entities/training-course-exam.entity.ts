@@ -12,7 +12,7 @@ import {
 import { TrainingCourseExamQuestion } from './training-course-exam-question.entity';
 import { TrainingCourse } from './training-course.entity';
 
-@Entity()
+@Entity({ orderBy: { order: 'ASC' } })
 export class TrainingCourseExam {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

@@ -1,8 +1,9 @@
+import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
 import { mock, MockProxy } from 'jest-mock-extended';
 
 import { TrainingAggregate } from '../../aggregates/training.aggregate';
 
-import { SkipExamHandler } from './skip-exam.handler';
+import { SkipPrensentationHandler } from './skip-presentation.handler';
 
 import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
@@ -10,13 +11,12 @@ import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.e
 import { ExamCopyNotStartedError } from '@business/student/domain/errors/exam-copy-not-started-error';
 import { TrainingNotFoundError } from '@business/student/domain/errors/training-not-found-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
-import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
 import { EventPublisher } from '@cqrs/event';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 
 describe('Skip presentation', () => {
-  let handler: SkipExamHandler;
+  let handler: SkipPrensentationHandler;
 
   let examCopyCommandRepository: MockProxy<ExamCopyCommandRepository>;
   let trainingCommandRepository: MockProxy<TrainingCommandRepository>;
@@ -37,7 +37,12 @@ describe('Skip presentation', () => {
     uuidGenerator = mock<UuidGenerator>();
     eventPublisher = mock<EventPublisher>();
 
-    handler = new SkipExamHandler(examCopyCommandRepository, trainingCommandRepository, uuidGenerator, eventPublisher);
+    handler = new SkipPrensentationHandler(
+      examCopyCommandRepository,
+      trainingCommandRepository,
+      uuidGenerator,
+      eventPublisher,
+    );
 
     trainingPresentation = TrainingAggregate.from({
       id: trainingId,
@@ -81,7 +86,7 @@ describe('Skip presentation', () => {
     examCopy = ExamCopyAggregate.from({
       id: examCopyId,
       examId,
-      responses: [],
+      questions: [],
       state: ExamCopyStateEnum.IN_PROGRESS,
     });
     examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(examCopy);

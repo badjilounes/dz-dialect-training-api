@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 
 import { TrainingCourse } from './training-course.entity';
 
-@Entity()
+@Entity({ orderBy: { order: 'ASC' } })
 export class Training {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

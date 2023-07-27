@@ -6,7 +6,7 @@ import { StartPresentationHandler } from './start-presentation.handler';
 
 import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { PresentationExamNotFoundError } from '@business/student/domain/errors/exam-presentation-not-found-error';
+import { TrainingPresentationExamNotFoundError } from '@business/student/domain/errors/training-presentation-exam-not-found-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
@@ -83,7 +83,7 @@ describe('Start presentation', () => {
   it('should throw if no presentation exam exist', async () => {
     trainingCommandRepository.findTrainingPresentationExam.mockResolvedValue(undefined);
 
-    await expect(handler.execute()).rejects.toStrictEqual(new PresentationExamNotFoundError());
+    await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationExamNotFoundError());
   });
 
   it('should create a copy for presentation exam', async () => {

@@ -5,11 +5,11 @@ import { TrainingFixtureModule } from '../training/training-fixture.module';
 
 import { ExamCopyFixture } from './exam-copy.fixture';
 
-import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
+import { ExamCopyQuestionResponse } from '@business/student/infrastructure/database/entities/exam-copy-question-response.entity';
 import { ExamCopy } from '@business/student/infrastructure/database/entities/exam-copy.entity';
 
 @Module({
-  imports: [TrainingFixtureModule, TypeOrmModule.forFeature([ExamCopy, ExamCopyResponse])],
+  imports: [TrainingFixtureModule, TypeOrmModule.forFeature([ExamCopy, ExamCopyQuestionResponse])],
   providers: [ExamCopyFixture],
 })
 export class ExamCopyFixtureModule {}

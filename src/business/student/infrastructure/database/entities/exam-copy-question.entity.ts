@@ -4,18 +4,31 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { TrainingCourseExam } from './training-course-exam.entity';
+import { QuestionTypeEnum } from '../../../domain/enums/question-type.enum';
 
-import { QuestionTypeEnum } from '@business/professor/domain/enums/question-type.enum';
+import { ExamCopyQuestionResponse } from './exam-copy-question-response.entity';
+import { ExamCopy } from './exam-copy.entity';
 
 @Entity({ orderBy: { order: 'ASC' } })
-export class TrainingCourseExamQuestion {
+export class ExamCopyQuestion {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @Column()
+  examQuestionId!: string;
+
+  @ManyToOne(() => ExamCopy, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  examCopy!: ExamCopy;
+
+  @OneToOne(() => ExamCopyQuestionResponse, { eager: true, cascade: true })
+  @JoinColumn()
+  response!: ExamCopyQuestionResponse | null;
 
   @Column({ enum: QuestionTypeEnum })
   type!: QuestionTypeEnum;
@@ -28,10 +41,6 @@ export class TrainingCourseExamQuestion {
 
   @Column('text', { array: true })
   propositions!: string[];
-
-  @ManyToOne(() => TrainingCourseExam, { onDelete: 'CASCADE' })
-  @JoinColumn()
-  exam!: TrainingCourseExam;
 
   @Column()
   order!: number;

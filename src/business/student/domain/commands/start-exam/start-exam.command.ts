@@ -1,3 +1,4 @@
+import { ExamCopyStateEnum } from '../../enums/exam-copy-state.enum';
 import { QuestionTypeEnum } from '../../enums/question-type.enum';
 
 import { Command } from '@cqrs/command';
@@ -7,13 +8,19 @@ type StartExamQuestion = {
   type: QuestionTypeEnum;
   question: string;
   propositions: string[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type StartExamCommandResult = {
   id: string;
-  name: string;
-  trainingId: string;
+  examId: string;
+  state: ExamCopyStateEnum;
   questions: StartExamQuestion[];
+  currentQuestionIndex: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type StartExamCommandPayload = {

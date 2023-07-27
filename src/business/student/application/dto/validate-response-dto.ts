@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ValidateExamResponseResponseDto {
+import { ExamCopyStateEnum } from '../../domain/enums/exam-copy-state.enum';
+
+export class ValidateResponseResponseDto {
   @ApiProperty()
   valid!: boolean;
 
@@ -9,4 +11,10 @@ export class ValidateExamResponseResponseDto {
 
   @ApiProperty()
   answer!: string;
+
+  @ApiProperty()
+  nextQuestionIndex!: number;
+
+  @ApiProperty({ enum: ExamCopyStateEnum, enumName: 'ExamCopyStateEnum' })
+  examCopyState!: ExamCopyStateEnum;
 }

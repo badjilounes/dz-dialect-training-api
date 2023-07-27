@@ -6,31 +6,18 @@ import { TrainingCommandHandlers } from '../domain/commands';
 import { PROFESSOR_GATEWAY } from '../domain/gateways/tokens';
 import { TrainingQueryHandlers } from '../domain/queries';
 import { EXAM_COPY_COMMAND_REPOSITORY, EXAM_COPY_QUERY_REPOSITORY } from '../domain/repositories/tokens';
-import { TrainingCourse } from '../infrastructure/database/entities/training-course.entity';
-import { TrainingExamQuestion } from '../infrastructure/database/entities/training-exam-question.entity';
+import { ExamCopyQuestion } from '../infrastructure/database/entities/exam-copy-question.entity';
 import { ProfessorFacadeGateway } from '../infrastructure/database/gateways/professor.facade-gateway';
 
 import { StudentController } from './student.controller';
 
-import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
+import { ExamCopyQuestionResponse } from '@business/student/infrastructure/database/entities/exam-copy-question-response.entity';
 import { ExamCopy } from '@business/student/infrastructure/database/entities/exam-copy.entity';
-import { TrainingExam } from '@business/student/infrastructure/database/entities/training-exam.entity';
-import { Training } from '@business/student/infrastructure/database/entities/training.entity';
 import { ExamCopyTypeormCommandRepository } from '@business/student/infrastructure/database/repositories/exam-copy.typeorm-command-repository';
 import { ExamCopyTypeormQueryRepository } from '@business/student/infrastructure/database/repositories/exam-copy.typeorm-query-repository';
 
 @Module({
-  imports: [
-    ProfessorFacadeModule,
-    TypeOrmModule.forFeature([
-      Training,
-      TrainingCourse,
-      TrainingExam,
-      TrainingExamQuestion,
-      ExamCopy,
-      ExamCopyResponse,
-    ]),
-  ],
+  imports: [ProfessorFacadeModule, TypeOrmModule.forFeature([ExamCopy, ExamCopyQuestion, ExamCopyQuestionResponse])],
   controllers: [StudentController],
   providers: [
     ...TrainingQueryHandlers,

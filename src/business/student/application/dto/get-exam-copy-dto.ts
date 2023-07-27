@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GetExamResultDto {
+export class GetExamCopyDto {
   @ApiProperty()
   examId!: string;
 }

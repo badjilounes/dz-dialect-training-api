@@ -68,10 +68,7 @@ export class TrainingTypeormCommandRepository
   }
 
   async findTrainingById(id: string): Promise<TrainingAggregate | undefined> {
-    const training = await this.repository.findOne({
-      where: { id },
-      order: { courses: { order: 'ASC', exams: { order: 'ASC', questions: { order: 'ASC' } } } },
-    });
+    const training = await this.repository.findOneBy({ id });
 
     if (!training) {
       return undefined;

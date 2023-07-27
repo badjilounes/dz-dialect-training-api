@@ -1,8 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { ExamQuestionEntity } from '@business/student/domain/entities/question.entity';
-import { ResponseEntity } from '@business/student/domain/entities/response.entity';
 import { ExamCopy, ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
 import { ExamCopy as ExamCopyEntity } from '@business/student/infrastructure/database/entities/exam-copy.entity';
@@ -18,44 +16,45 @@ export class ExamCopyTypeormQueryRepository extends BaseTypeormQueryRepository i
     super(context);
   }
 
-  async findExamCopy(examId: string): Promise<ExamCopy | undefined> {
-    const copy = await this.repository.findOne({
-      where: { exam: { id: examId }, userId: this.context.userId },
-      relations: ['exam', 'responses', 'responses.question'],
+  async findExamCopyByExamId(examId: string): Promise<ExamCopy | undefined> {
+    const examCopy = await this.repository.findOne({
+      where: { examId, userId: this.context.userId },
       order: {
-        createdAt: 'DESC',
+        updatedAt: 'DESC',
       },
     });
 
-    if (!copy) {
+    if (!examCopy) {
       return undefined;
     }
 
+    const currentQuestionIndex = examCopy.questions.findIndex((question) => !question.response);
     return {
-      id: copy.id,
-      examId: copy.exam.id,
-      responses: copy.responses.map((response) =>
-        ResponseEntity.from({
-          id: response.id,
-          question: ExamQuestionEntity.from({
-            id: response.question.id,
-            examId: copy.exam.id,
-            type: response.question.type,
-            question: response.question.question,
-            answer: AnswerValueType.from({
-              questionType: response.question.type,
-              value: response.question.answer,
-            }),
-            propositions: response.question.propositions,
-            order: response.question.order,
-          }),
-          response: AnswerValueType.from({
-            questionType: response.question.type,
-            value: response.response,
-          }),
-        }),
-      ),
-      state: copy.state,
+      id: examCopy.id,
+      examId: examCopy.examId,
+      state: examCopy.state,
+      currentQuestionIndex: currentQuestionIndex > 0 ? currentQuestionIndex : 0,
+      createdAt: examCopy.createdAt,
+      updatedAt: examCopy.updatedAt,
+      questions: examCopy.questions.map((question) => ({
+        id: question.id,
+        type: question.type,
+        order: question.order,
+        createdAt: question.createdAt,
+        updatedAt: question.updatedAt,
+        question: question.question,
+        propositions: question.propositions,
+        answer: AnswerValueType.from({ questionType: question.type, value: question.answer }).formattedValue,
+        response: question.response
+          ? {
+              id: question.response.id,
+              createdAt: question.response.createdAt,
+              valid: question.response.valid,
+              value: AnswerValueType.from({ questionType: question.type, value: question.response.response })
+                .formattedValue,
+            }
+          : undefined,
+      })),
     };
   }
 }

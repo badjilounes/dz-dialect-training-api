@@ -1,5 +1,5 @@
-import { ResponseEntity } from '@business/student/domain/entities/response.entity';
+import { ExamCopyAggregate } from '../aggregates/exam-copy.aggregate';
 
 export class ExamCopyResponseAddedEvent {
-  constructor(public examCopyId: string, public response: ResponseEntity) {}
+  constructor(public examCopy: ExamCopyAggregate) {}
 }

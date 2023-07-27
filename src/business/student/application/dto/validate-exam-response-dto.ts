@@ -1,14 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ValidateExamResponseDto {
+export class ValidateResponseDto {
   @ApiProperty()
-  trainingId!: string;
-
-  @ApiProperty()
-  courseId!: string;
-
-  @ApiProperty()
-  examId!: string;
+  examCopyId!: string;
 
   @ApiProperty()
   questionId!: string;

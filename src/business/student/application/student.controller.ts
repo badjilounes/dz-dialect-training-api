@@ -8,20 +8,19 @@ import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '
 
 import { StartExamCommand } from '../domain/commands/start-exam/start-exam.command';
 
-import { GetExamDto } from '@business/student/application/dto/get-exam-dto';
-import { GetExamResponseDto } from '@business/student/application/dto/get-exam-response-dto';
+import { GetExamCopyDto } from '@business/student/application/dto/get-exam-copy-dto';
+import { GetExamCopyResponseDto } from '@business/student/application/dto/get-exam-copy-response-dto';
 import { GetExamResultDto } from '@business/student/application/dto/get-exam-result-dto';
 import { GetExamResultResponseDto } from '@business/student/application/dto/get-result-response-dto';
-import { SkipExamDto } from '@business/student/application/dto/skip-exam-dto';
 import { StartExamDto } from '@business/student/application/dto/start-exam-dto';
-import { ValidateExamResponseDto } from '@business/student/application/dto/validate-exam-response-dto';
-import { ValidateExamResponseResponseDto } from '@business/student/application/dto/validate-response-dto';
+import { ValidateResponseDto } from '@business/student/application/dto/validate-exam-response-dto';
+import { ValidateResponseResponseDto } from '@business/student/application/dto/validate-response-dto';
 import { StudentErrorInterceptor } from '@business/student/application/student.error-interceptor';
-import { SkipExamCommand } from '@business/student/domain/commands/skip-exam/skip-exam.command';
+import { SkipPresentationCommand } from '@business/student/domain/commands/skip-presentation/skip-presentation.command';
 import { StartPresentationCommand } from '@business/student/domain/commands/start-presentation/start-presentation.command';
 import { ValidateResponseCommand } from '@business/student/domain/commands/validate-response/validate-response.command';
+import { GetExamCopyQuery } from '@business/student/domain/queries/get-exam-copy/get-exam-copy.query';
 import { GetExamResultQuery } from '@business/student/domain/queries/get-exam-result/get-exam-result.query';
-import { GetExamQuery } from '@business/student/domain/queries/get-exam/get-exam.query';
 import { GuestOrUserAuthGuard } from '@core/auth/guest-or-user-auth.guard';
 import { CommandBus } from '@cqrs/command';
 
@@ -31,37 +30,31 @@ import { CommandBus } from '@cqrs/command';
 export class StudentController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
 
-  @ApiOperation({ operationId: 'get-exam', summary: 'Get exam' })
-  @Get('get-exam')
-  @ApiOkResponse({ type: GetExamResponseDto })
-  getExam(@Query() payload: GetExamDto): Promise<GetExamResponseDto> {
-    return this.queryBus.execute(new GetExamQuery(payload));
+  @ApiOperation({ operationId: 'get-exam-copy', summary: 'Get the user copy of given exam' })
+  @Get('get-exam-copy')
+  @ApiOkResponse({ type: GetExamCopyResponseDto })
+  getExam(@Query() payload: GetExamCopyDto): Promise<GetExamCopyResponseDto> {
+    return this.queryBus.execute(new GetExamCopyQuery(payload));
   }
 
   @UseGuards(GuestOrUserAuthGuard)
-  @ApiOperation({ operationId: 'get-exam-result', summary: 'Get training exam results' })
+  @ApiOperation({ operationId: 'get-exam-result', summary: 'Get exam results' })
   @ApiHeader({ name: 'x-guest-id', required: false })
   @Get('get-exam-result')
   @ApiOkResponse({ type: GetExamResultResponseDto })
-  getTrainingExamResult(@Query() payload: GetExamResultDto): Promise<GetExamResultResponseDto> {
+  getExamResult(@Query() payload: GetExamResultDto): Promise<GetExamResultResponseDto> {
     return this.queryBus.execute(new GetExamResultQuery(payload));
   }
 
   @UseGuards(GuestOrUserAuthGuard)
   @ApiBearerAuth()
   @ApiHeader({ name: 'x-guest-id', required: false })
-  @ApiOperation({ operationId: 'validate-exam-response', summary: 'Validate exam response' })
-  @Post('validate-exam-response')
-  @ApiOkResponse({ type: ValidateExamResponseResponseDto })
-  validateExamResponse(@Body() response: ValidateExamResponseDto): Promise<ValidateExamResponseResponseDto> {
+  @ApiOperation({ operationId: 'validate-response', summary: 'Validate response' })
+  @Post('validate-response')
+  @ApiOkResponse({ type: ValidateResponseResponseDto })
+  validateResponse(@Body() response: ValidateResponseDto): Promise<ValidateResponseResponseDto> {
     return this.commandBus.execute(
-      new ValidateResponseCommand(
-        response.trainingId,
-        response.courseId,
-        response.examId,
-        response.questionId,
-        response.response,
-      ),
+      new ValidateResponseCommand(response.examCopyId, response.questionId, response.response),
     );
   }
 
@@ -70,8 +63,8 @@ export class StudentController {
   @ApiHeader({ name: 'x-guest-id', required: false })
   @ApiOperation({ operationId: 'start-exam', summary: 'Start exam' })
   @Post('start-exam')
-  @ApiOkResponse({ type: GetExamResponseDto })
-  startExam(@Body() payload: StartExamDto): Promise<GetExamResponseDto> {
+  @ApiOkResponse({ type: GetExamCopyResponseDto })
+  startExam(@Body() payload: StartExamDto): Promise<GetExamCopyResponseDto> {
     return this.commandBus.execute(new StartExamCommand(payload));
   }
 
@@ -80,18 +73,18 @@ export class StudentController {
   @ApiHeader({ name: 'x-guest-id', required: false })
   @ApiOperation({ operationId: 'start-presentation', summary: 'Start exam' })
   @Post('start-presentation')
-  @ApiOkResponse({ type: GetExamResponseDto })
-  startPresentation(): Promise<GetExamResponseDto> {
+  @ApiOkResponse({ type: GetExamCopyResponseDto })
+  startPresentation(): Promise<GetExamCopyResponseDto> {
     return this.commandBus.execute(new StartPresentationCommand());
   }
 
   @UseGuards(GuestOrUserAuthGuard)
   @ApiBearerAuth()
   @ApiHeader({ name: 'x-guest-id', required: false })
-  @ApiOperation({ operationId: 'skip-exam', summary: 'Skip exam' })
-  @Post('skip-exam')
+  @ApiOperation({ operationId: 'skip-presentation', summary: 'Skip presentation' })
+  @Post('skip-presentation')
   @ApiOkResponse()
-  skipExam(@Body() { trainingId, courseId, examId }: SkipExamDto): Promise<void> {
-    return this.commandBus.execute(new SkipExamCommand(trainingId, courseId, examId));
+  skipPresentation(): Promise<void> {
+    return this.commandBus.execute(new SkipPresentationCommand());
   }
 }

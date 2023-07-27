@@ -33,9 +33,7 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
   }
 
   getTrainingList(): Promise<GetTrainingListQueryResult> {
-    return this.trainingRepository.find({
-      order: { order: 'ASC' },
-    });
+    return this.trainingRepository.find();
   }
 
   async getTrainingById(trainingId: string): Promise<GetTrainingByIdQueryResult> {
@@ -55,7 +53,6 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
 
   async searchTraining(pageIndex: number, pageSize: number, query = ''): Promise<SearchTrainingQueryResult> {
     const options: FindManyOptions<Training> = {
-      order: { order: 'ASC' },
       skip: pageIndex * pageSize,
       take: pageSize,
     };
@@ -82,7 +79,6 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
   ): Promise<SearchCourseQueryResult> {
     const options: FindManyOptions<TrainingCourse> = {
       where: { training: { id: trainingId } },
-      order: { order: 'ASC' },
       skip: pageIndex * pageSize,
       take: pageSize,
     };
@@ -107,7 +103,6 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
   async searchExam(courseId: string, pageIndex: number, pageSize: number, query = ''): Promise<SearchExamQueryResult> {
     const options: FindManyOptions<TrainingCourseExam> = {
       where: { course: { id: courseId } },
-      order: { order: 'ASC' },
       skip: pageIndex * pageSize,
       take: pageSize,
     };

@@ -4,13 +4,13 @@ import * as request from 'supertest';
 import { initAppTesting } from '../core/setup';
 
 import { Training } from '@business/professor/infrastructure/database/entities/training.entity';
-import { ValidateExamResponseDto } from '@business/student/application/dto/validate-exam-response-dto';
+import { ValidateResponseDto } from '@business/student/application/dto/validate-exam-response-dto';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
 
 describe('(TrainingController) validate-exam-response', () => {
   const testHelper = initAppTesting('validate_exam_response');
 
-  let validateDto: ValidateExamResponseDto;
+  let validateDto: ValidateResponseDto;
   let training: Training;
 
   beforeEach(async () => {

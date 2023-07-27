@@ -5,14 +5,14 @@ import { DeepPartial, FindManyOptions, In, Repository } from 'typeorm';
 import { TrainingFixture } from '../training/training.fixture';
 
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
-import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
+import { ExamCopyQuestionResponse } from '@business/student/infrastructure/database/entities/exam-copy-question-response.entity';
 import { ExamCopy } from '@business/student/infrastructure/database/entities/exam-copy.entity';
 
 @Injectable()
 export class ExamCopyFixture {
   constructor(
     @InjectRepository(ExamCopy) private readonly repository: Repository<ExamCopy>,
-    @InjectRepository(ExamCopyResponse) private readonly responseRepository: Repository<ExamCopyResponse>,
+    @InjectRepository(ExamCopyQuestionResponse) private readonly responseRepository: Repository<ExamCopyQuestionResponse>,
     private readonly trainingFixture: TrainingFixture,
   ) {}
 
@@ -30,7 +30,7 @@ export class ExamCopyFixture {
     await this.repository.update(examCopyId, { state: ExamCopyStateEnum.COMPLETED });
   }
 
-  findUserResponse(examId: string, questionId: string, userId: string): Promise<ExamCopyResponse | null> {
+  findUserResponse(examId: string, questionId: string, userId: string): Promise<ExamCopyQuestionResponse | null> {
     return this.responseRepository.findOne({
       where: {
         examCopy: { exam: { id: examId }, userId },

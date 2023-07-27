@@ -1,6 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 
+import { examCopyAggregateToExamCopy } from '../../mappers/exam-copy-aggregate-to-exam-copy.mapper';
+
 import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
 import { ExamCopyCompletedEvent } from '@business/student/domain/events/exam-copy-completed-event';
@@ -8,9 +10,9 @@ import { ExamCopyCreatedEvent } from '@business/student/domain/events/exam-copy-
 import { ExamCopyResponseAddedEvent } from '@business/student/domain/events/exam-copy-response-added-event';
 import { ExamCopySkippedEvent } from '@business/student/domain/events/exam-copy-skipped-event';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
-import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
+import { ExamCopyQuestionResponse } from '@business/student/infrastructure/database/entities/exam-copy-question-response.entity';
 import { ExamCopy } from '@business/student/infrastructure/database/entities/exam-copy.entity';
-import { examCopyToExamCopyAggregate } from '@business/student/infrastructure/mappers/exam-copy.mapper';
+import { examCopyToExamCopyAggregate } from '@business/student/infrastructure/mappers/exam-copy-to-exam-copy-aggregate.mapper';
 import { AppContextService } from '@core/context/app-context.service';
 import { BaseTypeormCommandRepository } from '@ddd/infrastructure/base.typeorm-command-repository';
 
@@ -22,8 +24,8 @@ export class ExamCopyTypeormCommandRepository
     @InjectRepository(ExamCopy)
     protected readonly repository: Repository<ExamCopy>,
 
-    @InjectRepository(ExamCopyResponse)
-    protected readonly responseRepository: Repository<ExamCopyResponse>,
+    @InjectRepository(ExamCopyQuestionResponse)
+    protected readonly responseRepository: Repository<ExamCopyQuestionResponse>,
 
     protected readonly context: AppContextService,
   ) {
@@ -34,14 +36,18 @@ export class ExamCopyTypeormCommandRepository
     this.register(ExamCopySkippedEvent, this.skipExamCopy);
   }
 
+  async findExamCopyById(examCopyId: string): Promise<ExamCopyAggregate | undefined> {
+    const copy = await this.repository.findOneBy({ id: examCopyId, userId: this.context.userId });
+
+    if (!copy) {
+      return undefined;
+    }
+
+    return examCopyToExamCopyAggregate(copy);
+  }
+
   async findExamCopyByExamId(examId: string): Promise<ExamCopyAggregate | undefined> {
-    const examCopy = await this.repository.findOne({
-      where: { exam: { id: examId }, userId: this.context.userId },
-      relations: ['exam', 'responses', 'responses.question'],
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    const examCopy = await this.repository.findOneBy({ examId, userId: this.context.userId });
 
     if (!examCopy) {
       return undefined;
@@ -50,16 +56,12 @@ export class ExamCopyTypeormCommandRepository
     return examCopyToExamCopyAggregate(examCopy);
   }
 
-  private async addExamCopyResponse(event: ExamCopyResponseAddedEvent): Promise<ExamCopyResponse> {
-    const examCopyResponse = this.responseRepository.create({
-      id: event.response.id,
-      examCopy: { id: event.examCopyId },
-      question: { id: event.response.questionId },
-      response: event.response.response.value,
-      valid: event.response.valid,
-    });
+  private addExamCopyResponse(event: ExamCopyResponseAddedEvent): Promise<ExamCopy> {
+    return this.persistExamCopy(event.examCopy);
+  }
 
-    return this.responseRepository.save(examCopyResponse);
+  private async createExamCopy(event: ExamCopyCreatedEvent): Promise<ExamCopy> {
+    return this.persistExamCopy(event.examCopy);
   }
 
   private async completeExamCopy(event: ExamCopyCompletedEvent): Promise<UpdateResult> {
@@ -73,17 +75,6 @@ export class ExamCopyTypeormCommandRepository
     return this.repository.update(examCopy.id, { state: ExamCopyStateEnum.COMPLETED });
   }
 
-  private async createExamCopy(event: ExamCopyCreatedEvent): Promise<ExamCopy> {
-    const examCopy = this.repository.create({
-      id: event.examCopy.id,
-      exam: { id: event.examCopy.examId },
-      userId: this.context.userId,
-      state: event.examCopy.state,
-    });
-
-    return this.repository.save(examCopy);
-  }
-
   private async skipExamCopy(event: ExamCopySkippedEvent): Promise<UpdateResult> {
     const examCopy = await this.repository.findOneOrFail({
       where: {
@@ -93,5 +84,10 @@ export class ExamCopyTypeormCommandRepository
     });
 
     return this.repository.update(examCopy.id, { state: ExamCopyStateEnum.SKIPPED });
+  }
+
+  private persistExamCopy(examCopyAggregate: ExamCopyAggregate): Promise<ExamCopy> {
+    const examCopy = examCopyAggregateToExamCopy(examCopyAggregate);
+    return this.repository.save({ ...examCopy, userId: this.context.userId });
   }
 }

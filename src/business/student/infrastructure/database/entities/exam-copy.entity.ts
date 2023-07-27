@@ -1,20 +1,11 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+
+import { ExamCopyQuestion } from './exam-copy-question.entity';
 
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
-import { ExamCopyResponse } from '@business/student/infrastructure/database/entities/exam-copy-response.entity';
-import { TrainingExam } from '@business/student/infrastructure/database/entities/training-exam.entity';
 
-@Index(['exam.id', 'userId'])
-@Entity()
+@Index(['examId', 'userId'])
+@Entity({ orderBy: { updatedAt: 'DESC' } })
 export class ExamCopy {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -22,14 +13,17 @@ export class ExamCopy {
   @Column()
   userId!: string;
 
+  @Column()
+  examId!: string;
+
   @Column({ type: 'enum', enum: ExamCopyStateEnum, default: ExamCopyStateEnum.IN_PROGRESS })
   state!: ExamCopyStateEnum;
 
-  @ManyToOne(() => TrainingExam, { onDelete: 'CASCADE' })
-  exam!: TrainingExam;
+  @OneToMany(() => ExamCopyQuestion, (question) => question.examCopy, { eager: true, cascade: true })
+  questions!: ExamCopyQuestion[];
 
-  @OneToMany(() => ExamCopyResponse, (response) => response.examCopy, { eager: true, cascade: true })
-  responses!: ExamCopyResponse[];
+  @Column()
+  currentQuestionIndex!: number;
 
   @CreateDateColumn()
   createdAt!: Date;

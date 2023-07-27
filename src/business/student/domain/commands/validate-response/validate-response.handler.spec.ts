@@ -3,11 +3,11 @@ import { mock, MockProxy } from 'jest-mock-extended';
 import { ValidateResponseHandler } from './validate-response.handler';
 
 import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
-import { ExamQuestionEntity } from '@business/student/domain/entities/question.entity';
-import { ResponseEntity } from '@business/student/domain/entities/response.entity';
+import { ExamCopyQuestionResponseEntity } from '@business/student/domain/entities/exam-copy-question-response.entity';
+import { ExamCopyQuestionEntity } from '@business/student/domain/entities/exam-copy-question.entity';
 import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { QuestionNotFoundError } from '@business/student/domain/errors/question-not-found-error';
+import { ExamCopyQuestionNotFoundError } from '@business/student/domain/errors/exam-copy-question-not-found-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
@@ -31,8 +31,8 @@ describe('Validate user response', () => {
   const responseId = 'responseId';
 
   let examCopy: ExamCopyAggregate;
-  let examQuestion: ExamQuestionEntity;
-  let examResponse: ResponseEntity;
+  let examQuestion: ExamCopyQuestionEntity;
+  let examResponse: ExamCopyQuestionResponseEntity;
 
   beforeEach(() => {
     examCopyCommandRepository = mock<ExamCopyCommandRepository>();
@@ -47,9 +47,9 @@ describe('Validate user response', () => {
       eventPublisher,
     );
 
-    examQuestion = ExamQuestionEntity.from({
+    examQuestion = ExamCopyQuestionEntity.from({
       id: questionId,
-      examId,
+      examCopyId: examId,
       type: QuestionTypeEnum.WORD_LIST,
       question: 'question',
       answer: AnswerValueType.createWordList({ value: ['answer'] }),
@@ -61,12 +61,12 @@ describe('Validate user response', () => {
     examCopy = ExamCopyAggregate.from({
       id: examCopyId,
       examId,
-      responses: [],
+      questions: [],
       state: ExamCopyStateEnum.IN_PROGRESS,
     });
     examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(examCopy);
 
-    examResponse = ResponseEntity.from({
+    examResponse = ExamCopyQuestionResponseEntity.from({
       id: responseId,
       question: examQuestion,
       response: AnswerValueType.createWordList({ value: response }),
@@ -83,7 +83,7 @@ describe('Validate user response', () => {
         questionId,
         response,
       }),
-    ).rejects.toStrictEqual(new QuestionNotFoundError(questionId));
+    ).rejects.toStrictEqual(new ExamCopyQuestionNotFoundError(questionId));
   });
 
   it('should create a copy for given exam if no copy exist for this exam', async () => {
@@ -97,7 +97,7 @@ describe('Validate user response', () => {
 
   it('should write the response on the copy for given exam', async () => {
     uuidGenerator.generate.mockReturnValue(responseId);
-    const expectedResponse = ResponseEntity.from({
+    const expectedResponse = ExamCopyQuestionResponseEntity.from({
       id: responseId,
       question: examQuestion,
       response: AnswerValueType.createWordList({ value: response }),
@@ -105,7 +105,7 @@ describe('Validate user response', () => {
 
     await handler.execute({ trainingId, examId, questionId, response });
 
-    expect(examCopy.responses).toEqual([expectedResponse]);
+    expect(examCopy.questions).toEqual([expectedResponse]);
   });
 
   it('should save the the copy with the response added', async () => {
@@ -119,7 +119,7 @@ describe('Validate user response', () => {
         id: examCopyId,
         examId,
         responses: [
-          ResponseEntity.from({
+          ExamCopyQuestionResponseEntity.from({
             id: responseId,
             question: examQuestion,
             response: AnswerValueType.createWordList({ value: response }),

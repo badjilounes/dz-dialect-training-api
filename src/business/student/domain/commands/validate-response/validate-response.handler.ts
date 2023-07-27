@@ -1,16 +1,13 @@
 import { Inject } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 
-import { ExamQuestionEntity } from '../../entities/question.entity';
-import { ExamNotFoundError } from '../../errors/exam-not-found-error';
+import { ExamCopyNotFoundError } from '../../errors/exam-copy-not-found-error';
 import { ProfessorGateway } from '../../gateways/professor-gateway';
 import { PROFESSOR_GATEWAY } from '../../gateways/tokens';
 
 import { ValidateResponseCommand, ValidateResponseCommandResult } from './validate-response.command';
 
-import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
-import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
-import { QuestionNotFoundError } from '@business/student/domain/errors/question-not-found-error';
+import { ExamCopyQuestionNotFoundError } from '@business/student/domain/errors/exam-copy-question-not-found-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import { EXAM_COPY_COMMAND_REPOSITORY } from '@business/student/domain/repositories/tokens';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
@@ -29,68 +26,44 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
     private readonly eventPublisher: EventPublisher,
   ) {}
 
-  async execute({
-    trainingId,
-    courseId,
-    examId,
-    questionId,
-    response,
-  }: ValidateResponseCommand): Promise<ValidateResponseCommandResult> {
+  async execute({ examCopyId, questionId, response }: ValidateResponseCommand): Promise<ValidateResponseCommandResult> {
     // Find given exam question
-    const exam = await this.professorGatewway.getExamById(trainingId, courseId, examId);
-    if (!exam) {
-      throw new ExamNotFoundError(examId);
+    const examCopy = await this.trainingExamCopyCommandRepository.findExamCopyById(examCopyId);
+    if (!examCopy) {
+      throw new ExamCopyNotFoundError(examCopyId);
     }
 
-    const question = exam.questions.find((q) => q.id === questionId);
+    const question = examCopy.questions.find((q) => q.id === questionId);
     if (!question) {
-      throw new QuestionNotFoundError(questionId);
+      throw new ExamCopyQuestionNotFoundError(examCopy.id, questionId);
     }
 
-    // Find existing copy of exam otherwise create a new one
-    let copy = await this.trainingExamCopyCommandRepository.findExamCopyByExamId(examId);
-    if (!copy) {
-      copy = ExamCopyAggregate.create({
-        id: this.uuidGenerator.generate(),
-        examId,
-        responses: [],
-        state: ExamCopyStateEnum.IN_PROGRESS,
-      });
-    }
-    this.eventPublisher.mergeObjectContext(copy);
+    this.eventPublisher.mergeObjectContext(examCopy);
 
-    // Write the response for given question
-    const responseEntity = copy.writeResponse({
+    examCopy.writeQuestionResponse(question, {
       id: this.uuidGenerator.generate(),
-      question: ExamQuestionEntity.from({
-        id: question.id,
-        examId: question.examId,
-        order: question.order,
-        type: question.type,
-        question: question.question,
-        propositions: question.propositions,
-        answer: AnswerValueType.from({
-          questionType: question.type,
-          value: question.answer,
-        }),
-      }),
+      questionId: question.id,
       response: AnswerValueType.from({
         questionType: question.type,
         value: response,
       }),
+      answer: question.answer,
+      createdAt: new Date(),
     });
 
-    // If this is the last question, mark the copy as completed
-    if (copy.responses.length === exam.questions.length) {
-      copy.complete();
+    await this.trainingExamCopyCommandRepository.persist(examCopy);
+
+    const savedResponse = question.response;
+    if (!savedResponse) {
+      throw new Error('Response should be defined');
     }
 
-    await this.trainingExamCopyCommandRepository.persist(copy);
-
     return {
-      valid: responseEntity.valid,
-      response: responseEntity.response.formattedValue,
-      answer: responseEntity.answer.formattedValue,
+      valid: savedResponse.valid,
+      response: savedResponse.response.formattedValue,
+      answer: savedResponse.answer.formattedValue,
+      nextQuestionIndex: examCopy.currentQuestionIndex,
+      examCopyState: examCopy.state,
     };
   }
 }
