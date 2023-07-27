@@ -35,6 +35,7 @@ function examCopyQuestionEntityToExamCopyQuestion(question: ExamCopyQuestionEnti
           response: question.response.response.value,
           valid: question.response.valid,
           createdAt: question.response.createdAt,
+          examCopyQuestion: { id: question.id },
         }
       : null,
   };

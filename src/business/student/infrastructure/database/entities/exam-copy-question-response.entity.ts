@@ -1,4 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+
+import { ExamCopyQuestion } from './exam-copy-question.entity';
 
 @Entity()
 export class ExamCopyQuestionResponse {
@@ -13,4 +15,8 @@ export class ExamCopyQuestionResponse {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @OneToOne(() => ExamCopyQuestion, (examCopyQuestion) => examCopyQuestion.response)
+  @JoinColumn()
+  examCopyQuestion!: ExamCopyQuestion;
 }
