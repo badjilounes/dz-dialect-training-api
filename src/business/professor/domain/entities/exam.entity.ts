@@ -91,6 +91,7 @@ export class ExamEntity extends BaseEntity {
 
   update(props: UpdateExamEntityProps): ExamEntity {
     this._name = props.name;
+    this._description = props.description;
     this._questions = props.questions.map(ExamQuestionEntity.from);
     this._order = props.order;
     this._updatedAt = new Date();
