@@ -12,7 +12,7 @@ type ExamQuestionQueryResult = {
   updatedAt: Date;
 };
 
-type ExamQueryResult = {
+export type ExamQueryResult = {
   id: string;
   name: string;
   description: string;

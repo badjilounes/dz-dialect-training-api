@@ -2,17 +2,17 @@ import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 
 import { CourseEntity, CourseEntityProps, UpdateCourseEntityProps } from '../entities/course.entity';
 import { ExamEntity, UpdateExamEntityProps } from '../entities/exam.entity';
-import { TrainingCourseAddedEvent } from '../events/training/training-course-added-event';
-import { TrainingCourseDeletedEvent } from '../events/training/training-course-deleted-event';
-import { TrainingCourseExamAddedEvent } from '../events/training/training-course-exam-added-event';
-import { TrainingCourseExamDeletedEvent } from '../events/training/training-course-exam-deleted-event';
-import { TrainingCourseExamReorderedEvent } from '../events/training/training-course-exam-reordered-event';
-import { TrainingCourseExamUpdatedEvent } from '../events/training/training-course-exam-udpated-event';
-import { TrainingCourseUpdatedEvent } from '../events/training/training-course-updated-event';
-import { TrainingCreatedEvent } from '../events/training/training-created-event';
-import { TrainingDeletedEvent } from '../events/training/training-deleted-event';
-import { TrainingReorderedEvent } from '../events/training/training-reordered-event';
-import { TrainingUpdatedEvent } from '../events/training/training-updated-event';
+import { TrainingCourseAddedEvent } from '../events/training-course-added-event';
+import { TrainingCourseDeletedEvent } from '../events/training-course-deleted-event';
+import { TrainingCourseExamAddedEvent } from '../events/training-course-exam-added-event';
+import { TrainingCourseExamDeletedEvent } from '../events/training-course-exam-deleted-event';
+import { TrainingCourseExamReorderedEvent } from '../events/training-course-exam-reordered-event';
+import { TrainingCourseExamUpdatedEvent } from '../events/training-course-exam-udpated-event';
+import { TrainingCourseUpdatedEvent } from '../events/training-course-updated-event';
+import { TrainingCreatedEvent } from '../events/training-created-event';
+import { TrainingDeletedEvent } from '../events/training-deleted-event';
+import { TrainingReorderedEvent } from '../events/training-reordered-event';
+import { TrainingUpdatedEvent } from '../events/training-updated-event';
 
 import { BaseAggregateRoot } from '@ddd/domain/base-aggregate-root';
 

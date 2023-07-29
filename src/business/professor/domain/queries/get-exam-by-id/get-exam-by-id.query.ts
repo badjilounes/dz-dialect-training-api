@@ -13,7 +13,7 @@ type TrainingCourseExamQuestionQueryResult = {
   updatedAt: Date;
 };
 
-type TrainingCourseExamQueryResult = {
+export type TrainingCourseExamQueryResult = {
   id: string;
   name: string;
   description: string;

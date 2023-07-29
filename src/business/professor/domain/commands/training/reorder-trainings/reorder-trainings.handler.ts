@@ -1,6 +1,5 @@
 import { Inject } from '@nestjs/common';
 
-import { TrainingAggregate } from '../../../aggregates/training.aggregate';
 import { TRAINING_COMMAND_REPOSITORY } from '../../../repositories/tokens';
 import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
@@ -23,25 +22,15 @@ export class ReorderTrainingsHandler implements ICommandHandler<ReorderTrainings
 
     await Promise.all(
       trainingList.map((training) => {
-        const aggregate = TrainingAggregate.from({
-          id: training.id,
-          name: training.name,
-          description: training.description,
-          isPresentation: training.isPresentation,
-          courses: training.courses,
-          order: training.order,
-          createdAt: training.createdAt,
-          updatedAt: training.updatedAt,
-        });
-        this.eventPublisher.mergeObjectContext(aggregate);
+        this.eventPublisher.mergeObjectContext(training);
 
-        const newOrder = payload.find((c) => c.id === aggregate.id)?.order;
+        const newOrder = payload.find((c) => c.id === training.id)?.order;
 
         if (newOrder !== undefined) {
-          aggregate.reorder(newOrder);
+          training.reorder(newOrder);
         }
 
-        return this.trainingCommandRepository.persist(aggregate);
+        return this.trainingCommandRepository.persist(training);
       }),
     );
   }

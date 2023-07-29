@@ -46,6 +46,9 @@ export class EditTrainingHandler implements ICommandHandler<EditTrainingCommand>
       name: training.name,
       description: training.description,
       isPresentation: training.isPresentation,
+      order: training.order,
+      createdAt: training.createdAt,
+      updatedAt: training.updatedAt,
     };
   }
 }

@@ -1,84 +1,50 @@
-// import { mock, MockProxy } from 'jest-mock-extended';
+import { mock, MockProxy } from 'jest-mock-extended';
 
-// import { GetTrainingChapterListQueryHandler } from './search-chapter.handler';
+import { TrainingQueryRepository } from '../../repositories/training-query-repository';
 
-// import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-// import {
-//   Chapter,
-//   Training,
-//   TrainingQueryRepository,
-// } from '@business/student/domain/repositories/training-query-repository';
+import { GetExamByIdQueryHandler } from './get-exam-by-id.handler';
+import { GetExamByIdQuery, TrainingCourseExamQueryResult } from './get-exam-by-id.query';
 
-// describe('Get training chapter list', () => {
-//   let handler: GetTrainingChapterListQueryHandler;
+describe('Get exam by id', () => {
+  let handler: GetExamByIdQueryHandler;
 
-//   let trainingQueryRepository: MockProxy<TrainingQueryRepository>;
+  let trainingQueryRepository: MockProxy<TrainingQueryRepository>;
 
-//   let chapter: Chapter;
-//   let training: Training;
+  let exam: TrainingCourseExamQueryResult;
 
-//   const trainingId = 'trainingId';
-//   const examId = 'examId';
-//   const questionId = 'questionId';
+  let payload: GetExamByIdQuery;
 
-//   beforeEach(() => {
-//     trainingQueryRepository = mock<TrainingQueryRepository>();
-//     trainingQueryRepository.findExamById.mockResolvedValue(undefined);
+  const trainingId = 'trainingId';
+  const courseId = 'courseId';
+  const examId = 'examId';
 
-//     handler = new GetTrainingChapterListQueryHandler(trainingQueryRepository);
+  beforeEach(() => {
+    trainingQueryRepository = mock<TrainingQueryRepository>();
 
-//     chapter = {
-//       id: 'chapterId',
-//       name: 'chapter name',
-//       description: 'chapter description',
-//       order: 1,
-//     };
+    handler = new GetExamByIdQueryHandler(trainingQueryRepository);
 
-//     training = {
-//       id: trainingId,
-//       chapterId: 'chapterId',
-//       exams: [
-//         {
-//           id: examId,
-//           name: 'presentation exam',
-//           questions: [
-//             {
-//               id: questionId,
-//               type: QuestionTypeEnum.WORD_LIST,
-//               order: 1,
-//               question: 'el makla rahi el dekhel',
-//               answer: ["la nourriture est à l'intérieur"],
-//               propositions: [
-//                 'part',
-//                 'avec',
-//                 'nous',
-//                 'intérieur',
-//                 'quelque',
-//                 'est',
-//                 'est',
-//                 "l'",
-//                 'nourriture',
-//                 'la',
-//                 'à',
-//               ],
-//             },
-//           ],
-//         },
-//       ],
-//     };
-//   });
+    exam = {
+      id: examId,
+      name: 'examgName',
+      description: 'examDescription',
+      questions: [],
+      order: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-//   it('should return the training chapter list', async () => {
-//     trainingQueryRepository.findChapters.mockResolvedValue([chapter]);
-//     trainingQueryRepository.findTrainingsByChapterId.mockResolvedValue([training]);
+    payload = {
+      trainingId,
+      courseId,
+      examId,
+    };
+  });
 
-//     const result = await handler.execute();
+  it('should return exam corresponding to given identifier', async () => {
+    trainingQueryRepository.getTrainingCourseExamById.mockResolvedValue(exam);
 
-//     expect(result).toEqual([
-//       {
-//         chapter,
-//         trainingList: [training],
-//       },
-//     ]);
-//   });
-// });
+    const result = await handler.execute(payload);
+
+    expect(result).toStrictEqual(exam);
+  });
+});

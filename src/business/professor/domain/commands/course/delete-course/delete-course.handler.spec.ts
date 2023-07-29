@@ -1,75 +1,80 @@
-// import { mock, MockProxy } from 'jest-mock-extended';
+import { mock, MockProxy } from 'jest-mock-extended';
 
-// import { ChapterAggregate } from '../../aggregates/chapter.aggregate';
-// import { TrainingChapterNameAlreadyExistError } from '../../errors/training-chapter-name-already-exist-error';
-// import { ChapterCommandRepository } from '../../repositories/chapter-command-repository';
+import { TrainingAggregate } from '../../../aggregates/training.aggregate';
+import { TrainingCourseNotFoundError } from '../../../errors/training-course-not-found-error';
+import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
+import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
-// import { DeleteChapterHandler } from './delete-chapter.handler';
+import { DeleteCourseCommand } from './delete-course.command';
+import { DeleteCourseHandler } from './delete-course.handler';
 
-// import { EventPublisher } from '@cqrs/event';
-// import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
+import { EventPublisher } from '@cqrs/event';
 
-// describe('Create chapter', () => {
-//   let handler: DeleteChapterHandler;
+describe('Delete course', () => {
+  let handler: DeleteCourseHandler;
 
-//   let trainingChapterCommandRepository: MockProxy<ChapterCommandRepository>;
-//   let uuidGenerator: MockProxy<UuidGenerator>;
-//   let eventPublisher: MockProxy<EventPublisher>;
+  let trainingCommandRepository: MockProxy<TrainingCommandRepository>;
+  let eventPublisher: MockProxy<EventPublisher>;
 
-//   let chapter: ChapterAggregate;
+  let training: TrainingAggregate;
 
-//   const chapterId = 'chapterId';
+  const courseId = 'courseId';
+  const trainingId = 'trainingId';
 
-//   beforeEach(() => {
-//     trainingChapterCommandRepository = mock<ChapterCommandRepository>();
-//     uuidGenerator = mock<UuidGenerator>();
-//     eventPublisher = mock<EventPublisher>();
+  let payload: DeleteCourseCommand;
 
-//     handler = new DeleteChapterHandler(trainingChapterCommandRepository, uuidGenerator, eventPublisher);
+  beforeEach(() => {
+    trainingCommandRepository = mock<TrainingCommandRepository>();
+    eventPublisher = mock<EventPublisher>();
 
-//     chapter = ChapterAggregate.from({
-//       id: chapterId,
-//       name: 'chapter name',
-//       description: 'chapter description',
-//       isPresentation: false,
-//       order: 1,
-//     });
-//   });
+    handler = new DeleteCourseHandler(trainingCommandRepository, eventPublisher);
 
-//   it('should throw if a chapter already exist for given name', async () => {
-//     trainingChapterCommandRepository.findChapterByName.mockResolvedValue(chapter);
+    payload = { trainingId, courseId };
 
-//     await expect(
-//       handler.execute({
-//         payload: {
-//           name: chapter.name,
-//           description: chapter.description,
-//           isPresentation: chapter.isPresentation,
-//           order: chapter.order,
-//         },
-//       }),
-//     ).rejects.toStrictEqual(new TrainingChapterNameAlreadyExistError(chapter.name));
-//   });
+    training = TrainingAggregate.from({
+      id: trainingId,
+      name: 'trainingName',
+      description: 'trainingDescription',
+      isPresentation: false,
+      courses: [
+        {
+          id: courseId,
+          trainingId,
+          name: 'courseName',
+          description: 'courseDescription',
+          exams: [],
+          order: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      order: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
-//   it('should create a chapter when no cateogry exist for given name', async () => {
-//     trainingChapterCommandRepository.findChapterByName.mockResolvedValue(undefined);
-//     uuidGenerator.generate.mockReturnValueOnce(chapterId);
+    trainingCommandRepository.findTrainingById.mockResolvedValue(training);
+  });
 
-//     const result = await handler.execute({
-//       payload: {
-//         name: chapter.name,
-//         description: chapter.description,
-//         isPresentation: chapter.isPresentation,
-//         order: chapter.order,
-//       },
-//     });
+  it('should throw if training does not exist for given identifier', async () => {
+    trainingCommandRepository.findTrainingById.mockResolvedValue(undefined);
 
-//     expect(result).toEqual({
-//       id: chapterId,
-//       name: chapter.name,
-//       description: chapter.description,
-//       isPresentation: chapter.isPresentation,
-//       order: chapter.order,
-//     });
-//   });
-// });
+    await expect(handler.execute(payload)).rejects.toStrictEqual(new TrainingNotFoundError(payload.trainingId));
+  });
+
+  it('should throw if no course have given identifier for given training', async () => {
+    payload = { ...payload, courseId: 'unknownCourseId' };
+
+    await expect(handler.execute(payload)).rejects.toStrictEqual(
+      new TrainingCourseNotFoundError(payload.trainingId, payload.courseId),
+    );
+  });
+
+  it('should delete given course', async () => {
+    const result = await handler.execute(payload);
+
+    expect(result).toBeUndefined();
+    expect(training.courses).toHaveLength(0);
+    expect(trainingCommandRepository.persist).toHaveBeenCalledWith(training);
+  });
+});

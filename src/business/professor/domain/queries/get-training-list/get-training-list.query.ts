@@ -33,7 +33,7 @@ type TrainingCourseQueryResult = {
   updatedAt: Date;
 };
 
-type TrainingQueryResult = {
+export type TrainingQueryResult = {
   id: string;
   name: string;
   description: string;

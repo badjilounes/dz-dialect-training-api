@@ -1,36 +1,27 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { LanguageEntity } from '../../../entities/language.entity';
+import { TrainingAggregate } from '../../../aggregates/training.aggregate';
+import { TrainingNameAlreadyExistError } from '../../../errors/training-name-already-exist-error';
+import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
+import { CreateTrainingCommandPayload } from './create-training.command';
 import { CreateTrainingHandler } from './create-training.handler';
 
-import { TrainingAggregate } from '@business/professor/domain/aggregates/training.aggregate';
-import { CreateTrainingCommandPayload } from '@business/professor/domain/commands/training/create-training/create-training.command';
-import { TrainingCommandRepository } from '@business/professor/domain/repositories/training-command-repository';
 import { EventPublisher } from '@cqrs/event';
 import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 
-describe('Create presentation', () => {
+describe('Create training', () => {
   let handler: CreateTrainingHandler;
 
   let trainingCommandRepository: MockProxy<TrainingCommandRepository>;
   let uuidGenerator: MockProxy<UuidGenerator>;
   let eventPublisher: MockProxy<EventPublisher>;
 
-  let training: TrainingAggregate;
-
-  let payload: CreateTrainingCommandPayload;
-
-  const languageId = 'languageId';
   const trainingId = 'trainingId';
-  const courseId = 'courseId';
-  const examId = 'examId';
-  const questionId = 'questionId';
-
-  const existingLanguage = {
-    id: languageId,
-    from: 'fr',
-    learning: 'dz',
+  const payload: CreateTrainingCommandPayload = {
+    name: 'courseName',
+    description: 'courseDescription',
+    isPresentation: false,
   };
 
   beforeEach(() => {
@@ -40,30 +31,19 @@ describe('Create presentation', () => {
 
     handler = new CreateTrainingHandler(trainingCommandRepository, uuidGenerator, eventPublisher);
 
-    payload = {
-      name: 'presentation training',
-      description: 'presentation training description',
-      isPresentation: false,
-    };
-
-    training = TrainingAggregate.from({
-      id: trainingId,
-      name: 'presentation training',
-      description: 'presentation training description',
-      isPresentation: false,
-      courses: [],
-    });
+    trainingCommandRepository.hasTrainingWithName.mockResolvedValue(false);
   });
 
-  beforeEach(() => {
-    uuidGenerator.generate.mockReturnValueOnce(trainingId);
-    uuidGenerator.generate.mockReturnValueOnce(courseId);
-    uuidGenerator.generate.mockReturnValueOnce(examId);
-    uuidGenerator.generate.mockReturnValueOnce(questionId);
+  it('should throw if a training already exist for given name', async () => {
+    trainingCommandRepository.hasTrainingWithName.mockResolvedValue(true);
+
+    await expect(handler.execute({ payload })).rejects.toStrictEqual(new TrainingNameAlreadyExistError(payload.name));
   });
 
   it('should create a training', async () => {
-    trainingCommandRepository.findTrainingLanguage.mockResolvedValueOnce(LanguageEntity.from(existingLanguage));
+    const nextTrainingOrder = 1;
+    trainingCommandRepository.getNextOrder.mockResolvedValue(nextTrainingOrder);
+    uuidGenerator.generate.mockReturnValueOnce(trainingId);
 
     const result = await handler.execute({ payload });
 
@@ -72,6 +52,25 @@ describe('Create presentation', () => {
       name: payload.name,
       description: payload.description,
       isPresentation: payload.isPresentation,
+      order: nextTrainingOrder,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
     });
+    expect(result.createdAt.getTime()).toBeCloseTo(Date.now(), -3);
+    expect(result.updatedAt.getTime()).toBeCloseTo(Date.now(), -3);
+    expect(trainingCommandRepository.persist).toHaveBeenCalledWith(
+      expect.objectContaining(
+        TrainingAggregate.from({
+          id: trainingId,
+          name: payload.name,
+          description: payload.description,
+          isPresentation: payload.isPresentation,
+          courses: [],
+          order: nextTrainingOrder,
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        }),
+      ),
+    );
   });
 });

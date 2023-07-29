@@ -5,6 +5,9 @@ export type EditTrainingCommandResult = {
   name: string;
   description: string;
   isPresentation: boolean;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type EditTrainingCommandPayload = {

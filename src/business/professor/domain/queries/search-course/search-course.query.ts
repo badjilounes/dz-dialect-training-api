@@ -22,7 +22,7 @@ export type CourseExamQueryResult = {
   updatedAt: Date;
 };
 
-type CourseQueryResult = {
+export type CourseQueryResult = {
   id: string;
   name: string;
   description: string;

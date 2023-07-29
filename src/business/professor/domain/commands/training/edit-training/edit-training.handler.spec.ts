@@ -1,75 +1,88 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { ChapterAggregate } from '../../aggregates/chapter.aggregate';
-import { TrainingCourseNameAlreadyExistError } from '../../errors/training-course-name-already-exist-error';
-import { CourseCommandRepository } from '../../repositories/course-command-repository';
+import { TrainingAggregate } from '../../../aggregates/training.aggregate';
+import { TrainingNameAlreadyExistError } from '../../../errors/training-name-already-exist-error';
+import { TrainingNotFoundError } from '../../../errors/training-not-found-error';
+import { TrainingCommandRepository } from '../../../repositories/training-command-repository';
 
+import { EditTrainingCommand } from './edit-training.command';
 import { EditTrainingHandler } from './edit-training.handler';
 
 import { EventPublisher } from '@cqrs/event';
-import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 
-describe('Create chapter', () => {
+describe('Edit training', () => {
   let handler: EditTrainingHandler;
 
-  let trainingChapterCommandRepository: MockProxy<CourseCommandRepository>;
-  let uuidGenerator: MockProxy<UuidGenerator>;
+  let trainingCommandRepository: MockProxy<TrainingCommandRepository>;
   let eventPublisher: MockProxy<EventPublisher>;
 
-  let chapter: ChapterAggregate;
+  let training: TrainingAggregate;
 
-  const chapterId = 'chapterId';
+  const trainingId = 'trainingId';
+
+  let payload: EditTrainingCommand;
 
   beforeEach(() => {
-    trainingChapterCommandRepository = mock<CourseCommandRepository>();
-    uuidGenerator = mock<UuidGenerator>();
+    trainingCommandRepository = mock<TrainingCommandRepository>();
     eventPublisher = mock<EventPublisher>();
 
-    handler = new EditTrainingHandler(trainingChapterCommandRepository, uuidGenerator, eventPublisher);
+    handler = new EditTrainingHandler(trainingCommandRepository, eventPublisher);
 
-    chapter = ChapterAggregate.from({
-      id: chapterId,
-      name: 'chapter name',
-      description: 'chapter description',
-      isPresentation: false,
-      order: 1,
-    });
-  });
-
-  it('should throw if a chapter already exist for given name', async () => {
-    trainingChapterCommandRepository.findTrainingCourseByName.mockResolvedValue(chapter);
-
-    await expect(
-      handler.execute({
-        payload: {
-          name: chapter.name,
-          description: chapter.description,
-          isPresentation: chapter.isPresentation,
-          order: chapter.order,
-        },
-      }),
-    ).rejects.toStrictEqual(new TrainingCourseNameAlreadyExistError(chapter.name));
-  });
-
-  it('should create a chapter when no cateogry exist for given name', async () => {
-    trainingChapterCommandRepository.findTrainingCourseByName.mockResolvedValue(undefined);
-    uuidGenerator.generate.mockReturnValueOnce(chapterId);
-
-    const result = await handler.execute({
+    payload = {
+      id: trainingId,
       payload: {
-        name: chapter.name,
-        description: chapter.description,
-        isPresentation: chapter.isPresentation,
-        order: chapter.order,
+        name: 'trainingNameUpdated',
+        description: 'trainingDescriptionUpdated',
+        isPresentation: true,
       },
+    };
+
+    training = TrainingAggregate.from({
+      id: trainingId,
+      name: 'trainingName',
+      description: 'trainingDescription',
+      isPresentation: false,
+      courses: [],
+      order: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
+
+    trainingCommandRepository.hasTrainingWithName.mockResolvedValue(false);
+    trainingCommandRepository.findTrainingById.mockResolvedValue(training);
+  });
+
+  it('should throw if training does not exist for given identifier', async () => {
+    trainingCommandRepository.findTrainingById.mockResolvedValue(undefined);
+
+    await expect(handler.execute(payload)).rejects.toStrictEqual(new TrainingNotFoundError(training.id));
+  });
+
+  it('should throw if another training already exist for given name', async () => {
+    trainingCommandRepository.hasTrainingWithName.mockResolvedValue(true);
+
+    await expect(handler.execute(payload)).rejects.toStrictEqual(
+      new TrainingNameAlreadyExistError(payload.payload.name),
+    );
+  });
+
+  it('should edit given training', async () => {
+    const result = await handler.execute(payload);
 
     expect(result).toEqual({
-      id: chapterId,
-      name: chapter.name,
-      description: chapter.description,
-      isPresentation: chapter.isPresentation,
-      order: chapter.order,
+      id: trainingId,
+      name: payload.payload.name,
+      description: payload.payload.description,
+      isPresentation: payload.payload.isPresentation,
+      order: training.order,
+      createdAt: training.createdAt,
+      updatedAt: expect.any(Date),
     });
+    expect(result.updatedAt.getTime()).toBeCloseTo(Date.now(), -3);
+    expect(training.name).toStrictEqual(payload.payload.name);
+    expect(training.description).toStrictEqual(payload.payload.description);
+    expect(training.isPresentation).toStrictEqual(payload.payload.isPresentation);
+    expect(training.updatedAt.getTime()).toBeCloseTo(Date.now(), -3);
+    expect(trainingCommandRepository.persist).toHaveBeenCalledWith(training);
   });
 });
