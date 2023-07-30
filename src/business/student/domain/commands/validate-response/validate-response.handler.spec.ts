@@ -1,167 +1,134 @@
+import { EventPublisher } from '@nestjs/cqrs';
 import { mock, MockProxy } from 'jest-mock-extended';
 
+import { UuidGenerator } from '../../../../../shared/ddd/domain/uuid/uuid-generator.interface';
+import { ExamCopyAggregate, ExamCopyAggregateProps } from '../../aggregates/exam-copy.aggregate';
+import { ExamCopyStateEnum } from '../../enums/exam-copy-state.enum';
+import { QuestionTypeEnum } from '../../enums/question-type.enum';
+import { ExamCopyNotFoundError } from '../../errors/exam-copy-not-found-error';
+import { ExamCopyQuestionAlreadyAnsweredError } from '../../errors/exam-copy-question-already-answered-error';
+import { ExamCopyQuestionNotFoundError } from '../../errors/exam-copy-question-not-found-error';
+import { ExamCopyResponseNotSavedError } from '../../errors/exam-copy-response-not-saved-error';
+import { ExamCopyResponseAddedEvent } from '../../events/exam-copy-response-added-event';
+import { ProfessorGateway } from '../../gateways/professor-gateway';
+import { ExamCopyCommandRepository } from '../../repositories/exam-copy-command-repository';
+import { AnswerValueType } from '../../value-types/answer.value-type';
+
+import { ValidateResponseCommand } from './validate-response.command';
 import { ValidateResponseHandler } from './validate-response.handler';
 
-import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
-import { ExamCopyQuestionResponseEntity } from '@business/student/domain/entities/exam-copy-question-response.entity';
-import { ExamCopyQuestionEntity } from '@business/student/domain/entities/exam-copy-question.entity';
-import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
-import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { ExamCopyQuestionNotFoundError } from '@business/student/domain/errors/exam-copy-question-not-found-error';
-import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
-import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
-import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
-import { EventPublisher } from '@cqrs/event';
-import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
-
-describe('Validate user response', () => {
+describe('Validate response', () => {
   let handler: ValidateResponseHandler;
 
   let examCopyCommandRepository: MockProxy<ExamCopyCommandRepository>;
-  let trainingCommandRepository: MockProxy<TrainingCommandRepository>;
+  let professorGateway: MockProxy<ProfessorGateway>;
   let uuidGenerator: MockProxy<UuidGenerator>;
   let eventPublisher: MockProxy<EventPublisher>;
 
-  const trainingId = 'trainingId';
   const examId = 'examId';
   const questionId = 'questionId';
-  const response = ['response'];
-
   const examCopyId = 'examCopyId';
-  const responseId = 'responseId';
+  const response = ['answer1'];
+
+  let payload: ValidateResponseCommand;
 
   let examCopy: ExamCopyAggregate;
-  let examQuestion: ExamCopyQuestionEntity;
-  let examResponse: ExamCopyQuestionResponseEntity;
+  let examCopyProps: ExamCopyAggregateProps;
 
   beforeEach(() => {
     examCopyCommandRepository = mock<ExamCopyCommandRepository>();
-    trainingCommandRepository = mock<TrainingCommandRepository>();
+    professorGateway = mock<ProfessorGateway>();
     uuidGenerator = mock<UuidGenerator>();
     eventPublisher = mock<EventPublisher>();
 
-    handler = new ValidateResponseHandler(
-      examCopyCommandRepository,
-      trainingCommandRepository,
-      uuidGenerator,
-      eventPublisher,
-    );
+    handler = new ValidateResponseHandler(examCopyCommandRepository, professorGateway, uuidGenerator, eventPublisher);
 
-    examQuestion = ExamCopyQuestionEntity.from({
-      id: questionId,
-      examCopyId: examId,
-      type: QuestionTypeEnum.WORD_LIST,
-      question: 'question',
-      answer: AnswerValueType.createWordList({ value: ['answer'] }),
-      propositions: ['proposition1', 'proposition2'],
-      order: 1,
-    });
-    trainingCommandRepository.findExamQuestions.mockResolvedValue([examQuestion]);
+    payload = { examCopyId, questionId, response };
 
-    examCopy = ExamCopyAggregate.from({
+    examCopyProps = {
       id: examCopyId,
       examId,
-      questions: [],
       state: ExamCopyStateEnum.IN_PROGRESS,
-    });
-    examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(examCopy);
-
-    examResponse = ExamCopyQuestionResponseEntity.from({
-      id: responseId,
-      question: examQuestion,
-      response: AnswerValueType.createWordList({ value: response }),
-    });
-  });
-
-  it('should throw if question does not exist in given training exam', async () => {
-    trainingCommandRepository.findExamQuestions.mockResolvedValue([]);
-
-    await expect(
-      handler.execute({
-        trainingId,
-        examId,
-        questionId,
-        response,
-      }),
-    ).rejects.toStrictEqual(new ExamCopyQuestionNotFoundError(questionId));
-  });
-
-  it('should create a copy for given exam if no copy exist for this exam', async () => {
-    examCopyCommandRepository.findExamCopyByExamId.mockResolvedValue(undefined);
-
-    await handler.execute({ trainingId, examId, questionId, response });
-
-    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(expect.any(ExamCopyAggregate));
-    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(expect.objectContaining({ examId }));
-  });
-
-  it('should write the response on the copy for given exam', async () => {
-    uuidGenerator.generate.mockReturnValue(responseId);
-    const expectedResponse = ExamCopyQuestionResponseEntity.from({
-      id: responseId,
-      question: examQuestion,
-      response: AnswerValueType.createWordList({ value: response }),
-    });
-
-    await handler.execute({ trainingId, examId, questionId, response });
-
-    expect(examCopy.questions).toEqual([expectedResponse]);
-  });
-
-  it('should save the the copy with the response added', async () => {
-    uuidGenerator.generate.mockReturnValue(responseId);
-
-    await handler.execute({ trainingId, examId, questionId, response });
-
-    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(expect.any(ExamCopyAggregate));
-    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: examCopyId,
-        examId,
-        responses: [
-          ExamCopyQuestionResponseEntity.from({
-            id: responseId,
-            question: examQuestion,
-            response: AnswerValueType.createWordList({ value: response }),
+      questions: [
+        {
+          id: questionId,
+          examCopyId,
+          examQuestionId: questionId,
+          type: QuestionTypeEnum.MULTIPLE_CHOICE,
+          order: 1,
+          question: 'question',
+          answer: AnswerValueType.from({
+            questionType: QuestionTypeEnum.MULTIPLE_CHOICE,
+            value: ['answer1'],
           }),
-        ],
-      }),
+          response: undefined,
+          propositions: ['proposition1'],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+      currentQuestionIndex: 0,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+    };
+    examCopy = ExamCopyAggregate.from(examCopyProps);
+
+    examCopyCommandRepository.findExamCopyById.mockResolvedValue(examCopy);
+  });
+
+  it('should throw if no exam copy exist for given identifier', async () => {
+    examCopyCommandRepository.findExamCopyById.mockResolvedValue(undefined);
+
+    await expect(handler.execute(payload)).rejects.toStrictEqual(new ExamCopyNotFoundError(examCopyId));
+  });
+
+  it('should throw if exam copy does not have any question with given identifier', async () => {
+    payload = { ...payload, questionId: 'unknownQuestionId' };
+
+    await expect(handler.execute(payload)).rejects.toStrictEqual(
+      new ExamCopyQuestionNotFoundError(payload.examCopyId, payload.questionId),
     );
   });
 
-  it('should save an invalid response', async () => {
-    uuidGenerator.generate.mockReturnValue(responseId);
-
-    const result = await handler.execute({ trainingId, examId, questionId, response: examResponse.response.value });
-
-    expect(result).toEqual({
-      valid: false,
-      response: examResponse.response.formattedValue,
-      answer: examQuestion.answer.formattedValue,
+  it('should throw if exam copy question is already answered', async () => {
+    examCopy.questions[0].writeResponse({
+      id: 'responseId',
+      questionId,
+      answer: AnswerValueType.from({
+        questionType: QuestionTypeEnum.MULTIPLE_CHOICE,
+        value: ['answer1'],
+      }),
+      response: AnswerValueType.from({
+        questionType: QuestionTypeEnum.MULTIPLE_CHOICE,
+        value: ['answer1'],
+      }),
+      createdAt: new Date(),
     });
+
+    await expect(handler.execute(payload)).rejects.toStrictEqual(
+      new ExamCopyQuestionAlreadyAnsweredError(examCopyId, questionId),
+    );
   });
 
-  it('should save a valid response', async () => {
-    uuidGenerator.generate.mockReturnValue(responseId);
+  it('should throw if the response has not been saved', async () => {
+    examCopy.writeQuestionResponse = jest.fn();
 
-    const result = await handler.execute({ trainingId, examId, questionId, response: examQuestion.answer.value });
+    await expect(handler.execute(payload)).rejects.toStrictEqual(
+      new ExamCopyResponseNotSavedError(examCopyId, questionId, 'answer1'),
+    );
+  });
+
+  it('should validate given response', async () => {
+    const result = await handler.execute(payload);
 
     expect(result).toEqual({
       valid: true,
-      response: examQuestion.answer.formattedValue,
-      answer: examQuestion.answer.formattedValue,
+      response: 'answer1',
+      answer: 'answer1',
+      nextQuestionIndex: 1,
+      examCopyState: ExamCopyStateEnum.COMPLETED,
     });
-  });
-
-  it('should mark the exam copy as completed writing the last question response', async () => {
-    uuidGenerator.generate.mockReturnValue(responseId);
-
-    await handler.execute({ trainingId, examId, questionId, response: examQuestion.answer.value });
-
-    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(
-      expect.objectContaining({
-        state: ExamCopyStateEnum.COMPLETED,
-      }),
-    );
+    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(examCopy);
+    expect(examCopy.getUncommittedEvents()).toEqual(expect.arrayContaining([expect.any(ExamCopyResponseAddedEvent)]));
   });
 });

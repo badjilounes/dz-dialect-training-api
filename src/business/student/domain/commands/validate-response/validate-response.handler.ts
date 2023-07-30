@@ -2,6 +2,7 @@ import { Inject } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 
 import { ExamCopyNotFoundError } from '../../errors/exam-copy-not-found-error';
+import { ExamCopyResponseNotSavedError } from '../../errors/exam-copy-response-not-saved-error';
 import { ProfessorGateway } from '../../gateways/professor-gateway';
 import { PROFESSOR_GATEWAY } from '../../gateways/tokens';
 
@@ -40,13 +41,11 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
 
     this.eventPublisher.mergeObjectContext(examCopy);
 
+    const responseValueType = AnswerValueType.from({ questionType: question.type, value: response });
     examCopy.writeQuestionResponse(question, {
       id: this.uuidGenerator.generate(),
       questionId: question.id,
-      response: AnswerValueType.from({
-        questionType: question.type,
-        value: response,
-      }),
+      response: responseValueType,
       answer: question.answer,
       createdAt: new Date(),
     });
@@ -55,13 +54,13 @@ export class ValidateResponseHandler implements ICommandHandler<ValidateResponse
 
     const savedResponse = question.response;
     if (!savedResponse) {
-      throw new Error('Response should be defined');
+      throw new ExamCopyResponseNotSavedError(examCopy.id, question.id, responseValueType.formattedValue);
     }
 
     return {
-      valid: savedResponse.valid,
-      response: savedResponse.response.formattedValue,
-      answer: savedResponse.answer.formattedValue,
+      valid: question.response.valid,
+      response: question.response.response.formattedValue,
+      answer: question.response.answer.formattedValue,
       nextQuestionIndex: examCopy.currentQuestionIndex,
       examCopyState: examCopy.state,
     };

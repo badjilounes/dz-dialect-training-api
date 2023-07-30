@@ -1,95 +1,165 @@
+import { EventPublisher } from '@nestjs/cqrs';
 import { mock, MockProxy } from 'jest-mock-extended';
 
-import { TrainingAggregate } from '../../aggregates/training.aggregate';
+import { UuidGenerator } from '../../../../../shared/ddd/domain/uuid/uuid-generator.interface';
+import { ExamCopyAggregate } from '../../aggregates/exam-copy.aggregate';
+import { ExamCopyStateEnum } from '../../enums/exam-copy-state.enum';
+import { QuestionTypeEnum } from '../../enums/question-type.enum';
+import { TrainingPresentationExamNotFoundError } from '../../errors/training-presentation-exam-not-found-error';
+import { ProfessorGateway, Training } from '../../gateways/professor-gateway';
+import { ExamCopyCommandRepository } from '../../repositories/exam-copy-command-repository';
+import { AnswerValueType } from '../../value-types/answer.value-type';
 
 import { StartPresentationHandler } from './start-presentation.handler';
-
-import { ExamCopyAggregate } from '@business/student/domain/aggregates/exam-copy.aggregate';
-import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { TrainingPresentationExamNotFoundError } from '@business/student/domain/errors/training-presentation-exam-not-found-error';
-import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
-import { TrainingCommandRepository } from '@business/student/domain/repositories/training-command-repository';
-import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
-import { EventPublisher } from '@cqrs/event';
-import { UuidGenerator } from '@ddd/domain/uuid/uuid-generator.interface';
 
 describe('Start presentation', () => {
   let handler: StartPresentationHandler;
 
   let examCopyCommandRepository: MockProxy<ExamCopyCommandRepository>;
-  let trainingCommandRepository: MockProxy<TrainingCommandRepository>;
+  let professorGateway: MockProxy<ProfessorGateway>;
   let uuidGenerator: MockProxy<UuidGenerator>;
   let eventPublisher: MockProxy<EventPublisher>;
 
   const trainingId = 'trainingId';
   const examId = 'examId';
   const questionId = 'questionId';
+  const examCopyId = 'examCopyId';
 
-  let training: TrainingAggregate;
+  let trainingPresentation: Training;
 
   beforeEach(() => {
     examCopyCommandRepository = mock<ExamCopyCommandRepository>();
-    trainingCommandRepository = mock<TrainingCommandRepository>();
+    professorGateway = mock<ProfessorGateway>();
     uuidGenerator = mock<UuidGenerator>();
     eventPublisher = mock<EventPublisher>();
 
-    handler = new StartPresentationHandler(
-      examCopyCommandRepository,
-      trainingCommandRepository,
-      uuidGenerator,
-      eventPublisher,
-    );
+    handler = new StartPresentationHandler(examCopyCommandRepository, professorGateway, uuidGenerator, eventPublisher);
 
-    training = TrainingAggregate.from({
+    trainingPresentation = {
       id: trainingId,
-      chapterId: 'chapterId',
-      fromLanguage: 'fr',
-      learningLanguage: 'dz',
-      exams: [
+      name: 'trainingName',
+      description: 'trainingDescription',
+      isPresentation: true,
+      order: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      courses: [
         {
-          id: examId,
-          courseId: trainingId,
-          name: 'presentation exam',
-          questions: [
+          id: 'courseId',
+          trainingId,
+          name: 'courseName',
+          description: 'courseDescription',
+          order: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          exams: [
             {
-              id: questionId,
-              type: QuestionTypeEnum.WORD_LIST,
+              id: examId,
+              courseId: 'courseId',
+              name: 'examName',
+              description: 'examDescription',
               order: 1,
-              question: 'el makla rahi el dekhel',
-              examId,
-              answer: AnswerValueType.createWordList({ value: ["la nourriture est à l'intérieur"] }),
-              propositions: [
-                'part',
-                'avec',
-                'nous',
-                'intérieur',
-                'quelque',
-                'est',
-                'est',
-                "l'",
-                'nourriture',
-                'la',
-                'à',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              questions: [
+                {
+                  id: questionId,
+                  examId,
+                  type: QuestionTypeEnum.MULTIPLE_CHOICE,
+                  order: 1,
+                  question: 'question',
+                  answer: ['answer1'],
+                  propositions: ['proposition1'],
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                },
               ],
             },
           ],
         },
       ],
-    });
+    };
 
-    trainingCommandRepository.findTrainingPresentationExam.mockResolvedValue(training.exams[0]);
+    professorGateway.getTrainingPresentation.mockResolvedValue(trainingPresentation);
   });
 
-  it('should throw if no presentation exam exist', async () => {
-    trainingCommandRepository.findTrainingPresentationExam.mockResolvedValue(undefined);
+  it('should throw if no training presentation is defined', async () => {
+    professorGateway.getTrainingPresentation.mockResolvedValue(null);
 
     await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationExamNotFoundError());
   });
 
-  it('should create a copy for presentation exam', async () => {
-    await handler.execute();
+  it('should throw if training presentation does not have any course', async () => {
+    professorGateway.getTrainingPresentation.mockResolvedValue({ ...trainingPresentation, courses: [] });
 
-    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(expect.any(ExamCopyAggregate));
-    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(expect.objectContaining({ examId }));
+    await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationExamNotFoundError());
+  });
+
+  it('should throw if training presentation course does not have any exam', async () => {
+    professorGateway.getTrainingPresentation.mockResolvedValue({
+      ...trainingPresentation,
+      courses: [{ ...trainingPresentation.courses[0], exams: [] }],
+    });
+
+    await expect(handler.execute()).rejects.toStrictEqual(new TrainingPresentationExamNotFoundError());
+  });
+
+  it('should start training presentation', async () => {
+    uuidGenerator.generate.mockReturnValueOnce(examCopyId);
+    uuidGenerator.generate.mockReturnValueOnce(questionId);
+
+    const result = await handler.execute();
+
+    const [question] = trainingPresentation.courses[0].exams[0].questions;
+
+    expect(result).toEqual({
+      id: examCopyId,
+      examId,
+      state: ExamCopyStateEnum.IN_PROGRESS,
+      questions: [
+        {
+          id: questionId,
+          type: question.type,
+          order: question.order,
+          question: question.question,
+          propositions: question.propositions,
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        },
+      ],
+      currentQuestionIndex: 0,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date),
+    });
+    expect(examCopyCommandRepository.persist).toHaveBeenCalledWith(
+      expect.objectContaining(
+        ExamCopyAggregate.from({
+          id: examCopyId,
+          examId,
+          state: ExamCopyStateEnum.IN_PROGRESS,
+          questions: [
+            {
+              id: questionId,
+              examCopyId,
+              examQuestionId: questionId,
+              type: question.type,
+              order: question.order,
+              question: question.question,
+              propositions: question.propositions,
+              answer: AnswerValueType.from({
+                questionType: question.type,
+                value: question.answer,
+              }),
+              response: undefined,
+              createdAt: expect.any(Date),
+              updatedAt: expect.any(Date),
+            },
+          ],
+          currentQuestionIndex: 0,
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        }),
+      ),
+    );
   });
 });

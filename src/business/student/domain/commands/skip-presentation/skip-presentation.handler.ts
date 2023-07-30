@@ -1,13 +1,13 @@
 import { Inject } from '@nestjs/common';
 import { EventPublisher } from '@nestjs/cqrs';
 
+import { ExamCopyNotFoundError } from '../../errors/exam-copy-not-found-error';
 import { TrainingPresentationExamNotFoundError } from '../../errors/training-presentation-exam-not-found-error';
 import { ProfessorGateway } from '../../gateways/professor-gateway';
 import { PROFESSOR_GATEWAY } from '../../gateways/tokens';
 
 import { SkipEPresentationCommandResult, SkipPresentationCommand } from './skip-presentation.command';
 
-import { ExamCopyNotStartedError } from '@business/student/domain/errors/exam-copy-not-started-error';
 import { ExamCopyCommandRepository } from '@business/student/domain/repositories/exam-copy-command-repository';
 import { EXAM_COPY_COMMAND_REPOSITORY } from '@business/student/domain/repositories/tokens';
 import { CommandHandler, ICommandHandler } from '@cqrs/command';
@@ -32,7 +32,7 @@ export class SkipPrensentationHandler implements ICommandHandler<SkipPresentatio
     const presentationExamId = presentationExam.id;
     const presentationExamCopy = await this.trainingExamCopyCommandRepository.findExamCopyByExamId(presentationExamId);
     if (!presentationExamCopy) {
-      throw new ExamCopyNotStartedError(presentationExamId);
+      throw new ExamCopyNotFoundError(presentationExamId);
     }
 
     this.eventPublisher.mergeObjectContext(presentationExamCopy);

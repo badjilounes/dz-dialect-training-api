@@ -3,6 +3,7 @@ import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
 import { ExamCopyQuestionEntity, ExamCopyQuestionEntityProps } from '../entities/exam-copy-question.entity';
 import { ExamCopyNotFinishedError } from '../errors/exam-copy-not-finished-error';
 import { ExamCopyNotStartedError } from '../errors/exam-copy-not-started-error';
+import { ExamCopyQuestionAlreadyAnsweredError } from '../errors/exam-copy-question-already-answered-error';
 import { ExamCopyCreatedEvent } from '../events/exam-copy-created-event';
 
 import { ExamCopyQuestionResponseEntityProps } from '@business/student/domain/entities/exam-copy-question-response.entity';
@@ -89,6 +90,10 @@ export class ExamCopyAggregate extends BaseAggregateRoot {
     question: ExamCopyQuestionEntity,
     props: ExamCopyQuestionResponseEntityProps,
   ): ExamCopyAggregate {
+    if (question.response) {
+      throw new ExamCopyQuestionAlreadyAnsweredError(this.id, question.id);
+    }
+
     question.writeResponse(props);
 
     this._currentQuestionIndex++;
