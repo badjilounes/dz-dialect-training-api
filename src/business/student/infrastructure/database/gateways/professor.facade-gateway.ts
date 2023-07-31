@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 
 import { ProfessorQueryFacade } from '../../../../professor/application/facade/professor.query-facade';
 import { PROFESSOR_QUERY_FACADE_TOKEN } from '../../../../professor/application/facade/tokens';
-import { Exam, ProfessorGateway, Training } from '../../../domain/gateways/professor-gateway';
+import { Exam, ProfessorGateway, Training, TrainingListFilter } from '../../../domain/gateways/professor-gateway';
 
 export class ProfessorFacadeGateway implements ProfessorGateway {
   constructor(
@@ -10,8 +10,8 @@ export class ProfessorFacadeGateway implements ProfessorGateway {
     private readonly professorQueryFacade: ProfessorQueryFacade,
   ) {}
 
-  getTraingList(): Promise<Training[]> {
-    return this.professorQueryFacade.getTrainingList();
+  getTraingList(filter?: TrainingListFilter): Promise<Training[]> {
+    return this.professorQueryFacade.getTrainingList(filter);
   }
 
   getTrainingById(trainingId: string): Promise<Training | null> {

@@ -1,11 +1,18 @@
 import { Inject } from '@nestjs/common';
 
-import { ProfessorGateway } from '../../gateways/professor-gateway';
+import { ExamCopyStateEnum } from '../../enums/exam-copy-state.enum';
+import { Course, Exam, ProfessorGateway } from '../../gateways/professor-gateway';
 import { PROFESSOR_GATEWAY } from '../../gateways/tokens';
+import { ResultValueType } from '../../value-types/result.value-type';
 
-import { GetExerciseListQuery, GetExerciseListQueryResult } from './get-exercise-list.query';
+import {
+  GetExerciseListCourseQueryResult,
+  GetExerciseListExamQueryResult,
+  GetExerciseListQuery,
+  GetExerciseListQueryResult,
+} from './get-exercise-list.query';
 
-import { ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
+import { ExamCopy, ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
 import { EXAM_COPY_QUERY_REPOSITORY } from '@business/student/domain/repositories/tokens';
 import { IQueryHandler, QueryHandler } from '@cqrs/query';
 
@@ -19,23 +26,77 @@ export class GetExerciseListQueryHandler implements IQueryHandler<GetExerciseLis
   ) {}
 
   async execute(): Promise<GetExerciseListQueryResult> {
-    const allTrainingList = await this.professorGateway.getTraingList();
+    const trainingList = await this.professorGateway.getTraingList({ isPresentation: false });
 
-    const trainingList = allTrainingList.filter((training) => !training.isPresentation);
+    return Promise.all(
+      trainingList.map(async (training) => ({
+        ...training,
+        courses: await this.buildCourseList(training.courses),
+      })),
+    );
+  }
 
-    const courseList = trainingList.flatMap((training) => training.courses);
-
+  private async buildCourseList(courseList: Course[]): Promise<GetExerciseListCourseQueryResult[]> {
     return Promise.all(
       courseList.map(async (course) => ({
         ...course,
-        exams: await Promise.all(
-          course.exams.map(async (exam) => ({
-            ...exam,
-            currentQuestionIndex:
-              (await this.examCopyQueryRepository.findExamCopyByExamId(exam.id))?.currentQuestionIndex ?? 0,
-          })),
-        ),
+        exams: await this.buildExamList(course.exams),
       })),
     );
+  }
+
+  private async buildExamList(examList: Exam[]): Promise<GetExerciseListExamQueryResult[]> {
+    const examIdList = examList.map((exam) => exam.id);
+    const examCopyList = await this.examCopyQueryRepository.findExamCopyList();
+    const nextExamCopy = await this.examCopyQueryRepository.getNextExamCopy(examIdList);
+
+    return examList.map((exam, index) => ({
+      ...exam,
+      result: this.buildExamResult(exam.id, examCopyList),
+      current: this.buildCurrentExam(exam.questions.length, exam.id, index === 0, nextExamCopy),
+    }));
+  }
+
+  private buildCurrentExam(
+    questionLength: number,
+    examId: string,
+    isFirstCourseExam: boolean,
+    nextExamCopy?: ExamCopy,
+  ): { questionIndex: number; questionLength: number } | undefined {
+    const isFirstWithoutNextExam = isFirstCourseExam && !nextExamCopy;
+    if (isFirstWithoutNextExam) {
+      return {
+        questionIndex: 0,
+        questionLength,
+      };
+    }
+
+    const isNextExam = nextExamCopy && nextExamCopy.examId === examId;
+    if (isNextExam) {
+      return {
+        questionIndex: nextExamCopy.currentQuestionIndex,
+        questionLength,
+      };
+    }
+
+    return undefined;
+  }
+
+  private buildExamResult(examId: string, examCopyList: ExamCopy[]): { score: number; maxScore: number } | undefined {
+    const examCopy = examCopyList.find((copy) => copy.examId === examId);
+
+    if (examCopy?.state !== ExamCopyStateEnum.COMPLETED) {
+      return undefined;
+    }
+
+    const result = ResultValueType.fromCopy({
+      state: examCopy.state,
+      questions: examCopy.questions,
+    });
+
+    return {
+      score: result.score,
+      maxScore: result.maxScore,
+    };
   }
 }

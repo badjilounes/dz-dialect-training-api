@@ -14,7 +14,7 @@ export class GetTrainingListQueryHandler implements IQueryHandler<GetTrainingLis
     private readonly trainingQueryRepository: TrainingQueryRepository,
   ) {}
 
-  execute(): Promise<GetTrainingListQueryResult> {
-    return this.trainingQueryRepository.getTrainingList();
+  execute({ filter }: GetTrainingListQuery): Promise<GetTrainingListQueryResult> {
+    return this.trainingQueryRepository.getTrainingList(filter);
   }
 }

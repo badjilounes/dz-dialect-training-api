@@ -47,7 +47,7 @@ export type TrainingQueryResult = {
 export type GetTrainingListQueryResult = TrainingQueryResult[];
 
 export class GetTrainingListQuery extends Query<GetTrainingListQueryResult> {
-  constructor() {
+  constructor(public readonly filter?: { isPresentation: boolean }) {
     super();
   }
 }

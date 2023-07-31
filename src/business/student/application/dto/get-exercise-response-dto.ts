@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { QuestionTypeEnum } from '../../domain/enums/question-type.enum';
 
-class GetExamListTrainingCourseExamQuestionResponseDto {
+class GetExerciseExamQuestionResponseDto {
   @ApiProperty()
   id!: string;
 
@@ -19,7 +19,23 @@ class GetExamListTrainingCourseExamQuestionResponseDto {
   answer!: string[];
 }
 
-class GetExamListTrainingCourseExamResponseDto {
+export class GetExerciseExamCurrentResponseDto {
+  @ApiProperty()
+  questionIndex!: number;
+
+  @ApiProperty()
+  questionLength!: number;
+}
+
+export class GetExerciseExamResultResponseDto {
+  @ApiProperty()
+  score!: number;
+
+  @ApiProperty()
+  maxScore!: number;
+}
+
+class GetExerciseExamResponseDto {
   @ApiProperty()
   id!: string;
 
@@ -32,8 +48,40 @@ class GetExamListTrainingCourseExamResponseDto {
   @ApiProperty()
   description!: string;
 
-  @ApiProperty({ type: GetExamListTrainingCourseExamQuestionResponseDto, isArray: true })
-  questions: GetExamListTrainingCourseExamQuestionResponseDto[] = [];
+  @ApiProperty({ type: GetExerciseExamQuestionResponseDto, isArray: true })
+  questions: GetExerciseExamQuestionResponseDto[] = [];
+
+  @ApiProperty({ type: GetExerciseExamCurrentResponseDto, required: false })
+  current?: GetExerciseExamCurrentResponseDto;
+
+  @ApiProperty({ type: GetExerciseExamResultResponseDto, required: false })
+  result?: GetExerciseExamResultResponseDto;
+
+  @ApiProperty()
+  order!: number;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty()
+  updatedAt!: Date;
+}
+
+export class GetExerciseCourseResponseDto {
+  @ApiProperty()
+  id!: string;
+
+  @ApiProperty()
+  name!: string;
+
+  @ApiProperty()
+  description!: string;
+
+  @ApiProperty()
+  trainingId!: boolean;
+
+  @ApiProperty({ type: GetExerciseExamResponseDto, isArray: true })
+  exams!: GetExerciseExamResponseDto[];
 
   @ApiProperty()
   order!: number;
@@ -55,11 +103,8 @@ export class GetExerciseResponseDto {
   @ApiProperty()
   description!: string;
 
-  @ApiProperty()
-  trainingId!: boolean;
-
-  @ApiProperty({ type: GetExamListTrainingCourseExamResponseDto, isArray: true })
-  exams!: GetExamListTrainingCourseExamResponseDto[];
+  @ApiProperty({ type: GetExerciseCourseResponseDto, isArray: true })
+  courses!: GetExerciseCourseResponseDto[];
 
   @ApiProperty()
   order!: number;

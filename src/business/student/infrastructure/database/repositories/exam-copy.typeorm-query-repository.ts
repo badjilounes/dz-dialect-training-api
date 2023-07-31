@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { ExamCopy, ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
 import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
@@ -15,6 +15,15 @@ export class ExamCopyTypeormQueryRepository extends BaseTypeormQueryRepository i
   ) {
     super(context);
   }
+  async getNextExamCopy(sortedExamList: string[]): Promise<ExamCopy | undefined> {
+    const copyList = await this.repository.find({
+      where: { examId: In(sortedExamList), userId: this.context.userId },
+    });
+
+    const [latestCopy] = copyList.sort((a, b) => sortedExamList.indexOf(b.examId) - sortedExamList.indexOf(a.examId));
+
+    return latestCopy && this.buidlExamCopyFromEntity(latestCopy);
+  }
 
   async findExamCopyByExamId(examId: string): Promise<ExamCopy | undefined> {
     const examCopy = await this.repository.findOne({
@@ -28,6 +37,18 @@ export class ExamCopyTypeormQueryRepository extends BaseTypeormQueryRepository i
       return undefined;
     }
 
+    return this.buidlExamCopyFromEntity(examCopy);
+  }
+
+  async findExamCopyList(): Promise<ExamCopy[]> {
+    const examCopyList = await this.repository.find({
+      where: { userId: this.context.userId },
+    });
+
+    return examCopyList.map(this.buidlExamCopyFromEntity);
+  }
+
+  private buidlExamCopyFromEntity(examCopy: ExamCopyEntity): ExamCopy {
     const currentQuestionIndex = examCopy.questions.findIndex((question) => !question.response);
     return {
       id: examCopy.id,

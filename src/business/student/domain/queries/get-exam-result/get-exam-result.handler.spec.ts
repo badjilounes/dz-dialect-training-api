@@ -1,110 +1,148 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 
+import { ExamCopyStateEnum } from '../../enums/exam-copy-state.enum';
+import { QuestionTypeEnum } from '../../enums/question-type.enum';
+import { ExamCopyNotFinishedError } from '../../errors/exam-copy-not-finished-error';
+import { ExamCopyNotFoundError } from '../../errors/exam-copy-not-found-error';
+import { ExamCopy, ExamCopyQueryRepository } from '../../repositories/exam-copy-query-repository';
+
 import { GetExamResultQueryHandler } from './get-exam-result.handler';
+import { GetExamResultQueryPayload } from './get-exam-result.query';
 
-import { ExamCopyQuestionResponseEntity } from '@business/student/domain/entities/exam-copy-question-response.entity';
-import { ExamCopyQuestionEntity } from '@business/student/domain/entities/exam-copy-question.entity';
-import { ExamCopyStateEnum } from '@business/student/domain/enums/exam-copy-state.enum';
-import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
-import { ExamCopyNotFinishedError } from '@business/student/domain/errors/exam-copy-not-finished-error';
-import { TrainingExamNotFoundError } from '@business/student/domain/errors/training-exam-not-found-error';
-import { ExamCopy, ExamCopyQueryRepository } from '@business/student/domain/repositories/exam-copy-query-repository';
-import { Training, TrainingQueryRepository } from '@business/student/domain/repositories/training-query-repository';
-import { AnswerValueType } from '@business/student/domain/value-types/answer.value-type';
-
-describe('Get exm presentation result', () => {
+describe('Get exam result', () => {
   let handler: GetExamResultQueryHandler;
 
-  let trainingQueryRepository: MockProxy<TrainingQueryRepository>;
   let examCopyQueryRepository: MockProxy<ExamCopyQueryRepository>;
 
-  let training: Training;
   let examCopy: ExamCopy;
 
+  let payload: GetExamResultQueryPayload;
+
+  const examCopyId = 'examCopyId';
   const examId = 'examId';
 
   beforeEach(() => {
-    trainingQueryRepository = mock<TrainingQueryRepository>();
     examCopyQueryRepository = mock<ExamCopyQueryRepository>();
 
-    handler = new GetExamResultQueryHandler(trainingQueryRepository, examCopyQueryRepository);
-
-    training = {
-      id: 'trainingId',
-      chapterId: 'chapterId',
-      exams: [
-        {
-          id: examId,
-          name: 'presentation exam',
-          questions: [
-            {
-              id: 'questionId',
-              order: 1,
-              type: QuestionTypeEnum.WORD_LIST,
-              question: 'el makla rahi el dekhel',
-              answer: ["la nourriture est à l'intérieur"],
-              propositions: [
-                'part',
-                'avec',
-                'nous',
-                'intérieur',
-                'quelque',
-                'est',
-                'est',
-                "l'",
-                'nourriture',
-                'la',
-                'à',
-              ],
-            },
-          ],
-        },
-      ],
-    };
-    trainingQueryRepository.findExamById.mockResolvedValue(training.exams[0]);
+    handler = new GetExamResultQueryHandler(examCopyQueryRepository);
 
     examCopy = {
-      id: 'examCopyId',
-      examId: training.exams[0].id,
+      id: examCopyId,
+      examId,
       state: ExamCopyStateEnum.COMPLETED,
+      currentQuestionIndex: 0,
       questions: [
-        ExamCopyQuestionResponseEntity.from({
-          id: 'responseId',
-          question: ExamCopyQuestionEntity.from({
-            id: 'questionId',
-            examCopyId: examId,
-            type: QuestionTypeEnum.WORD_LIST,
-            question: 'el makla rahi el dekhel',
-            answer: AnswerValueType.createWordListFromValue("la nourriture est à l'intérieur"),
-            propositions: [],
-            order: 1,
-          }),
-          response: AnswerValueType.createWordListFromValue("la nourriture est à l'intérieur"),
-        }),
+        {
+          id: 'questionId',
+          type: QuestionTypeEnum.SINGLE_CHOICE,
+          order: 1,
+          question: 'question',
+          answer: 'answer',
+          propositions: ['proposition1', 'proposition2'],
+          response: {
+            id: 'responseId',
+            value: 'answer',
+            valid: true,
+            createdAt: new Date(),
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'questionId',
+          type: QuestionTypeEnum.SINGLE_CHOICE,
+          order: 1,
+          question: 'question',
+          answer: 'answer',
+          propositions: ['proposition1', 'proposition2'],
+          response: {
+            id: 'responseId',
+            value: 'answer',
+            valid: false,
+            createdAt: new Date(),
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'questionId',
+          type: QuestionTypeEnum.SINGLE_CHOICE,
+          order: 1,
+          question: 'question',
+          answer: 'answer',
+          propositions: ['proposition1', 'proposition2'],
+          response: {
+            id: 'responseId',
+            value: 'answer',
+            valid: false,
+            createdAt: new Date(),
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'questionId',
+          type: QuestionTypeEnum.SINGLE_CHOICE,
+          order: 1,
+          question: 'question',
+          answer: 'answer',
+          propositions: ['proposition1', 'proposition2'],
+          response: {
+            id: 'responseId',
+            value: 'answer',
+            valid: false,
+            createdAt: new Date(),
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'questionId',
+          type: QuestionTypeEnum.SINGLE_CHOICE,
+          order: 1,
+          question: 'question',
+          answer: 'answer',
+          propositions: ['proposition1', 'proposition2'],
+          response: {
+            id: 'responseId',
+            value: 'answer',
+            valid: false,
+            createdAt: new Date(),
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
+
+    payload = {
+      examId,
+    };
+
     examCopyQueryRepository.findExamCopyByExamId.mockResolvedValue(examCopy);
   });
 
-  it('should throw if exam does not exist for given id', async () => {
-    trainingQueryRepository.findExamById.mockResolvedValue(undefined);
+  it('should throw if no exam copy exist for given exam identifier', async () => {
+    examCopyQueryRepository.findExamCopyByExamId.mockResolvedValue(undefined);
 
-    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new TrainingExamNotFoundError(examId));
+    await expect(handler.execute({ payload })).rejects.toStrictEqual(new ExamCopyNotFoundError(payload.examId));
   });
 
-  it('should throw if the exam is not finished', async () => {
+  it('should throw if exam copy for given exam identifier is not completed', async () => {
     examCopy.state = ExamCopyStateEnum.IN_PROGRESS;
     examCopyQueryRepository.findExamCopyByExamId.mockResolvedValue(examCopy);
 
-    await expect(handler.execute({ payload: { examId } })).rejects.toStrictEqual(new ExamCopyNotFinishedError());
+    await expect(handler.execute({ payload })).rejects.toStrictEqual(new ExamCopyNotFinishedError(payload.examId));
   });
 
-  it('should return the exam result', async () => {
-    const result = await handler.execute({ payload: { examId } });
+  it('should return exam copy result with "note" equals to the number of valid responses', async () => {
+    const result = await handler.execute({ payload });
 
     expect(result).toStrictEqual({
       note: 1,
-      total: 1,
+      total: examCopy.questions.length,
     });
   });
 });

@@ -45,8 +45,12 @@ export type Training = {
   updatedAt: Date;
 };
 
+export type TrainingListFilter = {
+  isPresentation: boolean;
+};
+
 export interface ProfessorGateway {
-  getTraingList(): Promise<Training[]>;
+  getTraingList(filter?: TrainingListFilter): Promise<Training[]>;
   getTrainingById(trainingId: string): Promise<Training | null>;
   getTrainingPresentation(): Promise<Training | null>;
   getExamById(trainingId: string, courseId: string, examId: string): Promise<Exam | null>;

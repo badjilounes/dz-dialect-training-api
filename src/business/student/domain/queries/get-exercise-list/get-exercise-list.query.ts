@@ -1,43 +1,59 @@
 import { QuestionTypeEnum } from '@business/student/domain/enums/question-type.enum';
 import { Query } from '@cqrs/query';
 
-export type ExamQuestion = {
+export type GetExerciseListExamQuestionQueryResult = {
   id: string;
   examId: string;
   type: QuestionTypeEnum;
   order: number;
   question: string;
   propositions: string[];
-  answer: string[];
   createdAt: Date;
   updatedAt: Date;
 };
 
-export type Exam = {
+export type GetExerciseListExamQueryResult = {
   id: string;
   courseId: string;
   name: string;
   description: string;
-  questions: ExamQuestion[];
+  questions: GetExerciseListExamQuestionQueryResult[];
+  current?: {
+    questionIndex: number;
+    questionLength: number;
+  };
+  result?: {
+    score: number;
+    maxScore: number;
+  };
   order: number;
-  currentQuestionIndex: number;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export type Course = {
+export type GetExerciseListCourseQueryResult = {
   id: string;
   trainingId: string;
   name: string;
   description: string;
-  exams: Exam[];
+  exams: GetExerciseListExamQueryResult[];
   order: number;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export type GetExerciseListQueryResult = Course[];
+export type GetExerciseListTrainingQueryResult = {
+  id: string;
+  name: string;
+  description: string;
+  isPresentation: boolean;
+  courses: GetExerciseListCourseQueryResult[];
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
+export type GetExerciseListQueryResult = GetExerciseListTrainingQueryResult[];
 export class GetExerciseListQuery extends Query<GetExerciseListQueryResult> {
   constructor() {
     super();

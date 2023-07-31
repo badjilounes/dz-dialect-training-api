@@ -1,6 +1,7 @@
 import { Inject } from '@nestjs/common';
 
 import { ExamCopyNotFoundError } from '../../errors/exam-copy-not-found-error';
+import { ResultValueType } from '../../value-types/result.value-type';
 
 import { GetExamResultQuery, GetExamResultQueryResult } from './get-exam-result.query';
 
@@ -27,9 +28,14 @@ export class GetExamResultQueryHandler implements IQueryHandler<GetExamResultQue
       throw new ExamCopyNotFinishedError(copy.examId);
     }
 
+    const result = ResultValueType.fromCopy({
+      state: copy.state,
+      questions: copy.questions,
+    });
+
     return {
-      note: copy.questions.reduce((acc, question) => (question.response?.valid ? acc + 1 : acc), 0),
-      total: copy.questions.length,
+      note: result.score,
+      total: result.maxScore,
     };
   }
 }
