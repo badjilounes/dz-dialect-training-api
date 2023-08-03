@@ -4,6 +4,7 @@ export type EditCourseCommandResult = {
   id: string;
   name: string;
   description: string;
+  color: string;
   trainingId: string;
   order: number;
   createdAt: Date;
@@ -13,6 +14,7 @@ export type EditCourseCommandResult = {
 export type EditCourseCommandPayload = {
   name: string;
   description: string;
+  color: string;
   trainingId: string;
 };
 

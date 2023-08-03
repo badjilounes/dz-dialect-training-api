@@ -51,7 +51,7 @@ export class EditExamHandler implements ICommandHandler<EditExamCommand> {
 
     this.eventPublisher.mergeObjectContext(training);
 
-    training.updateCourseExam(course, examId, {
+    training.updateCourseExam(course, exam, {
       name: payload.name,
       description: payload.description,
       order: exam.order,

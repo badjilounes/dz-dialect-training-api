@@ -40,9 +40,10 @@ export class EditCourseHandler implements ICommandHandler<EditCourseCommand> {
 
     this.eventPublisher.mergeObjectContext(training);
 
-    training.updateCourse(courseId, {
+    training.updateCourse(courseWithId, {
       name: payload.name,
       description: payload.description,
+      color: payload.color,
       order: courseWithId.order,
     });
 
@@ -52,6 +53,7 @@ export class EditCourseHandler implements ICommandHandler<EditCourseCommand> {
       id: courseWithId.id,
       name: courseWithId.name,
       description: courseWithId.description,
+      color: courseWithId.color,
       trainingId: courseWithId.trainingId,
       order: courseWithId.order,
       createdAt: courseWithId.createdAt,

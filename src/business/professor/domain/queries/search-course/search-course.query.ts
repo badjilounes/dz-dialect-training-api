@@ -26,6 +26,7 @@ export type CourseQueryResult = {
   id: string;
   name: string;
   description: string;
+  color: string;
   exams: CourseExamQueryResult[];
   order: number;
   createdAt: Date;

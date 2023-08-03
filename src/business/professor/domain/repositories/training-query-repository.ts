@@ -25,6 +25,7 @@ type Course = {
   id: string;
   name: string;
   description: string;
+  color: string;
   exams: Exam[];
   order: number;
   createdAt: Date;

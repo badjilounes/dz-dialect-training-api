@@ -23,6 +23,9 @@ export class TrainingCourse {
   @Column()
   description!: string;
 
+  @Column({ default: '' })
+  color!: string;
+
   @ManyToOne(() => Training, { onDelete: 'CASCADE' })
   @JoinColumn()
   training!: TrainingCourse;

@@ -8,6 +8,7 @@ export type UpdateCourseEntityProps = {
   name: string;
   description: string;
   order: number;
+  color: string;
 };
 
 export type CourseEntityProps = {
@@ -15,6 +16,7 @@ export type CourseEntityProps = {
   trainingId: string;
   name: string;
   description: string;
+  color: string;
   order: number;
   exams: ExamEntityProps[];
   createdAt: Date;
@@ -46,6 +48,12 @@ export class CourseEntity extends BaseEntity {
     return this._description;
   }
 
+  @IsString()
+  private _color: string;
+  public get color(): string {
+    return this._color;
+  }
+
   @IsNumber()
   private _order: number;
   public get order(): number {
@@ -75,6 +83,7 @@ export class CourseEntity extends BaseEntity {
     this._trainingId = props.trainingId;
     this._name = props.name;
     this._description = props.description;
+    this._color = props.color;
     this._order = props.order;
     this._exams = props.exams.map(ExamEntity.from);
     this._createdAt = props.createdAt;
@@ -92,6 +101,7 @@ export class CourseEntity extends BaseEntity {
   update(props: UpdateCourseEntityProps): CourseEntity {
     this._name = props.name;
     this._description = props.description;
+    this._color = props.color;
     this._order = props.order;
     this._updatedAt = new Date();
     return this;
@@ -102,12 +112,8 @@ export class CourseEntity extends BaseEntity {
     return this;
   }
 
-  updateExam(examId: string, props: UpdateExamEntityProps): CourseEntity {
-    const examToUpdate = this._exams.find((e) => e.id === examId);
-    if (!examToUpdate) {
-      throw new Error('Exam not found');
-    }
-    examToUpdate.update(props);
+  updateExam(exam: ExamEntity, props: UpdateExamEntityProps): CourseEntity {
+    exam.update(props);
     return this;
   }
 
@@ -122,7 +128,7 @@ export class CourseEntity extends BaseEntity {
   reorderExams(newOrders: { id: string; order: number }[]): CourseEntity {
     this._exams.forEach((examToReorder) => {
       const examWithNewOrder = newOrders.find((current) => current.id === examToReorder.id);
-      this.updateExam(examToReorder.id, {
+      this.updateExam(examToReorder, {
         name: examToReorder.name,
         description: examToReorder.description,
         questions: examToReorder.questions,

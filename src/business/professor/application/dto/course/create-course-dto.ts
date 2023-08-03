@@ -8,5 +8,8 @@ export class CreateCourseDto {
   description!: string;
 
   @ApiProperty()
+  color!: string;
+
+  @ApiProperty()
   trainingId!: string;
 }

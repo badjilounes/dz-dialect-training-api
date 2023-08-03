@@ -28,6 +28,7 @@ export type CourseFacadeResponse = {
   trainingId: string;
   name: string;
   description: string;
+  color: string;
   exams: ExamFacadeResponse[];
   order: number;
   createdAt: Date;

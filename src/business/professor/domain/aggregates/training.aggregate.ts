@@ -149,11 +149,7 @@ export class TrainingAggregate extends BaseAggregateRoot {
     return this;
   }
 
-  updateCourse(courseId: string, props: UpdateCourseEntityProps): TrainingAggregate {
-    const course = this._courses.find((c) => c.id === courseId);
-    if (!course) {
-      throw new Error('Course not found');
-    }
+  updateCourse(course: CourseEntity, props: UpdateCourseEntityProps): TrainingAggregate {
     course.update(props);
     this.apply(new TrainingCourseUpdatedEvent(this));
     return this;
@@ -162,9 +158,10 @@ export class TrainingAggregate extends BaseAggregateRoot {
   reorderCourses(newOrders: { id: string; order: number }[]): TrainingAggregate {
     this._courses.forEach((courseToReorder) => {
       const courseWithNewOrder = newOrders.find((current) => current.id === courseToReorder.id);
-      this.updateCourse(courseToReorder.id, {
+      this.updateCourse(courseToReorder, {
         name: courseToReorder.name,
         description: courseToReorder.description,
+        color: courseToReorder.color,
         order: courseWithNewOrder?.order ?? courseToReorder.order,
       });
     });
@@ -178,8 +175,8 @@ export class TrainingAggregate extends BaseAggregateRoot {
     return this;
   }
 
-  updateCourseExam(course: CourseEntity, examId: string, props: UpdateExamEntityProps): TrainingAggregate {
-    course.updateExam(examId, props);
+  updateCourseExam(course: CourseEntity, exam: ExamEntity, props: UpdateExamEntityProps): TrainingAggregate {
+    course.updateExam(exam, props);
     this.apply(new TrainingCourseExamUpdatedEvent(this));
     return this;
   }

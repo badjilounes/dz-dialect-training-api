@@ -78,6 +78,9 @@ export class GetExerciseCourseResponseDto {
   description!: string;
 
   @ApiProperty()
+  color!: string;
+
+  @ApiProperty()
   trainingId!: boolean;
 
   @ApiProperty({ type: GetExerciseExamResponseDto, isArray: true })

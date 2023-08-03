@@ -36,6 +36,7 @@ export type GetExerciseListCourseQueryResult = {
   trainingId: string;
   name: string;
   description: string;
+  color: string;
   exams: GetExerciseListExamQueryResult[];
   order: number;
   createdAt: Date;

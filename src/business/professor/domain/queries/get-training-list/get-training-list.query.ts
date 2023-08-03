@@ -27,6 +27,7 @@ type TrainingCourseQueryResult = {
   id: string;
   name: string;
   description: string;
+  color: string;
   exams: TrainingCourseExamQueryResult[];
   order: number;
   createdAt: Date;

@@ -11,6 +11,9 @@ export class CourseResponseDto {
   description!: string;
 
   @ApiProperty()
+  color!: string;
+
+  @ApiProperty()
   trainingId!: boolean;
 
   @ApiProperty()

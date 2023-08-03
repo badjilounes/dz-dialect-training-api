@@ -33,7 +33,13 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
   }
 
   getTrainingList(filter?: { isPresentation: boolean }): Promise<GetTrainingListQueryResult> {
-    const options: FindManyOptions<Training> = filter ? { where: { isPresentation: filter.isPresentation } } : {};
+    const options: FindManyOptions<Training> = {
+      order: { order: 'ASC', courses: { order: 'ASC', exams: { order: 'ASC' } } },
+    };
+
+    if (filter) {
+      options.where = { isPresentation: filter.isPresentation };
+    }
 
     return this.trainingRepository.find(options);
   }

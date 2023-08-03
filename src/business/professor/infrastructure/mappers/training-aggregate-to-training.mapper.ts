@@ -28,6 +28,7 @@ export function courseEntityToCourse(trainingId: string, course: CourseEntity): 
     id: course.id,
     name: course.name,
     description: course.description,
+    color: course.color,
     training: { id: trainingId },
     createdAt: course.createdAt,
     updatedAt: course.updatedAt,

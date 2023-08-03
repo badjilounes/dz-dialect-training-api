@@ -26,7 +26,7 @@ export class CreateCourseHandler implements ICommandHandler<CreateCourseCommand>
   ) {}
 
   async execute({ payload }: CreateCourseCommand): Promise<CreateCourseCommandResult> {
-    const { name, description, trainingId } = payload;
+    const { name, description, color, trainingId } = payload;
 
     const training = await this.trainingCommandRepository.findTrainingById(trainingId);
     if (!training) {
@@ -46,6 +46,7 @@ export class CreateCourseHandler implements ICommandHandler<CreateCourseCommand>
       trainingId,
       name,
       description,
+      color,
       order: nextOrder,
       exams: [],
       createdAt: new Date(),
@@ -60,6 +61,7 @@ export class CreateCourseHandler implements ICommandHandler<CreateCourseCommand>
       id: course.id,
       name: course.name,
       description: course.description,
+      color: course.color,
       order: course.order,
       createdAt: course.createdAt,
       updatedAt: course.updatedAt,

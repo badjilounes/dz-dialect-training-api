@@ -27,6 +27,7 @@ export function courseToCourseEntity(trainingId: string, course: TrainingCourse)
     id: course.id,
     name: course.name,
     description: course.description,
+    color: course.color,
     trainingId,
     exams: course.exams.map((exam) => examToExamEntity(course.id, exam)),
     order: course.order,
