@@ -26,7 +26,7 @@ export type TrainingCourseExamQueryResult = {
 export type GetExamByIdQueryResult = TrainingCourseExamQueryResult | null;
 
 export class GetExamByIdQuery extends Query<GetExamByIdQueryResult> {
-  constructor(public readonly trainingId: string, public readonly courseId: string, public readonly examId: string) {
+  constructor(public readonly examId: string) {
     super();
   }
 }

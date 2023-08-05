@@ -55,7 +55,7 @@ type TrainigListFilter = {
 };
 
 export interface TrainingQueryRepository {
-  getTrainingCourseExamById(trainingId: string, courseId: string, examId: string): Promise<Exam | null>;
+  getTrainingCourseExamById(examId: string): Promise<Exam | null>;
   getTrainingPresentation(): Promise<Training | null>;
   getTrainingById(trainingid: string): Promise<Training | null>;
   getTrainingList(filter?: TrainigListFilter): Promise<Training[]>;

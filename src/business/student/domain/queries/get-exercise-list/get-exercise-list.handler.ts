@@ -48,34 +48,48 @@ export class GetExerciseListQueryHandler implements IQueryHandler<GetExerciseLis
   private async buildExamList(examList: Exam[]): Promise<GetExerciseListExamQueryResult[]> {
     const examIdList = examList.map((exam) => exam.id);
     const examCopyList = await this.examCopyQueryRepository.findExamCopyList();
-    const nextExamCopy = await this.examCopyQueryRepository.getNextExamCopy(examIdList);
+    const latestExamCopyInProgress = await this.examCopyQueryRepository.getLatestExamCopyInProgress(examIdList);
+    const latestExamCopyCompleted = await this.examCopyQueryRepository.getLatestExamCopyCompleted(examIdList);
 
-    return examList.map((exam, index) => ({
-      ...exam,
-      result: this.buildExamResult(exam.id, examCopyList),
-      current: this.buildCurrentExam(exam.questions.length, exam.id, index === 0, nextExamCopy),
-    }));
+    return examList.map((exam, index) => {
+      const result = this.buildExamResult(exam.id, examCopyList);
+      return {
+        ...exam,
+        result,
+        current: this.buildCurrentExam(examList, exam, index, latestExamCopyInProgress, latestExamCopyCompleted),
+      };
+    });
   }
 
   private buildCurrentExam(
-    questionLength: number,
-    examId: string,
-    isFirstCourseExam: boolean,
-    nextExamCopy?: ExamCopy,
+    examList: Exam[],
+    exam: Exam,
+    index: number,
+    examCopyInProgress?: ExamCopy,
+    latestExamCopyCompleted?: ExamCopy,
   ): { questionIndex: number; questionLength: number } | undefined {
-    const isFirstWithoutNextExam = isFirstCourseExam && !nextExamCopy;
+    const isFirstWithoutNextExam = index === 0 && !examCopyInProgress && !latestExamCopyCompleted;
     if (isFirstWithoutNextExam) {
       return {
         questionIndex: 0,
-        questionLength,
+        questionLength: exam.questions.length,
       };
     }
 
-    const isNextExam = nextExamCopy && nextExamCopy.examId === examId;
-    if (isNextExam) {
+    const isExamInProgress = examCopyInProgress && examCopyInProgress.examId === exam.id;
+    if (isExamInProgress) {
       return {
-        questionIndex: nextExamCopy.currentQuestionIndex,
-        questionLength,
+        questionIndex: examCopyInProgress.currentQuestionIndex,
+        questionLength: exam.questions.length,
+      };
+    }
+
+    const isPreviousExamCompleted =
+      latestExamCopyCompleted && latestExamCopyCompleted.examId === examList[index - 1]?.id;
+    if (isPreviousExamCompleted) {
+      return {
+        questionIndex: 0,
+        questionLength: exam.questions.length,
       };
     }
 

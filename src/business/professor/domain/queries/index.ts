@@ -1,3 +1,4 @@
+import { GetExamByIdQueryHandler } from './get-exam-by-id/get-exam-by-id.handler';
 import { GetTrainingByIdQueryHandler } from './get-training-by-id/get-training-by-id.handler';
 import { GetTrainingListQueryHandler } from './get-training-list/get-training-list.handler';
 import { GetTrainingPresentationQueryHandler } from './get-training-presentation/get-training-presentation.handler';
@@ -13,4 +14,5 @@ export const ProfessorQueryHandlers = [
   SearchCourseQueryHandler,
   SearchTrainingQueryHandler,
   SearchExamQueryHandler,
+  GetExamByIdQueryHandler,
 ];

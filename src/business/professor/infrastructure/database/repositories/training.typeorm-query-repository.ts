@@ -52,9 +52,9 @@ export class TrainingTypeormQueryRepository extends BaseTypeormQueryRepository i
     return this.trainingRepository.findOneBy({ isPresentation: true });
   }
 
-  getTrainingCourseExamById(trainingId: string, courseId: string, examId: string): Promise<GetExamByIdQueryResult> {
+  getTrainingCourseExamById(examId: string): Promise<GetExamByIdQueryResult> {
     return this.examRepository.findOne({
-      where: { id: examId, course: { id: courseId, training: { id: trainingId } } },
+      where: { id: examId },
       relations: ['course', 'course.training'],
     });
   }

@@ -29,7 +29,7 @@ export class ProfessorQueryBusFacade implements ProfessorQueryFacade {
     return this.queryBus.execute(new GetTrainingPresentationQuery());
   }
 
-  getExamById(trainingId: string, courseId: string, examId: string): Promise<ExamFacadeResponse> {
-    return this.queryBus.execute(new GetExamByIdQuery(trainingId, courseId, examId));
+  getExamById(examId: string): Promise<ExamFacadeResponse> {
+    return this.queryBus.execute(new GetExamByIdQuery(examId));
   }
 }

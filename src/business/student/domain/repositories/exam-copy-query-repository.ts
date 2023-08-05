@@ -32,7 +32,8 @@ export type ExamCopy = {
 };
 
 export interface ExamCopyQueryRepository {
-  getNextExamCopy(examIdList: string[]): Promise<ExamCopy | undefined>;
+  getLatestExamCopyCompleted(examIdList: string[]): Promise<ExamCopy | undefined>;
+  getLatestExamCopyInProgress(examIdList: string[]): Promise<ExamCopy | undefined>;
   findExamCopyList(): Promise<ExamCopy[]>;
   findExamCopyByExamId(examId: string): Promise<ExamCopy | undefined>;
 }

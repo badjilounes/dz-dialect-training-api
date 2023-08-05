@@ -54,5 +54,5 @@ export interface ProfessorGateway {
   getTraingList(filter?: TrainingListFilter): Promise<Training[]>;
   getTrainingById(trainingId: string): Promise<Training | null>;
   getTrainingPresentation(): Promise<Training | null>;
-  getExamById(trainingId: string, courseId: string, examId: string): Promise<Exam | null>;
+  getExamById(examId: string): Promise<Exam | null>;
 }

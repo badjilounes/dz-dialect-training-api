@@ -14,7 +14,7 @@ export class GetExamByIdQueryHandler implements IQueryHandler<GetExamByIdQuery> 
     private readonly trainingQueryRepository: TrainingQueryRepository,
   ) {}
 
-  execute({ trainingId, courseId, examId }: GetExamByIdQuery): Promise<GetExamByIdQueryResult> {
-    return this.trainingQueryRepository.getTrainingCourseExamById(trainingId, courseId, examId);
+  execute({ examId }: GetExamByIdQuery): Promise<GetExamByIdQueryResult> {
+    return this.trainingQueryRepository.getTrainingCourseExamById(examId);
   }
 }

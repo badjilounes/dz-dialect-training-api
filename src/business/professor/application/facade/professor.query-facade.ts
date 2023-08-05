@@ -54,5 +54,5 @@ export interface ProfessorQueryFacade {
   getTrainingList(filter?: TrainingListFilter): Promise<TrainingFacadeResponse[]>;
   getTrainingById(trainingId: string): Promise<TrainingFacadeResponse>;
   getTrainingPresentation(): Promise<TrainingFacadeResponse>;
-  getExamById(trainingId: string, courseId: string, examId: string): Promise<ExamFacadeResponse>;
+  getExamById(examId: string): Promise<ExamFacadeResponse>;
 }

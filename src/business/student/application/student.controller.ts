@@ -8,8 +8,10 @@ import { ApiBearerAuth, ApiHeader, ApiOkResponse, ApiOperation, ApiTags } from '
 
 import { StartExamCommand } from '../domain/commands/start-exam/start-exam.command';
 import { GetExerciseListQuery } from '../domain/queries/get-exercise-list/get-exercise-list.query';
+import { GetPresentationExamIdQuery } from '../domain/queries/get-presentation-exam-id/get-presentation-exam-id.query';
 
 import { GetExerciseResponseDto } from './dto/get-exercise-response-dto';
+import { GetPresentationExamIdResponseDto } from './dto/get-presentation-exam-id-response-dto';
 
 import { GetExamCopyDto } from '@business/student/application/dto/get-exam-copy-dto';
 import { GetExamCopyResponseDto } from '@business/student/application/dto/get-exam-copy-response-dto';
@@ -35,6 +37,16 @@ export class StudentController {
 
   @UseGuards(GuestOrUserAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ operationId: 'get-presentation-exam-id', summary: 'Get the presentation exam identifier' })
+  @ApiHeader({ name: 'x-guest-id', required: false })
+  @Get('get-presentation-exam-id')
+  @ApiOkResponse({ type: GetPresentationExamIdResponseDto })
+  getPresentationExamId(): Promise<GetPresentationExamIdResponseDto[]> {
+    return this.queryBus.execute(new GetPresentationExamIdQuery());
+  }
+
+  @UseGuards(GuestOrUserAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ operationId: 'get-exercise-list', summary: 'Get the user exercise list' })
   @ApiHeader({ name: 'x-guest-id', required: false })
   @Get('get-exercise-list')
@@ -43,6 +55,8 @@ export class StudentController {
     return this.queryBus.execute(new GetExerciseListQuery());
   }
 
+  @UseGuards(GuestOrUserAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ operationId: 'get-exam-copy', summary: 'Get the user copy of given exam' })
   @Get('get-exam-copy')
   @ApiOkResponse({ type: GetExamCopyResponseDto })
@@ -51,6 +65,7 @@ export class StudentController {
   }
 
   @UseGuards(GuestOrUserAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ operationId: 'get-exam-result', summary: 'Get exam results' })
   @ApiHeader({ name: 'x-guest-id', required: false })
   @Get('get-exam-result')

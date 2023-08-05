@@ -22,7 +22,7 @@ export class ProfessorFacadeGateway implements ProfessorGateway {
     return this.professorQueryFacade.getTrainingPresentation();
   }
 
-  getExamById(trainingId: string, courseId: string, examId: string): Promise<Exam | null> {
-    return this.professorQueryFacade.getExamById(trainingId, courseId, examId);
+  getExamById(examId: string): Promise<Exam | null> {
+    return this.professorQueryFacade.getExamById(examId);
   }
 }

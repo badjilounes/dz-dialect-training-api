@@ -28,10 +28,10 @@ export class StartExamHandler implements ICommandHandler<StartExamCommand> {
   ) {}
 
   async execute({ payload }: StartExamCommand): Promise<StartExamCommandResult> {
-    const { trainingId, courseId, examId } = payload;
-    const exam = await this.professorGateway.getExamById(trainingId, courseId, examId);
+    const { examId } = payload;
+    const exam = await this.professorGateway.getExamById(examId);
     if (!exam) {
-      throw new TrainingExamNotFoundError(trainingId, courseId, examId);
+      throw new TrainingExamNotFoundError(examId);
     }
 
     const examCopyId = this.uuidGenerator.generate();
