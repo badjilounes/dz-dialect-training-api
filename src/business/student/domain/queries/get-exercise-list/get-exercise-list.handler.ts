@@ -97,7 +97,7 @@ export class GetExerciseListQueryHandler implements IQueryHandler<GetExerciseLis
   }
 
   private buildExamResult(examId: string, examCopyList: ExamCopy[]): { score: number; maxScore: number } | undefined {
-    const examCopy = examCopyList.find((copy) => copy.examId === examId);
+    const examCopy = examCopyList.find((copy) => copy.examId === examId && copy.state === ExamCopyStateEnum.COMPLETED);
 
     if (examCopy?.state !== ExamCopyStateEnum.COMPLETED) {
       return undefined;
